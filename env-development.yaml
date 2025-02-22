@@ -1,0 +1,16 @@
+domain: 192.168.178.142
+website: http://192.168.178.142:8081
+env: development
+server:
+  host: 0.0.0.0
+  port: 6660
+cors:
+  origins:
+    - http://localhost:3000
+registration:
+  jwt:
+    maxAge: 3600
+    signingKey: sBpgeorwB4avrsf3j2mm7A1z6s4vi21x2b8Aot97
+database:
+  url: postgresql://root@127.0.0.1:26257/guardlight_development_test?sslmode=disable
+  name: guardlight_development_test
