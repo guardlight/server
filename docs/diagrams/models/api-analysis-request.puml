@@ -1,0 +1,68 @@
+@startuml Analysis Request
+
+class Request {
+    title : string
+    contentType : RequestType
+    mediaType : MediaType
+    themes : Theme[]
+    analyzers : AnalyzerType[]
+} 
+
+note left of Request 
+    The file or text content is 
+    uploaded via another API call
+end note
+
+class Theme {
+    title : string
+    id : string
+    analyzers : Analyzer[]
+}
+
+class Analyzer {
+    key : AnalyzerKey
+    inputs : AnalyzerInput[]
+    threshold : number
+}
+
+class AnalyzerInput {
+    key : string
+    value : string
+}
+
+enum AnalyzerKey {
+    word_search
+    sentiment_analysis
+}
+
+note left of AnalyzerKey
+    Analyzer keys are filled 
+    by available analyzers
+end note
+
+enum ContentType {
+    book
+    movie
+    series
+    lyrics
+}
+
+enum MediaType {
+    epub
+    freetext
+}
+
+note left of MediaType
+    Meda types are filled 
+    by available parsers
+end note
+
+
+Request *-- ContentType
+Request *-- MediaType
+Request *-- Theme
+Theme *-- Analyzer
+Analyzer *-- AnalyzerKey
+Analyzer *-- AnalyzerInput
+
+@enduml

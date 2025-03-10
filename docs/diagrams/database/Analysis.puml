@@ -1,0 +1,95 @@
+@startuml Database
+
+' hide the spot
+' hide circle
+
+' avoid problems with angled crows feet
+skinparam linetype ortho
+
+entity AnalysisRequest {
+    id
+    ---
+    user_id
+    media_title
+    media_type
+}
+
+entity AnalysisRequestSteps {
+    id
+    ---
+    analysis_request_id
+    index
+    type
+    status
+    status_description
+
+}
+
+note bottom of AnalysisRequestSteps
+    Type Types:
+    - create
+    - upload
+    - parse
+    - analyze_[theme]_[key]
+    - report
+    - done
+
+    Status Types:
+    - waiting
+    - inprogress
+    - finished
+    - error
+end note
+
+entity RawData {
+    id
+    ---
+    analysis_request_id
+    hash
+    content
+    file_type
+    processed_text
+}
+
+entity Analysis {
+    id
+    ---
+    analysis_request_id
+    analyzer_key
+    theme_id
+    status
+    threshold
+    score
+    content[]
+}
+
+note bottom of Analysis
+    status is waiting,
+    inprogress,finished,error.
+
+    key is the analyzer used.
+
+    content[] is an object list of
+    {score,content}
+end note
+
+entity Report {
+    id
+    ---
+    analysis_request_id
+    score
+    analysis_summary
+}
+
+note bottom of Report
+    analysis_summary is a json
+    of all analysis from all
+    analyzers 
+end note
+
+AnalysisRequest ||--|{ AnalysisRequestSteps
+AnalysisRequest ||--|{ Analysis
+AnalysisRequest ||--|| RawData
+AnalysisRequest ||--|| Report
+
+@enduml

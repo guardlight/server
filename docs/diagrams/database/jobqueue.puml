@@ -1,0 +1,28 @@
+@startuml JobQueue
+
+' hide the spot
+' hide circle
+
+' avoid problems with angled crows feet
+
+entity JobQueue {
+    id
+    ---
+    data
+    status
+    retry_count
+    topic
+}
+
+note right of JobQueue
+    status is queued,inprogress,
+    done,error.
+
+    dats is json that will be
+    given to the analyzer/parser
+
+    topic is parser.[key] or
+    analyzer.[key]
+end note
+
+@enduml

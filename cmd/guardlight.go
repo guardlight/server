@@ -7,12 +7,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/guardlight/server/internal/analysismanager"
+	"github.com/guardlight/server/internal/api"
+	"github.com/guardlight/server/internal/api/analysisapi"
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/essential/logging"
-	"github.com/guardlight/server/internal/essential/testcontainers"
 	"github.com/guardlight/server/internal/health"
-	"github.com/guardlight/server/pkg/database"
-	"github.com/guardlight/server/pkg/router"
 	"go.uber.org/zap"
 )
 
@@ -52,34 +52,33 @@ func main() {
 
 	GLAdapters()
 
-	dbUrl := config.Get().Database.Url
-	if config.Get().IsDevelopment() {
-		zap.S().Info("Starting staging cockroach database container")
-		ctx, ctxCancel := context.WithTimeout(context.Background(), time.Hour)
-		defer ctxCancel()
-		csqlContainer, err := testcontainers.NewCockroachSQLContainer(ctx)
-		if err != nil {
-			zap.S().Fatalw("database container cannot start", "error", err)
-		}
-		dbUrl = csqlContainer.GetDSN()
-		zap.S().Infow("starting staging database", "url", dbUrl)
-	}
+	// // When DB is needed
 
-	// Database
-	_ = database.InitDatabase(dbUrl)
-
-	// Repositories
-	// resultsRepository := results.NewResultsRepository(db)
+	// dbUrl := config.Get().Database.Url
+	// if config.Get().IsDevelopment() {
+	// 	zap.S().Info("Starting staging cockroach database container")
+	// 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Hour)
+	// 	defer ctxCancel()
+	// 	csqlContainer, err := testcontainers.NewCockroachSQLContainer(ctx)
+	// 	if err != nil {
+	// 		zap.S().Fatalw("database container cannot start", "error", err)
+	// 	}
+	// 	dbUrl = csqlContainer.GetDSN()
+	// 	zap.S().Infow("starting staging database", "url", dbUrl)
+	// }
 
 	// Controller Groups
-	mainRouter := router.NewRouter(logging.GetLogger())
+	mainRouter := api.NewRouter(logging.GetLogger())
 	baseGroup := mainRouter.Group("")
+
+	analysisManager := analysismanager.NewAnalysisMananger()
 
 	// Controllers
 	health.NewHealthController(baseGroup)
+	analysisapi.NewAnalysisRequestController(baseGroup, analysisManager)
 
 	// Start the server
-	go router.LiveOrLetDie(mainRouter)
+	go api.LiveOrLetDie(mainRouter)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -94,7 +93,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	router.LetDie(ctx)
+	api.LetDie(ctx)
 
 	// catching ctx.Done(). timeout of 5 seconds.
 	<-ctx.Done()
