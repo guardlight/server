@@ -12,7 +12,13 @@ import (
 	"github.com/guardlight/server/internal/api/analysisapi"
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/essential/logging"
+	"github.com/guardlight/server/internal/essential/testcontainers"
 	"github.com/guardlight/server/internal/health"
+	"github.com/guardlight/server/internal/infrastructure/database"
+	"github.com/guardlight/server/internal/jobmanager"
+	"github.com/guardlight/server/internal/natsclient"
+	"github.com/guardlight/server/internal/orchestrator"
+	"github.com/guardlight/server/internal/scheduler"
 	"go.uber.org/zap"
 )
 
@@ -49,38 +55,62 @@ func getEnv(key, fallback string) string {
 }
 
 func main() {
+	quit := make(chan os.Signal, 1)
+
+	loc, err := time.LoadLocation("Europe/Amsterdam")
+	if err != nil {
+		zap.S().Errorw("Could not load timezone", "error", err)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	}
 
 	GLAdapters()
 
-	// // When DB is needed
+	dbUrl := config.Get().Database.Url
+	if config.Get().IsDevelopment() {
+		zap.S().Info("Starting staging cockroach database container")
+		ctx, ctxCancel := context.WithTimeout(context.Background(), time.Hour)
+		defer ctxCancel()
+		csqlContainer, err := testcontainers.NewCockroachSQLContainer(ctx)
+		if err != nil {
+			zap.S().Fatalw("database container cannot start", "error", err)
+		}
+		dbUrl = csqlContainer.GetDSN()
+		zap.S().Infow("starting staging database", "url", dbUrl)
+	}
 
-	// dbUrl := config.Get().Database.Url
-	// if config.Get().IsDevelopment() {
-	// 	zap.S().Info("Starting staging cockroach database container")
-	// 	ctx, ctxCancel := context.WithTimeout(context.Background(), time.Hour)
-	// 	defer ctxCancel()
-	// 	csqlContainer, err := testcontainers.NewCockroachSQLContainer(ctx)
-	// 	if err != nil {
-	// 		zap.S().Fatalw("database container cannot start", "error", err)
-	// 	}
-	// 	dbUrl = csqlContainer.GetDSN()
-	// 	zap.S().Infow("starting staging database", "url", dbUrl)
-	// }
+	// Database
+	db := database.InitDatabase(dbUrl)
+
+	// Repositories
+	jmr := jobmanager.NewJobManagerRepository(db)
+	amr := analysismanager.NewAnalysisManagerRepository(db)
 
 	// Controller Groups
 	mainRouter := api.NewRouter(logging.GetLogger())
 	baseGroup := mainRouter.Group("")
 
-	analysisManager := analysismanager.NewAnalysisMananger()
+	// Services
+	nc := natsclient.NewNatsClient()
+	jm := jobmanager.NewJobMananger(jmr, jmr)
+	sch, err := scheduler.NewScheduler(loc)
+	if err != nil {
+		zap.S().Errorw("Could not create scheduler", "error", err)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	}
+	_, err = orchestrator.NewOrchestrator(jm, sch.Gos, nc)
+	if err != nil {
+		zap.S().Errorw("Could not create orhestrator", "error", err)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	}
+	analysisManagerRequester := analysismanager.NewAnalysisManangerRequester(jm, amr)
 
 	// Controllers
 	health.NewHealthController(baseGroup)
-	analysisapi.NewAnalysisRequestController(baseGroup, analysisManager)
+	analysisapi.NewAnalysisRequestController(baseGroup, analysisManagerRequester)
 
 	// Start the server
 	go api.LiveOrLetDie(mainRouter)
 
-	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 

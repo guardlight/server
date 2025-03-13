@@ -1,0 +1,20 @@
+quiet: False
+with-expecter: True
+filename: "mock_{{.InterfaceName | lower }}_test.go"
+dir: "{{.InterfaceDir}}"
+mockname: "Mock{{.InterfaceName}}"
+outpkg: "{{.PackageName}}"
+inpackage: True
+packages:
+  github.com/guardlight/server/internal/analysismanager:
+    interfaces:
+      analysisRecordSaver:
+      jobManagerRequester:
+  github.com/guardlight/server/internal/jobmanager:
+    interfaces:
+      jobStore:
+  github.com/guardlight/server/internal/orchestrator:
+    interfaces:
+      jobManager:
+      taskCreater:
+      natsSender:

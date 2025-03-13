@@ -12,22 +12,22 @@ import (
 )
 
 type AnalysisRequestController struct {
-	manager *analysismanager.AnalysisManager
+	manager *analysismanager.AnalysisManagerRequester
 }
 
-func NewAnalysisRequestController(group *gin.RouterGroup, manager *analysismanager.AnalysisManager) *AnalysisRequestController {
+func NewAnalysisRequestController(group *gin.RouterGroup, manager *analysismanager.AnalysisManagerRequester) *AnalysisRequestController {
 	arc := &AnalysisRequestController{
 		manager: manager,
 	}
 
 	analysisGroup := group.Group("analysis")
+	analysisGroup.Use(glsecurity.UseGuardlightAuth())
 	analysisGroup.POST("request", arc.analysisRequest)
 
 	return arc
 }
 
 func (arc AnalysisRequestController) analysisRequest(c *gin.Context) {
-
 	ar := &analysisrequest.AnalysisRequest{}
 	err := glsecurity.ReuseBindAndValidate(c, ar)
 	if err != nil {
@@ -36,11 +36,20 @@ func (arc AnalysisRequestController) analysisRequest(c *gin.Context) {
 		return
 	}
 
-	err = arc.manager.RequestAnalysis(ar)
+	ui := glsecurity.GetUserIdFromContextParsed(c)
+
+	err = arc.manager.RequestAnalysis(ar, ui)
 	if err != nil {
 		zap.S().Errorw("error creating analysis request", "error", err)
-		c.JSON(glerror.InternalServerError())
-		return
+		switch err {
+		case analysismanager.ErrInvalidAnalyzer:
+		case analysismanager.ErrInvalidParser:
+			c.JSON(glerror.BadRequestError())
+			return
+		default:
+			c.JSON(glerror.InternalServerError())
+			return
+		}
 	}
 
 	c.JSON(http.StatusNoContent, gin.H{})

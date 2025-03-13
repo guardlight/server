@@ -3,7 +3,7 @@
 class Request {
     title : string
     contentType : RequestType
-    mediaType : MediaType
+    file : File
     themes : Theme[]
     analyzers : AnalyzerType[]
 } 
@@ -12,6 +12,11 @@ note left of Request
     The file or text content is 
     uploaded via another API call
 end note
+
+class File {
+    mimeType : MediaType
+    content : byte[]
+}
 
 class Theme {
     title : string
@@ -59,7 +64,8 @@ end note
 
 
 Request *-- ContentType
-Request *-- MediaType
+Request *-- File
+File *-- MediaType
 Request *-- Theme
 Theme *-- Analyzer
 Analyzer *-- AnalyzerKey

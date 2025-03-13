@@ -8,12 +8,25 @@ import (
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
+	"github.com/samber/lo"
 	"go.uber.org/zap"
 )
 
 const (
 	glEnvPrefix = "GUARDLIGHT_"
 )
+
+type GLConfig struct {
+	Env          string       `koanf:"env"`
+	Domain       string       `koanf:"domain"`
+	Server       server       `koanf:"server"`
+	Cors         cors         `koanf:"cors"`
+	Database     database     `koanf:"database"`
+	Orchestrator orchestrator `koanf:"orchestrator"`
+	Console      console      `koanf:"console"`
+	Parsers      []parser     `koanf:"parsers"`
+	Analyzers    []analyzer   `koanf:"analyzers"`
+}
 
 type server struct {
 	Host string `koanf:"host"`
@@ -29,14 +42,8 @@ type database struct {
 	Name string `koanf:"name"`
 }
 
-type GLConfig struct {
-	Env      string   `koanf:"env"`
-	Domain   string   `koanf:"domain"`
-	Website  string   `koanf:"website"`
-	Server   server   `koanf:"server"`
-	Cors     cors     `koanf:"cors"`
-	Database database `koanf:"database"`
-	Console  console  `koanf:"console"`
+type orchestrator struct {
+	ScheduleRateCron string `koanf:"scheduleRateCron"`
 }
 
 type jwt struct {
@@ -46,6 +53,30 @@ type jwt struct {
 
 type console struct {
 	Jwt jwt `koanf:"jwt"`
+}
+
+type parser struct {
+	Type        string `koanf:"type"`
+	Name        string `koanf:"name"`
+	Description string `koanf:"description"`
+	Concurrency int    `koanf:"concurrency"`
+}
+
+type analyzer struct {
+	Key            string          `koanf:"key"`
+	Name           string          `koanf:"name"`
+	Description    string          `koanf:"description"`
+	ContenxtWindow string          `koanf:"contentWindow"`
+	Model          string          `koanf:"model"`
+	Concurrency    int             `koanf:"concurrency"`
+	Inputs         []analyzerInput `koanf:"inputs"`
+}
+
+type analyzerInput struct {
+	Key         string `koanf:"key"`
+	Name        string `koanf:"name"`
+	Description string `koanf:"description"`
+	Type        string `koanf:"type"`
 }
 
 var (
@@ -94,4 +125,16 @@ func (fc GLConfig) IsStaging() bool {
 
 func (fc GLConfig) IsDevelopment() bool {
 	return fc.Env == "development"
+}
+
+func (fc GLConfig) GetParser(parserType string) (parser, bool) {
+	return lo.Find(Get().Parsers, func(a parser) bool {
+		return a.Type == parserType
+	})
+}
+
+func (fc GLConfig) GetAnalyzer(analyzerKey string) (analyzer, bool) {
+	return lo.Find(Get().Analyzers, func(a analyzer) bool {
+		return a.Key == analyzerKey
+	})
 }

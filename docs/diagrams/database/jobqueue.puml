@@ -10,6 +10,7 @@ entity JobQueue {
     ---
     data
     status
+    status_description
     retry_count
     topic
 }

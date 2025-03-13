@@ -10,6 +10,9 @@ import (
 	ginzap "github.com/gin-contrib/zap"
 	"github.com/gin-gonic/gin"
 	"github.com/guardlight/server/internal/essential/config"
+	"github.com/ulule/limiter/v3"
+	ginlimiter "github.com/ulule/limiter/v3/drivers/middleware/gin"
+	"github.com/ulule/limiter/v3/drivers/store/memory"
 	"go.uber.org/zap"
 )
 
@@ -22,7 +25,7 @@ func NewRouter(l *zap.Logger) *gin.Engine {
 	router.Use(useCors())
 	router.Use(ginzap.Ginzap(l, time.RFC3339, true))
 	router.Use(ginzap.RecoveryWithZap(l, true))
-	// router.Use(UseRateLimiting())
+	router.Use(UseRateLimiting())
 
 	if config.Get().IsProduction() {
 		gin.SetMode(gin.ReleaseMode)
@@ -57,9 +60,22 @@ func useCors() gin.HandlerFunc {
 		AllowHeaders:     []string{"Accept, Accept-Encoding, Authorization, Cache-Control, Content-Type, Content-Length, Origin, X-Real-IP, X-CSRF-Token, X-Auth-Key"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		// AllowOriginFunc: func(origin string) bool {
-		// 	return origin == "https://github.com"
-		// },
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	})
+}
+
+func UseRateLimiting() gin.HandlerFunc {
+
+	rate := limiter.Rate{
+		Period: 5 * time.Minute,
+		Limit:  100,
+	}
+
+	// Initialize the memory store.
+	store := memory.NewStore()
+
+	// Create a Gin middleware using the rate limiter.
+	middleware := ginlimiter.NewMiddleware(limiter.New(store, rate))
+
+	return middleware
 }

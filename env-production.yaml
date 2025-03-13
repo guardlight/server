@@ -1,5 +1,4 @@
 domain: 192.168.178.142
-website: http://192.168.178.142:8081
 env: development
 server:
   host: 0.0.0.0
@@ -7,10 +6,12 @@ server:
 cors:
   origins:
     - http://localhost:3000
-registration:
+console:
   jwt:
     maxAge: 3600
-    signingKey: pktniik6cfio1dnt6zjs5s6ku76qqwlst75jd3yn
+    signingKey: 2hoYqxrYEGx0nyURZepOR9wJJGVCl7hp
 database:
   url: postgresql://root@127.0.0.1:26257/guardlight_production?sslmode=disable
   name: guardlight_production
+orchestrator:
+  scheduleRateCron: "* * * * * 30"
