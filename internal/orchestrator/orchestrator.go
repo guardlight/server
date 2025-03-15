@@ -17,7 +17,7 @@ type jobManager interface {
 }
 
 type natsSender interface {
-	natsclient.Sender
+	natsclient.Publisher
 }
 
 type taskCreater interface {
@@ -27,13 +27,14 @@ type taskCreater interface {
 type Orchestrator struct {
 	jm  jobManager
 	ns  natsSender
-	jcs map[string]int
+	jcs jobCounts
 }
 
 func NewOrchestrator(jm jobManager, tc taskCreater, ns natsSender) (*Orchestrator, error) {
 	o := &Orchestrator{
-		jm: jm,
-		ns: ns,
+		jm:  jm,
+		ns:  ns,
+		jcs: jc(),
 	}
 
 	_, err := tc.NewJob(
@@ -48,32 +49,27 @@ func NewOrchestrator(jm jobManager, tc taskCreater, ns natsSender) (*Orchestrato
 	return o, nil
 }
 
-func (o *Orchestrator) buildJobCounts(j []jobmanager.Job) {
-	for _, job := range j {
-		if job.Status == jobmanager.Inprogress {
-			o.jcs[string(job.Type)]++
-		}
-	}
-}
-
 func (o *Orchestrator) checkForJobs() {
-	zap.S().Info("Checking for jobs")
+	zap.S().Infow("Checking for jobs")
 	nfj, _ := o.jm.GetAllNonFinishedJobs()
-	o.buildJobCounts(nfj)
+	o.jcs.build(nfj)
 
 	for _, job := range nfj {
-		if job.Status == jobmanager.Error || job.Status == jobmanager.Queued {
+		if job.Status == jobmanager.Queued {
 			o.processJob(job)
 		}
 	}
 }
 
 func (o *Orchestrator) processJob(j jobmanager.Job) {
-	zap.S().Info("Found job", "job_id", j.Id)
+	zap.S().Infow("Found job", "job_id", j.Id)
 	if j.Type == jobmanager.Parse {
 		o.processParseJob(j)
+	} else if j.Type == jobmanager.Analyze {
+		o.processAnalyzeJob(j)
+	} else {
+		zap.S().Errorw("Job type unsupported", "type", j.Type)
 	}
-	o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
 }
 
 func (o *Orchestrator) processParseJob(j jobmanager.Job) {
@@ -81,24 +77,61 @@ func (o *Orchestrator) processParseJob(j jobmanager.Job) {
 	err := json.Unmarshal(j.Data, &f)
 	if err != nil {
 		zap.S().Errorw("Error unmarshaling parser job data", "error", err)
-		o.updateJobStatus(j.Id, jobmanager.Error, err.Error(), j.RetryCount+1)
+		o.updateJobStatus(j.Id, jobmanager.Queued, err.Error(), j.RetryCount+1)
 		return
 	}
 
 	p, ok := config.Get().GetParser(f.Type)
 	if !ok {
 		zap.S().Errorw("Parser type not found", "error", err)
-		o.updateJobStatus(j.Id, jobmanager.Error, "Parser type not found", j.RetryCount+1)
+		o.updateJobStatus(j.Id, jobmanager.Error, "Parser type not found", 3)
 		return
 	}
 
-	if o.jcs[string(j.Type)] < p.Concurrency {
-		zap.S().Info("Sent data for parsing", "data", f)
-		o.ns.Send(f.Topic)
+	if o.jcs[string(j.Type)]+1 <= p.Concurrency {
+		if f.Image == "builtin" {
+			zap.S().Infow("using builtin parser", "data", f)
+		} else {
+			// Start docker container and wait, with max duration.
+		}
+		o.ns.Publish(f.Topic, f.ParserData)
+		zap.S().Infow("Sent data for parsing", "data", f)
+		o.jcs.inc(string(j.Type))
+		o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
 	} else {
-		zap.S().Info("Job still queued", "data", f)
+		zap.S().Infow("Job still queued", "data", f)
+	}
+}
+
+func (o *Orchestrator) processAnalyzeJob(j jobmanager.Job) {
+	var f jobmanager.AnalyzerJobData
+	err := json.Unmarshal(j.Data, &f)
+	if err != nil {
+		zap.S().Errorw("Error unmarshaling analyzer job data", "error", err)
+		o.updateJobStatus(j.Id, jobmanager.Queued, err.Error(), j.RetryCount+1)
+		return
 	}
 
+	a, ok := config.Get().GetAnalyzer(f.Type)
+	if !ok {
+		zap.S().Errorw("Analyzer not found", "error", err)
+		o.updateJobStatus(j.Id, jobmanager.Error, "Analyzer not found", 3)
+		return
+	}
+
+	if o.jcs[string(j.Type)]+1 <= a.Concurrency {
+		if f.Image == "builtin" {
+			zap.S().Infow("using builtin analyzer", "data", f)
+		} else {
+			// Start docker container and wait, with max duration.
+		}
+		o.ns.Publish(f.Topic, f.AnalyzerData)
+		zap.S().Infow("Sent data for analyzing", "data", f)
+		o.jcs.inc(string(j.Type))
+		o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
+	} else {
+		zap.S().Infow("Job still queued", "data", f)
+	}
 }
 
 func (o *Orchestrator) updateJobStatus(id uuid.UUID, js jobmanager.JobStatus, jsd string, rc int) {

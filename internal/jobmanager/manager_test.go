@@ -19,7 +19,8 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 
 	jm := NewJobMananger(mockJs)
 
-	pjd := &ParserJobData{
+	pjd := ParserJobData{
+		Image: "test",
 		Type:  "test",
 		Topic: "test",
 		ParserData: parsercontract.ParserRequest{
@@ -35,7 +36,7 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 		StatusDescription: "",
 		RetryCount:        0,
 		Type:              "test",
-		Data:              []byte("{\"Name\":\"Nice to know\",\"Content\":\"Q29udGVudCBnb2VzIGhlcmUgYXMgYnl0ZSBhcnJheQ==\"}"),
+		Data:              []byte("{\"type\":\"test\",\"topic\":\"test\",\"image\":\"test\",\"parserData\":{\"jobId\":\"d2efcbb9-c7e0-423c-95c3-a01e7723bedf\",\"analysisId\":\"4bc608a3-7f52-4dd4-97dc-ea01975d9f09\",\"content\":\"Q29udGVudCBnb2VzIGhlcmUgYXMgYnl0ZSBhcnJheQ==\"}}"),
 	}
 
 	mockJs.EXPECT().saveJob(j).Return(nil)

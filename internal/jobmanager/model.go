@@ -2,8 +2,11 @@ package jobmanager
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/google/uuid"
+	"github.com/guardlight/server/pkg/analyzercontract"
+	"github.com/guardlight/server/pkg/parsercontract"
 )
 
 type JobStatus string
@@ -22,6 +25,10 @@ const (
 	Analyze JobType = "analyze"
 )
 
+func (jt JobType) Match(s string) bool {
+	return strings.HasPrefix(s, string(jt))
+}
+
 type Job struct {
 	Id                uuid.UUID       `gorm:"column:id;primaryKey;type:uuid"`
 	Status            JobStatus       `gorm:"column:status"`
@@ -32,7 +39,15 @@ type Job struct {
 }
 
 type ParserJobData struct {
-	Type       string      `json:"type"`
-	Topic      string      `json:"topic"`
-	ParserData interface{} `json:"parserData"`
+	Type       string                       `json:"type"`
+	Topic      string                       `json:"topic"`
+	Image      string                       `json:"image"`
+	ParserData parsercontract.ParserRequest `json:"parserData"`
+}
+
+type AnalyzerJobData struct {
+	Type         string                           `json:"type"`
+	Topic        string                           `json:"topic"`
+	Image        string                           `json:"image"`
+	AnalyzerData analyzercontract.AnalyzerRequest `json:"analyzerData"`
 }

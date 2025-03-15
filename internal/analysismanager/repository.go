@@ -1,6 +1,9 @@
 package analysismanager
 
 import (
+	"errors"
+
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -32,4 +35,35 @@ func (amr AnalysisManagerRepository) createAnalysisRequest(analysisRequest *Anal
 	}
 
 	return nil
+}
+
+func (amr AnalysisManagerRepository) updateProcessedText(ai uuid.UUID, text string) error {
+	res := amr.db.
+		Model(RawData{
+			AnalysisRequestId: ai,
+		}).
+		Updates(RawData{ProcessedText: text})
+
+	if res.Error != nil {
+		zap.S().Errorw("Could not update processed text", "error", res.Error)
+		return res.Error
+	}
+
+	if res.RowsAffected == 0 {
+		zap.S().Errorw("No records updated", "analysis_request_id", ai)
+		return errors.New("no records affected after update")
+	}
+
+	return nil
+}
+
+func (amr AnalysisManagerRepository) getAllAnalysisByAnalysisRecordId(id uuid.UUID) ([]Analysis, error) {
+	var a []Analysis
+	if err := amr.db.Where("analysis_request_id = ?", id).Find(&a).Error; err != nil {
+		zap.S().Errorw("Could not get analysis records", "error", err)
+		return nil, err
+	}
+
+	return a, nil
+
 }

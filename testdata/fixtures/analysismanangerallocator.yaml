@@ -1,0 +1,30 @@
+jobs:
+  - id: fed9b891-a38d-41df-b7c5-cc0200726450
+    status: queued
+    status_description: ""
+    retry_count: 0
+    type: parse
+    data: '{"parserData":{"analysisId":"51fa6e15-2d95-4c89-b031-43f472a0aa91","content":"UnVubmluZyBhbmQgd2Fsa2luZw==","jobId":"234bebcd-b4df-4229-a978-3a15a807ebf3"},"topic":"parser.freetext","type":"freetext","image":"builtin"}'
+
+analysis_requests:
+  - id: 7ffe69cc-7ba2-4500-aee6-1ab36be5ce10
+    user_id: 22f406e4-600c-4217-aae1-f00edf889c25
+    title: Test analysis
+
+raw_data:
+  - id: 0fc5ae48-88d0-490a-9e90-1936d894c451
+    analysis_request_id: 7ffe69cc-7ba2-4500-aee6-1ab36be5ce10
+    hash: hashOfContent
+    content: byteContent
+    file_type: freetext
+    processed_text: ""
+
+analyses:
+  - id: ce0fd8a8-29ea-40c6-93a3-8097f8a851e8
+    analysis_request_id: 7ffe69cc-7ba2-4500-aee6-1ab36be5ce10
+    analyzer_key: word_search
+    theme_id: 1717b65e-0c37-4e9e-afe8-d1680cfca018
+    status: waiting
+    threshold: 2
+    score: 0
+    content: []

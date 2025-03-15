@@ -15,10 +15,12 @@ import (
 	"github.com/guardlight/server/internal/essential/testcontainers"
 	"github.com/guardlight/server/internal/health"
 	"github.com/guardlight/server/internal/infrastructure/database"
+	"github.com/guardlight/server/internal/infrastructure/messaging"
 	"github.com/guardlight/server/internal/jobmanager"
 	"github.com/guardlight/server/internal/natsclient"
 	"github.com/guardlight/server/internal/orchestrator"
 	"github.com/guardlight/server/internal/scheduler"
+	"github.com/guardlight/server/servers/natsmessaging"
 	"go.uber.org/zap"
 )
 
@@ -63,6 +65,7 @@ func main() {
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	}
 
+	GlExternalServers()
 	GLAdapters()
 
 	dbUrl := config.Get().Database.Url
@@ -78,6 +81,9 @@ func main() {
 		zap.S().Infow("starting staging database", "url", dbUrl)
 	}
 
+	// Messaging
+	ncon := messaging.InitNats(natsmessaging.GetNatsUrl(), natsmessaging.GetServer())
+
 	// Database
 	db := database.InitDatabase(dbUrl)
 
@@ -90,8 +96,8 @@ func main() {
 	baseGroup := mainRouter.Group("")
 
 	// Services
-	nc := natsclient.NewNatsClient()
-	jm := jobmanager.NewJobMananger(jmr, jmr)
+	nc := natsclient.NewNatsClient(ncon)
+	jm := jobmanager.NewJobMananger(jmr)
 	sch, err := scheduler.NewScheduler(loc)
 	if err != nil {
 		zap.S().Errorw("Could not create scheduler", "error", err)
@@ -102,11 +108,12 @@ func main() {
 		zap.S().Errorw("Could not create orhestrator", "error", err)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	}
-	analysisManagerRequester := analysismanager.NewAnalysisManangerRequester(jm, amr)
+	am := analysismanager.NewAnalysisManangerRequester(jm, amr)
+	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm)
 
 	// Controllers
 	health.NewHealthController(baseGroup)
-	analysisapi.NewAnalysisRequestController(baseGroup, analysisManagerRequester)
+	analysisapi.NewAnalysisRequestController(baseGroup, am)
 
 	// Start the server
 	go api.LiveOrLetDie(mainRouter)
@@ -124,6 +131,7 @@ func main() {
 	defer cancel()
 
 	api.LetDie(ctx)
+	sch.Gos.Shutdown()
 
 	// catching ctx.Done(). timeout of 5 seconds.
 	<-ctx.Done()

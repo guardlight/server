@@ -10,6 +10,9 @@ packages:
     interfaces:
       analysisRecordSaver:
       jobManagerRequester:
+      subsriber:
+      analysisStore:
+      jobber:
   github.com/guardlight/server/internal/jobmanager:
     interfaces:
       jobStore:

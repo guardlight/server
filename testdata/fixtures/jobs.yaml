@@ -3,4 +3,10 @@
   status_description: ""
   retry_count: 0
   type: parse
-  data: '{"parserData":{"analysisId":"e5652a80-df4f-4670-8d48-816828ba3c73","content":"UnVubmluZyBhbmQgd2Fsa2luZw==","jobId":"a79c05d2-2e07-4431-9269-8f36338142b6"},"topic":"parser.freetext","type":"freetext"}'
+  data: '{"parserData":{"analysisId":"e5652a80-df4f-4670-8d48-816828ba3c73","content":"UnVubmluZyBhbmQgd2Fsa2luZw==","jobId":"a79c05d2-2e07-4431-9269-8f36338142b6"},"topic":"parser.freetext","type":"freetext","image":"builtin"}'
+- id: 234bebcd-b4df-4229-a978-3a15a807ebf3
+  status: queued
+  status_description: ""
+  retry_count: 0
+  type: parse
+  data: '{"parserData":{"analysisId":"51fa6e15-2d95-4c89-b031-43f472a0aa91","content":"UnVubmluZyBhbmQgd2Fsa2luZw==","jobId":"234bebcd-b4df-4229-a978-3a15a807ebf3"},"topic":"parser.freetext","type":"freetext","image":"builtin"}'

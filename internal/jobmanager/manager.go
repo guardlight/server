@@ -47,8 +47,7 @@ func (jm *JobManager) CreateId() uuid.UUID {
 	return uuid.New()
 }
 
-func (jm *JobManager) EnqueueJob(Id uuid.UUID, t JobType, jd interface{}) error {
-
+func (jm *JobManager) EnqueueJob(id uuid.UUID, t JobType, jd interface{}) error {
 	jData, err := json.Marshal(jd)
 	if err != nil {
 		zap.S().Errorw("Could not marshal job data", "error", err)
@@ -56,7 +55,7 @@ func (jm *JobManager) EnqueueJob(Id uuid.UUID, t JobType, jd interface{}) error 
 	}
 
 	j := &Job{
-		Id:                Id,
+		Id:                id,
 		Status:            Queued,
 		StatusDescription: "",
 		RetryCount:        0,

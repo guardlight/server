@@ -17,17 +17,17 @@ func (_m *MocknatsSender) EXPECT() *MocknatsSender_Expecter {
 	return &MocknatsSender_Expecter{mock: &_m.Mock}
 }
 
-// Send provides a mock function with given fields: topic
-func (_m *MocknatsSender) Send(topic string) error {
-	ret := _m.Called(topic)
+// Publish provides a mock function with given fields: topic, data
+func (_m *MocknatsSender) Publish(topic string, data interface{}) error {
+	ret := _m.Called(topic, data)
 
 	if len(ret) == 0 {
-		panic("no return value specified for Send")
+		panic("no return value specified for Publish")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(topic)
+	if rf, ok := ret.Get(0).(func(string, interface{}) error); ok {
+		r0 = rf(topic, data)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -35,30 +35,31 @@ func (_m *MocknatsSender) Send(topic string) error {
 	return r0
 }
 
-// MocknatsSender_Send_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Send'
-type MocknatsSender_Send_Call struct {
+// MocknatsSender_Publish_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Publish'
+type MocknatsSender_Publish_Call struct {
 	*mock.Call
 }
 
-// Send is a helper method to define mock.On call
+// Publish is a helper method to define mock.On call
 //   - topic string
-func (_e *MocknatsSender_Expecter) Send(topic interface{}) *MocknatsSender_Send_Call {
-	return &MocknatsSender_Send_Call{Call: _e.mock.On("Send", topic)}
+//   - data interface{}
+func (_e *MocknatsSender_Expecter) Publish(topic interface{}, data interface{}) *MocknatsSender_Publish_Call {
+	return &MocknatsSender_Publish_Call{Call: _e.mock.On("Publish", topic, data)}
 }
 
-func (_c *MocknatsSender_Send_Call) Run(run func(topic string)) *MocknatsSender_Send_Call {
+func (_c *MocknatsSender_Publish_Call) Run(run func(topic string, data interface{})) *MocknatsSender_Publish_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		run(args[0].(string), args[1].(interface{}))
 	})
 	return _c
 }
 
-func (_c *MocknatsSender_Send_Call) Return(_a0 error) *MocknatsSender_Send_Call {
+func (_c *MocknatsSender_Publish_Call) Return(_a0 error) *MocknatsSender_Publish_Call {
 	_c.Call.Return(_a0)
 	return _c
 }
 
-func (_c *MocknatsSender_Send_Call) RunAndReturn(run func(string) error) *MocknatsSender_Send_Call {
+func (_c *MocknatsSender_Publish_Call) RunAndReturn(run func(string, interface{}) error) *MocknatsSender_Publish_Call {
 	_c.Call.Return(run)
 	return _c
 }

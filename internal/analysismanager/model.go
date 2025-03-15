@@ -27,6 +27,13 @@ const (
 	Error      AnalysisRequestStepStatus = "error"
 )
 
+type AnalysisStatus string
+
+const (
+	AnalysisWaiting  AnalysisStatus = "waiting"
+	AnalysisFinished AnalysisStatus = "finished"
+)
+
 type AnalysisRequest struct {
 	Id                   uuid.UUID             `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()"`
 	UserId               uuid.UUID             `gorm:"column:user_id"`
@@ -56,14 +63,14 @@ type RawData struct {
 }
 
 type Analysis struct {
-	Id                uuid.UUID `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()"`
-	AnalysisRequestId uuid.UUID `gorm:"column:analysis_request_id;primaryKey;type:uuid"`
-	AnalyzerKey       string    `gorm:"column:analyzer_key"`
-	ThemeId           string    `gorm:"column:theme_id"`
-	Status            string    `gorm:"column:status"`
-	Threshold         int       `gorm:"column:threshold"`
-	Score             int       `gorm:"column:score"`
-	Content           Content   `gorm:"column:content;type:jsonb"`
+	Id                uuid.UUID      `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()"`
+	AnalysisRequestId uuid.UUID      `gorm:"column:analysis_request_id;primaryKey;type:uuid"`
+	AnalyzerKey       string         `gorm:"column:analyzer_key"`
+	ThemeId           uuid.UUID      `gorm:"column:theme_id"`
+	Status            AnalysisStatus `gorm:"column:status"`
+	Threshold         int            `gorm:"column:threshold"`
+	Score             int            `gorm:"column:score"`
+	Content           Content        `gorm:"column:content;type:jsonb"`
 }
 
 type AnalysisReport struct {

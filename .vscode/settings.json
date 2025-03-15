@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "CockroachDB",
+            "name": "test",
+            "connectString": "postgresql://root@localhost:57539/guardlight_development_test?sslmode=disable"
+        }
+    ]
+}

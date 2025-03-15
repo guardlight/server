@@ -60,16 +60,18 @@ type parser struct {
 	Name        string `koanf:"name"`
 	Description string `koanf:"description"`
 	Concurrency int    `koanf:"concurrency"`
+	Image       string `koanf:"image"`
 }
 
 type analyzer struct {
-	Key            string          `koanf:"key"`
-	Name           string          `koanf:"name"`
-	Description    string          `koanf:"description"`
-	ContenxtWindow string          `koanf:"contentWindow"`
-	Model          string          `koanf:"model"`
-	Concurrency    int             `koanf:"concurrency"`
-	Inputs         []analyzerInput `koanf:"inputs"`
+	Key           string          `koanf:"key"`
+	Name          string          `koanf:"name"`
+	Description   string          `koanf:"description"`
+	ContextWindow int             `koanf:"contextWindow"`
+	Model         string          `koanf:"model"`
+	Concurrency   int             `koanf:"concurrency"`
+	Inputs        []analyzerInput `koanf:"inputs"`
+	Image         string          `koanf:"image"`
 }
 
 type analyzerInput struct {

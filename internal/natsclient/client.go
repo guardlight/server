@@ -1,21 +1,36 @@
 package natsclient
 
-type Sender interface {
-	Send(topic string) error
+import (
+	"encoding/json"
+
+	"github.com/nats-io/nats.go"
+	"go.uber.org/zap"
+)
+
+type Publisher interface {
+	Publish(topic string, data interface{}) error
 }
 
 var (
 	T string = ""
 )
 
-type NatsClient struct{}
-
-func NewNatsClient() *NatsClient {
-	return &NatsClient{}
+type NatsClient struct {
+	n *nats.Conn
 }
 
-func (nc NatsClient) Send(topic string) error {
-	T = topic
+func NewNatsClient(ncon *nats.Conn) *NatsClient {
+	return &NatsClient{
+		n: ncon,
+	}
+}
 
+func (nc *NatsClient) Publish(topic string, payload interface{}) error {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		zap.S().Errorw("error marshalling request", "error", err)
+		return err
+	}
+	nc.n.Publish(topic, data)
 	return nil
 }
