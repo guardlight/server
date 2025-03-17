@@ -66,7 +66,6 @@ func main() {
 	}
 
 	GlExternalServers()
-	GLAdapters()
 
 	dbUrl := config.Get().Database.Url
 	if config.Get().IsDevelopment() {
@@ -83,6 +82,7 @@ func main() {
 
 	// Messaging
 	ncon := messaging.InitNats(natsmessaging.GetNatsUrl(), natsmessaging.GetServer())
+	GLAdapters(ncon)
 
 	// Database
 	db := database.InitDatabase(dbUrl)

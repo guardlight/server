@@ -130,7 +130,7 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 			},
 			{
 				Title: "Test Swim Theme",
-				Id:    uuid.MustParse("2864d1b0-411a-4c6c-932a-61acddd67019"),
+				Id:    uuid.MustParse("3ab4a569-4de4-4206-a4fe-b4d2ddac3f6c"),
 				Analyzers: []analysisrequest.Analyzer{
 					{
 						Key:       "word_search",
@@ -196,13 +196,49 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 		FileType: "freetext",
 	}
 
+	as := []Analysis{
+		{
+			Id:                uuid.Nil,
+			AnalysisRequestId: uuid.Nil,
+			AnalyzerKey:       "word_search",
+			ThemeId:           uuid.MustParse("2864d1b0-411a-4c6c-932a-61acddd67019"),
+			Status:            AnalysisWaiting,
+			Threshold:         2,
+			Score:             0,
+			Content:           Content{},
+			Inputs: []AnalysisInput{
+				{
+					Key:   "strict_words",
+					Value: "Running, Walking",
+				},
+			},
+			Jobs: []SingleJobProgress{},
+		},
+		{
+			Id:                uuid.Nil,
+			AnalysisRequestId: uuid.Nil,
+			AnalyzerKey:       "word_search",
+			ThemeId:           uuid.MustParse("3ab4a569-4de4-4206-a4fe-b4d2ddac3f6c"),
+			Status:            AnalysisWaiting,
+			Threshold:         2,
+			Score:             0,
+			Content:           Content{},
+			Inputs: []AnalysisInput{
+				{
+					Key:   "strict_words",
+					Value: "Swimming, Drowning",
+				},
+			},
+			Jobs: []SingleJobProgress{},
+		},
+	}
+
 	arDb := &AnalysisRequest{
 		Title:                "test analysis",
 		UserId:               userId,
 		AnalysisRequestSteps: steps,
 		RawData:              rawData,
-		Analysis:             []Analysis{},
-		Report:               AnalysisReport{},
+		Analysis:             as,
 	}
 
 	analysisId := uuid.MustParse("75d25964-6d59-4f88-97f8-dfd3afe96c62")
@@ -222,7 +258,7 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 		},
 	}
 
-	mockJobManager.EXPECT().EnqueueJob(jobId, jobmanager.Parse, pData).Return(nil)
+	mockJobManager.EXPECT().EnqueueJob(jobId, jobmanager.Parse, "parser.freetext", pData).Return(nil)
 
 	err := analyzerRequester.RequestAnalysis(ar, userId)
 

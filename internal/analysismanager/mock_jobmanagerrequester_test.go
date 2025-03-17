@@ -69,17 +69,17 @@ func (_c *MockjobManagerRequester_CreateId_Call) RunAndReturn(run func() uuid.UU
 	return _c
 }
 
-// EnqueueJob provides a mock function with given fields: Id, t, jd
-func (_m *MockjobManagerRequester) EnqueueJob(Id uuid.UUID, t jobmanager.JobType, jd interface{}) error {
-	ret := _m.Called(Id, t, jd)
+// EnqueueJob provides a mock function with given fields: id, jType, groupKey, data
+func (_m *MockjobManagerRequester) EnqueueJob(id uuid.UUID, jType jobmanager.JobType, groupKey string, data interface{}) error {
+	ret := _m.Called(id, jType, groupKey, data)
 
 	if len(ret) == 0 {
 		panic("no return value specified for EnqueueJob")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID, jobmanager.JobType, interface{}) error); ok {
-		r0 = rf(Id, t, jd)
+	if rf, ok := ret.Get(0).(func(uuid.UUID, jobmanager.JobType, string, interface{}) error); ok {
+		r0 = rf(id, jType, groupKey, data)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -93,16 +93,17 @@ type MockjobManagerRequester_EnqueueJob_Call struct {
 }
 
 // EnqueueJob is a helper method to define mock.On call
-//   - Id uuid.UUID
-//   - t jobmanager.JobType
-//   - jd interface{}
-func (_e *MockjobManagerRequester_Expecter) EnqueueJob(Id interface{}, t interface{}, jd interface{}) *MockjobManagerRequester_EnqueueJob_Call {
-	return &MockjobManagerRequester_EnqueueJob_Call{Call: _e.mock.On("EnqueueJob", Id, t, jd)}
+//   - id uuid.UUID
+//   - jType jobmanager.JobType
+//   - groupKey string
+//   - data interface{}
+func (_e *MockjobManagerRequester_Expecter) EnqueueJob(id interface{}, jType interface{}, groupKey interface{}, data interface{}) *MockjobManagerRequester_EnqueueJob_Call {
+	return &MockjobManagerRequester_EnqueueJob_Call{Call: _e.mock.On("EnqueueJob", id, jType, groupKey, data)}
 }
 
-func (_c *MockjobManagerRequester_EnqueueJob_Call) Run(run func(Id uuid.UUID, t jobmanager.JobType, jd interface{})) *MockjobManagerRequester_EnqueueJob_Call {
+func (_c *MockjobManagerRequester_EnqueueJob_Call) Run(run func(id uuid.UUID, jType jobmanager.JobType, groupKey string, data interface{})) *MockjobManagerRequester_EnqueueJob_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID), args[1].(jobmanager.JobType), args[2].(interface{}))
+		run(args[0].(uuid.UUID), args[1].(jobmanager.JobType), args[2].(string), args[3].(interface{}))
 	})
 	return _c
 }
@@ -112,7 +113,7 @@ func (_c *MockjobManagerRequester_EnqueueJob_Call) Return(_a0 error) *MockjobMan
 	return _c
 }
 
-func (_c *MockjobManagerRequester_EnqueueJob_Call) RunAndReturn(run func(uuid.UUID, jobmanager.JobType, interface{}) error) *MockjobManagerRequester_EnqueueJob_Call {
+func (_c *MockjobManagerRequester_EnqueueJob_Call) RunAndReturn(run func(uuid.UUID, jobmanager.JobType, string, interface{}) error) *MockjobManagerRequester_EnqueueJob_Call {
 	_c.Call.Return(run)
 	return _c
 }

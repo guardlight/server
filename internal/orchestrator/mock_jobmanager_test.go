@@ -79,9 +79,9 @@ func (_c *MockjobManager_GetAllNonFinishedJobs_Call) RunAndReturn(run func() ([]
 	return _c
 }
 
-// UpdateJobStatus provides a mock function with given fields: id, s, sd, rc
-func (_m *MockjobManager) UpdateJobStatus(id uuid.UUID, s jobmanager.JobStatus, sd string, rc int) error {
-	ret := _m.Called(id, s, sd, rc)
+// UpdateJobStatus provides a mock function with given fields: id, status, desc, retryCount
+func (_m *MockjobManager) UpdateJobStatus(id uuid.UUID, status jobmanager.JobStatus, desc string, retryCount int) error {
+	ret := _m.Called(id, status, desc, retryCount)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateJobStatus")
@@ -89,7 +89,7 @@ func (_m *MockjobManager) UpdateJobStatus(id uuid.UUID, s jobmanager.JobStatus, 
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(uuid.UUID, jobmanager.JobStatus, string, int) error); ok {
-		r0 = rf(id, s, sd, rc)
+		r0 = rf(id, status, desc, retryCount)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -104,14 +104,14 @@ type MockjobManager_UpdateJobStatus_Call struct {
 
 // UpdateJobStatus is a helper method to define mock.On call
 //   - id uuid.UUID
-//   - s jobmanager.JobStatus
-//   - sd string
-//   - rc int
-func (_e *MockjobManager_Expecter) UpdateJobStatus(id interface{}, s interface{}, sd interface{}, rc interface{}) *MockjobManager_UpdateJobStatus_Call {
-	return &MockjobManager_UpdateJobStatus_Call{Call: _e.mock.On("UpdateJobStatus", id, s, sd, rc)}
+//   - status jobmanager.JobStatus
+//   - desc string
+//   - retryCount int
+func (_e *MockjobManager_Expecter) UpdateJobStatus(id interface{}, status interface{}, desc interface{}, retryCount interface{}) *MockjobManager_UpdateJobStatus_Call {
+	return &MockjobManager_UpdateJobStatus_Call{Call: _e.mock.On("UpdateJobStatus", id, status, desc, retryCount)}
 }
 
-func (_c *MockjobManager_UpdateJobStatus_Call) Run(run func(id uuid.UUID, s jobmanager.JobStatus, sd string, rc int)) *MockjobManager_UpdateJobStatus_Call {
+func (_c *MockjobManager_UpdateJobStatus_Call) Run(run func(id uuid.UUID, status jobmanager.JobStatus, desc string, retryCount int)) *MockjobManager_UpdateJobStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(uuid.UUID), args[1].(jobmanager.JobStatus), args[2].(string), args[3].(int))
 	})

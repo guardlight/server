@@ -78,6 +78,101 @@ func (_c *MockanalysisStore_getAllAnalysisByAnalysisRecordId_Call) RunAndReturn(
 	return _c
 }
 
+// updateAnalysisJobProgress provides a mock function with given fields: ai, jid, status
+func (_m *MockanalysisStore) updateAnalysisJobProgress(ai uuid.UUID, jid uuid.UUID, status AnalysisStatus) error {
+	ret := _m.Called(ai, jid, status)
+
+	if len(ret) == 0 {
+		panic("no return value specified for updateAnalysisJobProgress")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID, uuid.UUID, AnalysisStatus) error); ok {
+		r0 = rf(ai, jid, status)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockanalysisStore_updateAnalysisJobProgress_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'updateAnalysisJobProgress'
+type MockanalysisStore_updateAnalysisJobProgress_Call struct {
+	*mock.Call
+}
+
+// updateAnalysisJobProgress is a helper method to define mock.On call
+//   - ai uuid.UUID
+//   - jid uuid.UUID
+//   - status AnalysisStatus
+func (_e *MockanalysisStore_Expecter) updateAnalysisJobProgress(ai interface{}, jid interface{}, status interface{}) *MockanalysisStore_updateAnalysisJobProgress_Call {
+	return &MockanalysisStore_updateAnalysisJobProgress_Call{Call: _e.mock.On("updateAnalysisJobProgress", ai, jid, status)}
+}
+
+func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) Run(run func(ai uuid.UUID, jid uuid.UUID, status AnalysisStatus)) *MockanalysisStore_updateAnalysisJobProgress_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(uuid.UUID), args[1].(uuid.UUID), args[2].(AnalysisStatus))
+	})
+	return _c
+}
+
+func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) Return(_a0 error) *MockanalysisStore_updateAnalysisJobProgress_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) RunAndReturn(run func(uuid.UUID, uuid.UUID, AnalysisStatus) error) *MockanalysisStore_updateAnalysisJobProgress_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// updateAnalysisJobs provides a mock function with given fields: ai, jbs
+func (_m *MockanalysisStore) updateAnalysisJobs(ai uuid.UUID, jbs []SingleJobProgress) error {
+	ret := _m.Called(ai, jbs)
+
+	if len(ret) == 0 {
+		panic("no return value specified for updateAnalysisJobs")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID, []SingleJobProgress) error); ok {
+		r0 = rf(ai, jbs)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockanalysisStore_updateAnalysisJobs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'updateAnalysisJobs'
+type MockanalysisStore_updateAnalysisJobs_Call struct {
+	*mock.Call
+}
+
+// updateAnalysisJobs is a helper method to define mock.On call
+//   - ai uuid.UUID
+//   - jbs []SingleJobProgress
+func (_e *MockanalysisStore_Expecter) updateAnalysisJobs(ai interface{}, jbs interface{}) *MockanalysisStore_updateAnalysisJobs_Call {
+	return &MockanalysisStore_updateAnalysisJobs_Call{Call: _e.mock.On("updateAnalysisJobs", ai, jbs)}
+}
+
+func (_c *MockanalysisStore_updateAnalysisJobs_Call) Run(run func(ai uuid.UUID, jbs []SingleJobProgress)) *MockanalysisStore_updateAnalysisJobs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(uuid.UUID), args[1].([]SingleJobProgress))
+	})
+	return _c
+}
+
+func (_c *MockanalysisStore_updateAnalysisJobs_Call) Return(_a0 error) *MockanalysisStore_updateAnalysisJobs_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockanalysisStore_updateAnalysisJobs_Call) RunAndReturn(run func(uuid.UUID, []SingleJobProgress) error) *MockanalysisStore_updateAnalysisJobs_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // updateProcessedText provides a mock function with given fields: ai, text
 func (_m *MockanalysisStore) updateProcessedText(ai uuid.UUID, text string) error {
 	ret := _m.Called(ai, text)

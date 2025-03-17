@@ -88,7 +88,7 @@ func (o *Orchestrator) processParseJob(j jobmanager.Job) {
 		return
 	}
 
-	if o.jcs[string(j.Type)]+1 <= p.Concurrency {
+	if o.jcs[string(j.GroupKey)]+1 <= p.Concurrency {
 		if f.Image == "builtin" {
 			zap.S().Infow("using builtin parser", "data", f)
 		} else {
@@ -119,7 +119,7 @@ func (o *Orchestrator) processAnalyzeJob(j jobmanager.Job) {
 		return
 	}
 
-	if o.jcs[string(j.Type)]+1 <= a.Concurrency {
+	if o.jcs[string(j.GroupKey)]+1 <= a.Concurrency {
 		if f.Image == "builtin" {
 			zap.S().Infow("using builtin analyzer", "data", f)
 		} else {

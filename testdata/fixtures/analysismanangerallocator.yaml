@@ -3,6 +3,7 @@ jobs:
     status: queued
     status_description: ""
     retry_count: 0
+    group_key: parser.freetext
     type: parse
     data: '{"parserData":{"analysisId":"51fa6e15-2d95-4c89-b031-43f472a0aa91","content":"UnVubmluZyBhbmQgd2Fsa2luZw==","jobId":"234bebcd-b4df-4229-a978-3a15a807ebf3"},"topic":"parser.freetext","type":"freetext","image":"builtin"}'
 
@@ -28,3 +29,4 @@ analyses:
     threshold: 2
     score: 0
     content: []
+    inputs: [{key: "strict_words", value: "Running, Walking"}]

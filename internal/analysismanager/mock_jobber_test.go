@@ -69,17 +69,17 @@ func (_c *Mockjobber_CreateId_Call) RunAndReturn(run func() uuid.UUID) *Mockjobb
 	return _c
 }
 
-// EnqueueJob provides a mock function with given fields: Id, t, jd
-func (_m *Mockjobber) EnqueueJob(Id uuid.UUID, t jobmanager.JobType, jd interface{}) error {
-	ret := _m.Called(Id, t, jd)
+// EnqueueJob provides a mock function with given fields: id, jType, groupKey, data
+func (_m *Mockjobber) EnqueueJob(id uuid.UUID, jType jobmanager.JobType, groupKey string, data interface{}) error {
+	ret := _m.Called(id, jType, groupKey, data)
 
 	if len(ret) == 0 {
 		panic("no return value specified for EnqueueJob")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID, jobmanager.JobType, interface{}) error); ok {
-		r0 = rf(Id, t, jd)
+	if rf, ok := ret.Get(0).(func(uuid.UUID, jobmanager.JobType, string, interface{}) error); ok {
+		r0 = rf(id, jType, groupKey, data)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -93,16 +93,17 @@ type Mockjobber_EnqueueJob_Call struct {
 }
 
 // EnqueueJob is a helper method to define mock.On call
-//   - Id uuid.UUID
-//   - t jobmanager.JobType
-//   - jd interface{}
-func (_e *Mockjobber_Expecter) EnqueueJob(Id interface{}, t interface{}, jd interface{}) *Mockjobber_EnqueueJob_Call {
-	return &Mockjobber_EnqueueJob_Call{Call: _e.mock.On("EnqueueJob", Id, t, jd)}
+//   - id uuid.UUID
+//   - jType jobmanager.JobType
+//   - groupKey string
+//   - data interface{}
+func (_e *Mockjobber_Expecter) EnqueueJob(id interface{}, jType interface{}, groupKey interface{}, data interface{}) *Mockjobber_EnqueueJob_Call {
+	return &Mockjobber_EnqueueJob_Call{Call: _e.mock.On("EnqueueJob", id, jType, groupKey, data)}
 }
 
-func (_c *Mockjobber_EnqueueJob_Call) Run(run func(Id uuid.UUID, t jobmanager.JobType, jd interface{})) *Mockjobber_EnqueueJob_Call {
+func (_c *Mockjobber_EnqueueJob_Call) Run(run func(id uuid.UUID, jType jobmanager.JobType, groupKey string, data interface{})) *Mockjobber_EnqueueJob_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID), args[1].(jobmanager.JobType), args[2].(interface{}))
+		run(args[0].(uuid.UUID), args[1].(jobmanager.JobType), args[2].(string), args[3].(interface{}))
 	})
 	return _c
 }
@@ -112,14 +113,14 @@ func (_c *Mockjobber_EnqueueJob_Call) Return(_a0 error) *Mockjobber_EnqueueJob_C
 	return _c
 }
 
-func (_c *Mockjobber_EnqueueJob_Call) RunAndReturn(run func(uuid.UUID, jobmanager.JobType, interface{}) error) *Mockjobber_EnqueueJob_Call {
+func (_c *Mockjobber_EnqueueJob_Call) RunAndReturn(run func(uuid.UUID, jobmanager.JobType, string, interface{}) error) *Mockjobber_EnqueueJob_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// UpdateJobStatus provides a mock function with given fields: id, s, sd, rc
-func (_m *Mockjobber) UpdateJobStatus(id uuid.UUID, s jobmanager.JobStatus, sd string, rc int) error {
-	ret := _m.Called(id, s, sd, rc)
+// UpdateJobStatus provides a mock function with given fields: id, status, desc, retryCount
+func (_m *Mockjobber) UpdateJobStatus(id uuid.UUID, status jobmanager.JobStatus, desc string, retryCount int) error {
+	ret := _m.Called(id, status, desc, retryCount)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateJobStatus")
@@ -127,7 +128,7 @@ func (_m *Mockjobber) UpdateJobStatus(id uuid.UUID, s jobmanager.JobStatus, sd s
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(uuid.UUID, jobmanager.JobStatus, string, int) error); ok {
-		r0 = rf(id, s, sd, rc)
+		r0 = rf(id, status, desc, retryCount)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -142,14 +143,14 @@ type Mockjobber_UpdateJobStatus_Call struct {
 
 // UpdateJobStatus is a helper method to define mock.On call
 //   - id uuid.UUID
-//   - s jobmanager.JobStatus
-//   - sd string
-//   - rc int
-func (_e *Mockjobber_Expecter) UpdateJobStatus(id interface{}, s interface{}, sd interface{}, rc interface{}) *Mockjobber_UpdateJobStatus_Call {
-	return &Mockjobber_UpdateJobStatus_Call{Call: _e.mock.On("UpdateJobStatus", id, s, sd, rc)}
+//   - status jobmanager.JobStatus
+//   - desc string
+//   - retryCount int
+func (_e *Mockjobber_Expecter) UpdateJobStatus(id interface{}, status interface{}, desc interface{}, retryCount interface{}) *Mockjobber_UpdateJobStatus_Call {
+	return &Mockjobber_UpdateJobStatus_Call{Call: _e.mock.On("UpdateJobStatus", id, status, desc, retryCount)}
 }
 
-func (_c *Mockjobber_UpdateJobStatus_Call) Run(run func(id uuid.UUID, s jobmanager.JobStatus, sd string, rc int)) *Mockjobber_UpdateJobStatus_Call {
+func (_c *Mockjobber_UpdateJobStatus_Call) Run(run func(id uuid.UUID, status jobmanager.JobStatus, desc string, retryCount int)) *Mockjobber_UpdateJobStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		run(args[0].(uuid.UUID), args[1].(jobmanager.JobStatus), args[2].(string), args[3].(int))
 	})

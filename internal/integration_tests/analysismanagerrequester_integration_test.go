@@ -36,7 +36,7 @@ type TestSuiteAnalysisManagerIntegration struct {
 }
 
 func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
-	config.SetupConfig("../../env-test.yaml")
+	config.SetupConfig("../../testdata/envs/analysismanangerequester.yaml")
 	logging.SetupLogging("test")
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer ctxCancel()

@@ -17,6 +17,8 @@ import (
 type analysisStore interface {
 	updateProcessedText(ai uuid.UUID, text string) error
 	getAllAnalysisByAnalysisRecordId(id uuid.UUID) ([]Analysis, error)
+	updateAnalysisJobs(ai uuid.UUID, jbs []SingleJobProgress) error
+	updateAnalysisJobProgress(ai uuid.UUID, jid uuid.UUID, status AnalysisStatus) error
 }
 
 type subsriber interface {
@@ -61,6 +63,16 @@ func (ama *AnalysisManagerAllocator) processParserResult(m *nats.Msg) {
 		zap.S().Errorw("Could not update processed text in raw data", "error", err)
 		return
 	}
+
+	if pr.Status == parsercontract.ParseError {
+		err = ama.ju.UpdateJobStatus(pr.JobId, jobmanager.Error, pr.Text, 0)
+		if err != nil {
+			zap.S().Errorw("Could not update job status", "error", err)
+			return
+		}
+		return
+	}
+
 	err = ama.ju.UpdateJobStatus(pr.JobId, jobmanager.Finished, "", 0)
 	if err != nil {
 		zap.S().Errorw("Could not update job status", "error", err)
@@ -79,22 +91,34 @@ func (ama *AnalysisManagerAllocator) allocateAnalyzeJobs(ai uuid.UUID, text stri
 	}
 
 	for _, a := range al {
-		ama.buildJobsForAnalyzer(ai, a, text)
+		jbs := ama.buildJobsForAnalyzer(ai, a, text)
+		ama.as.updateAnalysisJobs(ai, jbs)
 	}
 
 }
 
-func (ama *AnalysisManagerAllocator) buildJobsForAnalyzer(ai uuid.UUID, a Analysis, text string) {
+func (ama *AnalysisManagerAllocator) buildJobsForAnalyzer(ai uuid.UUID, a Analysis, text string) []SingleJobProgress {
 	analyzerFromConfig, ok := config.Get().GetAnalyzer(a.AnalyzerKey)
 	if !ok {
 		zap.S().Errorw("Could not get analyzer from config", "analyzer_key", a.AnalyzerKey)
-		return
+		return nil
 	}
+	jobs := make([]SingleJobProgress, 0)
 
 	if analyzerFromConfig.Model == "text" {
 		chks := lo.ChunkString(text, analyzerFromConfig.ContextWindow)
 		for _, ch := range chks {
 			jid := ama.ju.CreateId()
+			jobs = append(jobs, SingleJobProgress{
+				JobId:  jid,
+				Status: AnalysisWaiting,
+			})
+			ainputs := lo.Map(a.Inputs, func(inp AnalysisInput, _ int) analyzercontract.AnalysisInput {
+				return analyzercontract.AnalysisInput{
+					Key:   inp.Key,
+					Value: inp.Value,
+				}
+			})
 			ajd := jobmanager.AnalyzerJobData{
 				Type:  analyzerFromConfig.Key,
 				Image: analyzerFromConfig.Image,
@@ -103,16 +127,18 @@ func (ama *AnalysisManagerAllocator) buildJobsForAnalyzer(ai uuid.UUID, a Analys
 					JobId:      jid,
 					AnalysisId: ai,
 					Content:    ch,
+					Inputs:     ainputs,
 				},
 			}
-			ama.ju.EnqueueJob(jid, jobmanager.Analyze, ajd)
+			gk := fmt.Sprintf("analyzer.%s", analyzerFromConfig.Key)
+			ama.ju.EnqueueJob(jid, jobmanager.Analyze, gk, ajd)
 			zap.S().Infow("Analyzer job submitted", "job_id", jid)
 		}
 	} else {
 		zap.S().Errorw("Model not supported", "model", analyzerFromConfig.Model)
-		return
 	}
 
+	return jobs
 }
 
 func (ama *AnalysisManagerAllocator) processAnalyzerResult(m *nats.Msg) {
@@ -125,8 +151,11 @@ func (ama *AnalysisManagerAllocator) processAnalyzerResult(m *nats.Msg) {
 		//      Update to error status with description, "Task running to long"
 	}
 
-	// TODO Update analysis
-	// Figure out how to know when all jobs are finished for analysis
+	err = ama.as.updateAnalysisJobProgress(ar.AnalysisId, ar.JobId, AnalysisFinished)
+	if err != nil {
+		zap.S().Errorw("Could not update analysis progress", "error", err)
+		return
+	}
 
 	err = ama.ju.UpdateJobStatus(ar.JobId, jobmanager.Finished, "", 0)
 	if err != nil {
@@ -135,6 +164,6 @@ func (ama *AnalysisManagerAllocator) processAnalyzerResult(m *nats.Msg) {
 	}
 	zap.S().Infow("Analyzer result processed")
 
-	// if allAnalysisFinished
-	// make report
+	// if contributeToPublicMADB (MADB=Media Analysis Database)
+
 }

@@ -11,7 +11,7 @@ func jc() map[string]int {
 func (jc jobCounts) build(j []jobmanager.Job) {
 	for _, job := range j {
 		if job.Status == jobmanager.Inprogress {
-			jc[string(job.Type)]++
+			jc[job.GroupKey]++
 		}
 	}
 }

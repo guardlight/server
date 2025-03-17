@@ -29,6 +29,7 @@ func TestAnalysisOrchestratorStart(t *testing.T) {
 			StatusDescription: "",
 			RetryCount:        0,
 			Type:              jobmanager.Parse,
+			GroupKey:          "parser.freetext",
 			Data:              []byte("{\"image\":\"builtin\",\"type\":\"freetext\",\"topic\":\"parser.freetext\",\"parserData\":{\"jobId\":\"b268c2e9-3a9d-4e36-a17f-33032fa77c72\",\"analysisId\":\"165c0cff-9395-4b10-8636-9d65b3d364ef\",\"Content\":\"UnVubmluZyBhbmQgV2Fsa2luZw==\"}}"),
 		},
 	}
@@ -65,6 +66,7 @@ func TestAnalysisOrchestratorDoNothing(t *testing.T) {
 			StatusDescription: "",
 			RetryCount:        0,
 			Type:              jobmanager.Parse,
+			GroupKey:          "parser.freetext",
 			Data:              []byte("{\"type\":\"freetext\",\"topic\":\"parser.freetext\",\"parserData\":{\"jobId\":\"b268c2e9-3a9d-4e36-a17f-33032fa77c72\",\"analysisId\":\"dcfd5683-bccc-42b0-963a-93fc97ecf67d\",\"Content\":\"UnVubmluZyBhbmQgV2Fsa2luZw==\"}}"),
 		},
 		{
@@ -105,6 +107,7 @@ func TestAnalysisOrchestratorStartNew(t *testing.T) {
 			StatusDescription: "",
 			RetryCount:        0,
 			Type:              jobmanager.Parse,
+			GroupKey:          "parser.freetext",
 			Data:              []byte("{\"image\":\"builtin\",\"type\":\"freetext\",\"topic\":\"parser.freetext\",\"parserData\":{\"jobId\":\"b268c2e9-3a9d-4e36-a17f-33032fa77c72\",\"analysisId\":\"dcfd5683-bccc-42b0-963a-93fc97ecf67d\",\"Content\":\"UnVubmluZyBhbmQgV2Fsa2luZw==\"}}"),
 		},
 		{
@@ -149,6 +152,7 @@ func TestAnalysisOrchestratorFailed(t *testing.T) {
 			StatusDescription: "",
 			RetryCount:        0,
 			Type:              jobmanager.Parse,
+			GroupKey:          "parser.freetext",
 			Data:              []byte("{\"type\":\"unknown\",\"topic\":\"parser.freetext\",\"parserData\":{\"jobId\":\"b268c2e9-3a9d-4e36-a17f-33032fa77c72\",\"analysisId\":\"dcfd5683-bccc-42b0-963a-93fc97ecf67d\",\"Content\":\"UnVubmluZyBhbmQgV2Fsa2luZw==\"}}"),
 		},
 	}
@@ -179,6 +183,7 @@ func TestAnalysisOrchestratorCannotUnmarshal(t *testing.T) {
 			StatusDescription: "",
 			RetryCount:        0,
 			Type:              jobmanager.Parse,
+			GroupKey:          "parser.freetext",
 			Data:              []byte("Wont unmarshal"),
 		},
 	}

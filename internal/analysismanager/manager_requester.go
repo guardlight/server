@@ -67,7 +67,6 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		AnalysisRequestSteps: steps,
 		RawData:              rawData,
 		Analysis:             analysisParts,
-		Report:               AnalysisReport{},
 	}
 	err := am.analysisRecordSaver.createAnalysisRequest(ar)
 	if err != nil {
@@ -77,8 +76,8 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 	jobId := am.jobMananger.CreateId()
 
 	jd := jobmanager.ParserJobData{
-		Type:  arDto.File.Mimetype,
-		Topic: fmt.Sprintf("parser.%s", arDto.File.Mimetype),
+		Type:  p.Type,
+		Topic: fmt.Sprintf("parser.%s", p.Type),
 		Image: p.Image,
 		ParserData: parsercontract.ParserRequest{
 			JobId:      jobId,
@@ -86,7 +85,8 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 			Content:    arDto.File.Content,
 		},
 	}
-	am.jobMananger.EnqueueJob(jobId, jobmanager.Parse, jd)
+	gk := fmt.Sprintf("parser.%s", p.Type)
+	am.jobMananger.EnqueueJob(jobId, jobmanager.Parse, gk, jd)
 
 	return nil
 }
@@ -96,6 +96,12 @@ func createAnalysis(arDto *analysisrequest.AnalysisRequest) []Analysis {
 
 	for _, t := range arDto.Themes {
 		for _, a := range t.Analyzers {
+			ainputs := lo.Map(a.Inputs, func(inp analysisrequest.AnalyzerInput, _ int) AnalysisInput {
+				return AnalysisInput{
+					Key:   inp.Key,
+					Value: inp.Value,
+				}
+			})
 			as = append(as, Analysis{
 				Id:                uuid.Nil,
 				AnalysisRequestId: uuid.Nil,
@@ -104,7 +110,9 @@ func createAnalysis(arDto *analysisrequest.AnalysisRequest) []Analysis {
 				Status:            AnalysisWaiting,
 				Threshold:         a.Threshold,
 				Score:             0,
+				Inputs:            ainputs,
 				Content:           []string{},
+				Jobs:              []SingleJobProgress{},
 			})
 		}
 	}

@@ -82,6 +82,7 @@ func (sama *TestSuiteAnalysisManagerAllocatorIntegration) TestParserResult() {
 		JobId:      uuid.MustParse("fed9b891-a38d-41df-b7c5-cc0200726450"),
 		AnalysisId: ai,
 		Text:       "Running and Walking",
+		Status:     parsercontract.ParseSuccess,
 	}
 
 	dat, err := json.Marshal(pr)
@@ -99,4 +100,10 @@ func (sama *TestSuiteAnalysisManagerAllocatorIntegration) TestParserResult() {
 	sama.Assert().NoError(res.Error)
 	sama.Assert().Len(jobs, 2)
 
+	as := analysismanager.Analysis{
+		AnalysisRequestId: ai,
+	}
+	err = sama.db.Find(&as).Error
+	sama.Assert().NoError(err)
+	sama.Assert().Len(as.Jobs, 1)
 }

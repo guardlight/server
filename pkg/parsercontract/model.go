@@ -8,8 +8,16 @@ type ParserRequest struct {
 	Content    []byte    `json:"content"`
 }
 
+type ParserResponseStatus string
+
+const (
+	ParseSuccess ParserResponseStatus = "success"
+	ParseError   ParserResponseStatus = "error"
+)
+
 type ParserResponse struct {
-	JobId      uuid.UUID `json:"jobId"`
-	AnalysisId uuid.UUID `json:"analysisId"`
-	Text       string    `json:"text"`
+	JobId      uuid.UUID            `json:"jobId"`
+	AnalysisId uuid.UUID            `json:"analysisId"`
+	Text       string               `json:"text"`
+	Status     ParserResponseStatus `json:"status"`
 }

@@ -32,6 +32,7 @@ type AnalysisStatus string
 const (
 	AnalysisWaiting  AnalysisStatus = "waiting"
 	AnalysisFinished AnalysisStatus = "finished"
+	AnalysisError    AnalysisStatus = "error"
 )
 
 type AnalysisRequest struct {
@@ -41,7 +42,6 @@ type AnalysisRequest struct {
 	AnalysisRequestSteps []AnalysisRequestStep `gorm:"foreignKey:AnalysisRequestId"`
 	RawData              RawData               `gorm:"foreignKey:AnalysisRequestId"`
 	Analysis             []Analysis            `gorm:"foreignKey:AnalysisRequestId"`
-	Report               AnalysisReport        `gorm:"foreignKey:AnalysisRequestId"`
 }
 
 type AnalysisRequestStep struct {
@@ -71,13 +71,23 @@ type Analysis struct {
 	Threshold         int            `gorm:"column:threshold"`
 	Score             int            `gorm:"column:score"`
 	Content           Content        `gorm:"column:content;type:jsonb"`
+	Inputs            Inputs         `gorm:"column:inputs;type:jsonb"`
+	Jobs              JobsProgress   `gorm:"column:jobs_progress;type:jsonb"`
 }
 
-type AnalysisReport struct {
-	Id                uuid.UUID       `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()"`
-	AnalysisRequestId uuid.UUID       `gorm:"column:analysis_request_id;primaryKey;type:uuid"`
-	Score             int             `gorm:"column:score"`
-	AnalysisSummary   AnalysisSummary `gorm:"column:analysis_summary;type:jsonb"`
+type AnalysisInput struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+type Inputs []AnalysisInput
+
+func (c Inputs) Value() (driver.Value, error) {
+	return json.Marshal(c)
+}
+
+func (c *Inputs) Scan(src interface{}) error {
+	return json.Unmarshal(src.([]byte), &c)
 }
 
 type Content []string
@@ -90,12 +100,16 @@ func (c *Content) Scan(src interface{}) error {
 	return json.Unmarshal(src.([]byte), &c)
 }
 
-type AnalysisSummary struct{}
+type SingleJobProgress struct {
+	JobId  uuid.UUID      `json:"jobId"`
+	Status AnalysisStatus `json:"status"`
+}
+type JobsProgress []SingleJobProgress
 
-func (as AnalysisSummary) Value() (driver.Value, error) {
+func (as JobsProgress) Value() (driver.Value, error) {
 	return json.Marshal(as)
 }
 
-func (as *AnalysisSummary) Scan(src interface{}) error {
+func (as *JobsProgress) Scan(src interface{}) error {
 	return json.Unmarshal(src.([]byte), &as)
 }

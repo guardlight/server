@@ -18,7 +18,6 @@ func NewAnalysisManagerRepository(db *gorm.DB) *AnalysisManagerRepository {
 		&AnalysisRequestStep{},
 		&RawData{},
 		&Analysis{},
-		&AnalysisReport{},
 	); err != nil {
 		zap.S().DPanicw("Problem automigrating the tables", "error", err)
 	}
@@ -65,5 +64,27 @@ func (amr AnalysisManagerRepository) getAllAnalysisByAnalysisRecordId(id uuid.UU
 	}
 
 	return a, nil
+}
 
+func (amr AnalysisManagerRepository) updateAnalysisJobs(ai uuid.UUID, jbs []SingleJobProgress) error {
+	res := amr.db.
+		Model(Analysis{
+			AnalysisRequestId: ai,
+		}).
+		Updates(Analysis{Jobs: jbs})
+
+	if res.Error != nil {
+		zap.S().Errorw("Could not update analysis jobs", "error", res.Error)
+		return res.Error
+	}
+
+	if res.RowsAffected == 0 {
+		zap.S().Errorw("No records updated", "analysis_request_id", ai)
+		return errors.New("no records affected after update")
+	}
+	return nil
+}
+
+func (amr AnalysisManagerRepository) updateAnalysisJobProgress(ai uuid.UUID, jid uuid.UUID, status AnalysisStatus) error {
+	return nil
 }

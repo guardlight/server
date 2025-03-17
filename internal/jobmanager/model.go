@@ -35,6 +35,7 @@ type Job struct {
 	StatusDescription string          `gorm:"column:status_description"`
 	RetryCount        int             `gorm:"column:retry_count"`
 	Type              JobType         `gorm:"column:type"`
+	GroupKey          string          `gorm:"column:group_key"`
 	Data              json.RawMessage `gorm:"column:data;type:jsonb"`
 }
 

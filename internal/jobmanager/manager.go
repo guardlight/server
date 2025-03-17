@@ -10,7 +10,7 @@ import (
 // Public Interfaces
 
 type Enqueuer interface {
-	EnqueueJob(Id uuid.UUID, t JobType, jd interface{}) error
+	EnqueueJob(id uuid.UUID, jType JobType, groupKey string, data interface{}) error
 }
 
 type IdCreater interface {
@@ -22,7 +22,7 @@ type JobsGetter interface {
 }
 
 type JobUpdater interface {
-	UpdateJobStatus(id uuid.UUID, s JobStatus, sd string, rc int) error
+	UpdateJobStatus(id uuid.UUID, status JobStatus, desc string, retryCount int) error
 }
 
 // Private
@@ -47,8 +47,8 @@ func (jm *JobManager) CreateId() uuid.UUID {
 	return uuid.New()
 }
 
-func (jm *JobManager) EnqueueJob(id uuid.UUID, t JobType, jd interface{}) error {
-	jData, err := json.Marshal(jd)
+func (jm *JobManager) EnqueueJob(id uuid.UUID, jType JobType, groupKey string, data interface{}) error {
+	jData, err := json.Marshal(data)
 	if err != nil {
 		zap.S().Errorw("Could not marshal job data", "error", err)
 		return err
@@ -59,7 +59,8 @@ func (jm *JobManager) EnqueueJob(id uuid.UUID, t JobType, jd interface{}) error 
 		Status:            Queued,
 		StatusDescription: "",
 		RetryCount:        0,
-		Type:              t,
+		GroupKey:          groupKey,
+		Type:              jType,
 		Data:              jData,
 	}
 

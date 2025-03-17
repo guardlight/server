@@ -4,16 +4,19 @@ jobs:
     status_description: ""
     retry_count: 0
     type: parse
+    group_key: parser.freetext
     data: '{"parserData":{"analysisId":"e5652a80-df4f-4670-8d48-816828ba3c73","content":"UnVubmluZyBhbmQgd2Fsa2luZw==","jobId":"a79c05d2-2e07-4431-9269-8f36338142b6"},"topic":"parser.freetext","type":"freetext","image":"builtin"}'
   - id: 234bebcd-b4df-4229-a978-3a15a807ebf3
     status: finished
     status_description: ""
     retry_count: 0
     type: parse
+    group_key: parser.freetext
     data: '{"parserData":{"analysisId":"51fa6e15-2d95-4c89-b031-43f472a0aa91","content":"UnVubmluZyBhbmQgd2Fsa2luZw==","jobId":"234bebcd-b4df-4229-a978-3a15a807ebf3"},"topic":"parser.freetext","type":"freetext","image":"builtin"}'
   - id: e36d69cb-c795-4db2-9149-9277b348c3df
     status: queued
     status_description: ""
     retry_count: 0
     type: analyze
-    data: '{"analyzerData":{"analysisId":"51fa6e15-2d95-4c89-b031-43f472a0aa91","content":"Running and Walking","jobId":"e36d69cb-c795-4db2-9149-9277b348c3df"},"topic":"analyzer.word_search","type":"word_search","image":"builtin"}'
+    group_key: analyzer.word_search
+    data: '{"analyzerData":{"analysisId":"51fa6e15-2d95-4c89-b031-43f472a0aa91","content":"Running and Walking","jobId":"e36d69cb-c795-4db2-9149-9277b348c3df","inputs":[{"key":"strict_words","value","Running, Walking"}]},"topic":"analyzer.word_search","type":"word_search","image":"builtin"}'
