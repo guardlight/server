@@ -15,6 +15,7 @@ import (
 	"github.com/guardlight/server/internal/infrastructure/database"
 	"github.com/guardlight/server/internal/infrastructure/messaging"
 	"github.com/guardlight/server/internal/jobmanager"
+	"github.com/guardlight/server/pkg/analyzercontract"
 	"github.com/guardlight/server/pkg/parsercontract"
 	"github.com/guardlight/server/servers/natsmessaging"
 	"github.com/nats-io/nats.go"
@@ -76,11 +77,11 @@ func TestAnalysisManangerAllocatorSuiteRun(t *testing.T) {
 }
 
 func (sama *TestSuiteAnalysisManagerAllocatorIntegration) TestParserResult() {
-	ai := uuid.MustParse("7ffe69cc-7ba2-4500-aee6-1ab36be5ce10")
+	arid := uuid.MustParse("7ffe69cc-7ba2-4500-aee6-1ab36be5ce10")
 
 	pr := parsercontract.ParserResponse{
 		JobId:      uuid.MustParse("fed9b891-a38d-41df-b7c5-cc0200726450"),
-		AnalysisId: ai,
+		AnalysisId: arid,
 		Text:       "Running and Walking",
 		Status:     parsercontract.ParseSuccess,
 	}
@@ -91,7 +92,7 @@ func (sama *TestSuiteAnalysisManagerAllocatorIntegration) TestParserResult() {
 	time.Sleep(3 * time.Second)
 
 	var rawDat analysismanager.RawData
-	res := sama.db.Model(analysismanager.RawData{AnalysisRequestId: ai}).Find(&rawDat)
+	res := sama.db.Model(analysismanager.RawData{AnalysisRequestId: arid}).Find(&rawDat)
 	sama.Assert().NoError(res.Error)
 	sama.Assert().Equal("Running and Walking", rawDat.ProcessedText)
 
@@ -100,10 +101,37 @@ func (sama *TestSuiteAnalysisManagerAllocatorIntegration) TestParserResult() {
 	sama.Assert().NoError(res.Error)
 	sama.Assert().Len(jobs, 2)
 
+	aid := uuid.MustParse("ce0fd8a8-29ea-40c6-93a3-8097f8a851e8")
 	as := analysismanager.Analysis{
-		AnalysisRequestId: ai,
+		AnalysisRequestId: aid,
 	}
 	err = sama.db.Find(&as).Error
 	sama.Assert().NoError(err)
 	sama.Assert().Len(as.Jobs, 1)
+}
+
+func (sama *TestSuiteAnalysisManagerAllocatorIntegration) TestAnalyzerResult() {
+	aid := uuid.MustParse("ce0fd8a8-29ea-40c6-93a3-8097f8a851e8")
+
+	pr := analyzercontract.AnalyzerResponse{
+		JobId:      uuid.MustParse("829dc757-0820-4334-86c5-93c2b014c8a0"),
+		AnalysisId: aid,
+		Results:    []string{"Running and Walking"},
+		Status:     analyzercontract.AnalyzerSuccess,
+		Score:      0.25,
+	}
+
+	dat, err := json.Marshal(pr)
+	sama.Assert().NoError(err)
+	sama.ncon.Publish("analyzer.result", dat)
+	time.Sleep(4 * time.Second)
+
+	as := analysismanager.Analysis{
+		Id: aid,
+	}
+	err = sama.db.Find(&as).Error
+	sama.Assert().NoError(err)
+	sama.Assert().Len(as.Jobs, 1)
+	sama.Assert().Equal(analysismanager.AnalysisFinished, as.Status)
+	sama.Assert().Equal(float32(0.25), as.Score)
 }

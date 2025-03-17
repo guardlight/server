@@ -14,7 +14,7 @@ import (
 var userId = uuid.MustParse("f6bec23c-5106-4805-980f-9c9c1c050af4")
 
 func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
-	mockAnalysisRecordSaver := NewMockanalysisRecordSaver(t)
+	mockAnalysisRecordSaver := NewMockanalysisRequestStore(t)
 	mockJobManager := NewMockjobManagerRequester(t)
 	config.SetupConfig("../../env-test.yaml")
 
@@ -95,7 +95,7 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 }
 
 func TestAnalysisRequestSuccess(t *testing.T) {
-	mockAnalysisRecordSaver := NewMockanalysisRecordSaver(t)
+	mockAnalysisRecordSaver := NewMockanalysisRequestStore(t)
 	mockJobManager := NewMockjobManagerRequester(t)
 	config.SetupConfig("../../env-test.yaml")
 

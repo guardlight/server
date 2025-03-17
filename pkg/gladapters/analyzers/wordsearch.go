@@ -36,7 +36,7 @@ func (wa *wordsearchAnalyzer) analyze(m *nats.Msg) {
 		return
 	}
 
-	res, err := analyze(ar.Content, ar.Inputs)
+	res, score, err := analyze(ar.Content, ar.Inputs)
 	if err != nil {
 		wa.makeParserErrorResponse(&ar, err)
 		return
@@ -47,6 +47,7 @@ func (wa *wordsearchAnalyzer) analyze(m *nats.Msg) {
 		AnalysisId: ar.AnalysisId,
 		Results:    res,
 		Status:     analyzercontract.AnalyzerSuccess,
+		Score:      score,
 	}
 	dat, err := json.Marshal(aresp)
 	if err != nil {
@@ -75,12 +76,12 @@ func (wa *wordsearchAnalyzer) makeParserErrorResponse(ar *analyzercontract.Analy
 	wa.ncon.Publish("analyzer.result", dat)
 }
 
-func analyze(text string, ins []analyzercontract.AnalysisInput) ([]string, error) {
+func analyze(text string, ins []analyzercontract.AnalysisInput) ([]string, float32, error) {
 	in, ok := lo.Find(ins, func(item analyzercontract.AnalysisInput) bool {
 		return item.Key == INPUT_KEY_STRICT_WORDS
 	})
 	if !ok {
-		return nil, errors.New("strict_words key not found in data")
+		return nil, 0, errors.New("strict_words key not found in data")
 	}
 
 	strWordsMapper := func(str string, _ int) string {
@@ -90,7 +91,6 @@ func analyze(text string, ins []analyzercontract.AnalysisInput) ([]string, error
 
 	// match sentence-ending punctuation (including optional closing quote)
 	re := regexp.MustCompile(`([.!?][")]?)(\s+|$)`)
-	// splText := lo.Map(re.Split(text, -1), func(s string, _ int) string { return strings.TrimSpace(s) })
 
 	// Find matches
 	matches := re.FindAllStringIndex(text, -1)
@@ -112,12 +112,18 @@ func analyze(text string, ins []analyzercontract.AnalysisInput) ([]string, error
 			re := regexp.MustCompile(pattern)
 			if re.MatchString(strings.ToLower(sentance)) {
 				sents = append(sents, buildSent(splText, i))
-				zap.S().Info("")
 			}
 		}
 	}
 
-	return sents, nil
+	score := func() float32 {
+		if len(sents) == 0 {
+			return -1
+		}
+		return 2*float32(len(sents))/float32(len(splText)) - 1
+	}()
+
+	return sents, score, nil
 }
 
 func buildSent(splText []string, ind int) string {

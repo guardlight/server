@@ -30,9 +30,10 @@ const (
 type AnalysisStatus string
 
 const (
-	AnalysisWaiting  AnalysisStatus = "waiting"
-	AnalysisFinished AnalysisStatus = "finished"
-	AnalysisError    AnalysisStatus = "error"
+	AnalysisWaiting    AnalysisStatus = "waiting"
+	AnalysisInprogress AnalysisStatus = "inprogress"
+	AnalysisFinished   AnalysisStatus = "finished"
+	AnalysisError      AnalysisStatus = "error"
 )
 
 type AnalysisRequest struct {
@@ -69,10 +70,10 @@ type Analysis struct {
 	ThemeId           uuid.UUID      `gorm:"column:theme_id"`
 	Status            AnalysisStatus `gorm:"column:status"`
 	Threshold         int            `gorm:"column:threshold"`
-	Score             int            `gorm:"column:score"`
+	Score             float32        `gorm:"column:score"`
 	Content           Content        `gorm:"column:content;type:jsonb"`
 	Inputs            Inputs         `gorm:"column:inputs;type:jsonb"`
-	Jobs              JobsProgress   `gorm:"column:jobs_progress;type:jsonb"`
+	Jobs              JobsProgress   `gorm:"column:jobs;type:jsonb"`
 }
 
 type AnalysisInput struct {

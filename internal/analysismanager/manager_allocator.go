@@ -18,7 +18,7 @@ type analysisStore interface {
 	updateProcessedText(ai uuid.UUID, text string) error
 	getAllAnalysisByAnalysisRecordId(id uuid.UUID) ([]Analysis, error)
 	updateAnalysisJobs(ai uuid.UUID, jbs []SingleJobProgress) error
-	updateAnalysisJobProgress(ai uuid.UUID, jid uuid.UUID, status AnalysisStatus) error
+	updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32) error
 }
 
 type subsriber interface {
@@ -91,13 +91,13 @@ func (ama *AnalysisManagerAllocator) allocateAnalyzeJobs(ai uuid.UUID, text stri
 	}
 
 	for _, a := range al {
-		jbs := ama.buildJobsForAnalyzer(ai, a, text)
-		ama.as.updateAnalysisJobs(ai, jbs)
+		jbs := ama.buildJobsForAnalyzer(a, text)
+		ama.as.updateAnalysisJobs(a.Id, jbs)
 	}
 
 }
 
-func (ama *AnalysisManagerAllocator) buildJobsForAnalyzer(ai uuid.UUID, a Analysis, text string) []SingleJobProgress {
+func (ama *AnalysisManagerAllocator) buildJobsForAnalyzer(a Analysis, text string) []SingleJobProgress {
 	analyzerFromConfig, ok := config.Get().GetAnalyzer(a.AnalyzerKey)
 	if !ok {
 		zap.S().Errorw("Could not get analyzer from config", "analyzer_key", a.AnalyzerKey)
@@ -125,7 +125,7 @@ func (ama *AnalysisManagerAllocator) buildJobsForAnalyzer(ai uuid.UUID, a Analys
 				Topic: fmt.Sprintf("analyzer.%s", analyzerFromConfig.Key),
 				AnalyzerData: analyzercontract.AnalyzerRequest{
 					JobId:      jid,
-					AnalysisId: ai,
+					AnalysisId: a.Id,
 					Content:    ch,
 					Inputs:     ainputs,
 				},
@@ -151,7 +151,7 @@ func (ama *AnalysisManagerAllocator) processAnalyzerResult(m *nats.Msg) {
 		//      Update to error status with description, "Task running to long"
 	}
 
-	err = ama.as.updateAnalysisJobProgress(ar.AnalysisId, ar.JobId, AnalysisFinished)
+	err = ama.as.updateAnalysisJobProgress(ar.AnalysisId, ar.JobId, AnalysisFinished, ar.Results, ar.Score)
 	if err != nil {
 		zap.S().Errorw("Could not update analysis progress", "error", err)
 		return

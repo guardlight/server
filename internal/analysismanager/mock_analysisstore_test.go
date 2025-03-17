@@ -78,17 +78,17 @@ func (_c *MockanalysisStore_getAllAnalysisByAnalysisRecordId_Call) RunAndReturn(
 	return _c
 }
 
-// updateAnalysisJobProgress provides a mock function with given fields: ai, jid, status
-func (_m *MockanalysisStore) updateAnalysisJobProgress(ai uuid.UUID, jid uuid.UUID, status AnalysisStatus) error {
-	ret := _m.Called(ai, jid, status)
+// updateAnalysisJobProgress provides a mock function with given fields: aid, jid, status, content, score
+func (_m *MockanalysisStore) updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32) error {
+	ret := _m.Called(aid, jid, status, content, score)
 
 	if len(ret) == 0 {
 		panic("no return value specified for updateAnalysisJobProgress")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID, uuid.UUID, AnalysisStatus) error); ok {
-		r0 = rf(ai, jid, status)
+	if rf, ok := ret.Get(0).(func(uuid.UUID, uuid.UUID, AnalysisStatus, []string, float32) error); ok {
+		r0 = rf(aid, jid, status, content, score)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -102,16 +102,18 @@ type MockanalysisStore_updateAnalysisJobProgress_Call struct {
 }
 
 // updateAnalysisJobProgress is a helper method to define mock.On call
-//   - ai uuid.UUID
+//   - aid uuid.UUID
 //   - jid uuid.UUID
 //   - status AnalysisStatus
-func (_e *MockanalysisStore_Expecter) updateAnalysisJobProgress(ai interface{}, jid interface{}, status interface{}) *MockanalysisStore_updateAnalysisJobProgress_Call {
-	return &MockanalysisStore_updateAnalysisJobProgress_Call{Call: _e.mock.On("updateAnalysisJobProgress", ai, jid, status)}
+//   - content []string
+//   - score float32
+func (_e *MockanalysisStore_Expecter) updateAnalysisJobProgress(aid interface{}, jid interface{}, status interface{}, content interface{}, score interface{}) *MockanalysisStore_updateAnalysisJobProgress_Call {
+	return &MockanalysisStore_updateAnalysisJobProgress_Call{Call: _e.mock.On("updateAnalysisJobProgress", aid, jid, status, content, score)}
 }
 
-func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) Run(run func(ai uuid.UUID, jid uuid.UUID, status AnalysisStatus)) *MockanalysisStore_updateAnalysisJobProgress_Call {
+func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) Run(run func(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32)) *MockanalysisStore_updateAnalysisJobProgress_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID), args[1].(uuid.UUID), args[2].(AnalysisStatus))
+		run(args[0].(uuid.UUID), args[1].(uuid.UUID), args[2].(AnalysisStatus), args[3].([]string), args[4].(float32))
 	})
 	return _c
 }
@@ -121,7 +123,7 @@ func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) Return(_a0 error) *M
 	return _c
 }
 
-func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) RunAndReturn(run func(uuid.UUID, uuid.UUID, AnalysisStatus) error) *MockanalysisStore_updateAnalysisJobProgress_Call {
+func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) RunAndReturn(run func(uuid.UUID, uuid.UUID, AnalysisStatus, []string, float32) error) *MockanalysisStore_updateAnalysisJobProgress_Call {
 	_c.Call.Return(run)
 	return _c
 }

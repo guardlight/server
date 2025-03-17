@@ -6,6 +6,13 @@ jobs:
     group_key: parser.freetext
     type: parse
     data: '{"parserData":{"analysisId":"51fa6e15-2d95-4c89-b031-43f472a0aa91","content":"UnVubmluZyBhbmQgd2Fsa2luZw==","jobId":"234bebcd-b4df-4229-a978-3a15a807ebf3"},"topic":"parser.freetext","type":"freetext","image":"builtin"}'
+  - id: 829dc757-0820-4334-86c5-93c2b014c8a0
+    status: queued
+    status_description: ""
+    retry_count: 0
+    group_key: analyzer.word_search
+    type: analyze
+    data: '{"analyzerData":{"analysisId":"ce0fd8a8-29ea-40c6-93a3-8097f8a851e8","content":"Running and Walking","jobId":"829dc757-0820-4334-86c5-93c2b014c8a0","inputs":[{"key":"strict_words","value":"Running, Walking"}]},"topic":"analyzer.word_search","type":"word_search","image":"builtin"}'
 
 analysis_requests:
   - id: 7ffe69cc-7ba2-4500-aee6-1ab36be5ce10
@@ -30,3 +37,9 @@ analyses:
     score: 0
     content: []
     inputs: [{key: "strict_words", value: "Running, Walking"}]
+    jobs: [
+      {
+        jobId: 829dc757-0820-4334-86c5-93c2b014c8a0,
+        status: waiting
+      }
+    ]

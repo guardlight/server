@@ -21,8 +21,10 @@ var (
 	ErrParserMarshal   = errors.New("error marshaling parser data")
 )
 
-type analysisRecordSaver interface {
+type analysisRequestStore interface {
 	createAnalysisRequest(analysisRequest *AnalysisRequest) error
+	getAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error)
+	getAnalysById(uid uuid.UUID, aid uuid.UUID) (AnalysisRequest, error)
 }
 
 type jobManagerRequester interface {
@@ -31,14 +33,14 @@ type jobManagerRequester interface {
 }
 
 type AnalysisManagerRequester struct {
-	jobMananger         jobManagerRequester
-	analysisRecordSaver analysisRecordSaver
+	jobMananger jobManagerRequester
+	ars         analysisRequestStore
 }
 
-func NewAnalysisManangerRequester(jobMananger jobManagerRequester, analysisRecordSaver analysisRecordSaver) *AnalysisManagerRequester {
+func NewAnalysisManangerRequester(jobMananger jobManagerRequester, ars analysisRequestStore) *AnalysisManagerRequester {
 	return &AnalysisManagerRequester{
-		jobMananger:         jobMananger,
-		analysisRecordSaver: analysisRecordSaver,
+		jobMananger: jobMananger,
+		ars:         ars,
 	}
 }
 
@@ -68,7 +70,7 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		RawData:              rawData,
 		Analysis:             analysisParts,
 	}
-	err := am.analysisRecordSaver.createAnalysisRequest(ar)
+	err := am.ars.createAnalysisRequest(ar)
 	if err != nil {
 		return err
 	}
@@ -201,4 +203,12 @@ func hasValidAnalyzers(arDto *analysisrequest.AnalysisRequest) bool {
 	}
 
 	return true
+}
+
+func (am *AnalysisManagerRequester) GetAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error) {
+	return am.ars.getAnalysesByUserId(id)
+}
+
+func (am *AnalysisManagerRequester) GetAnalysById(uid uuid.UUID, aid uuid.UUID) (AnalysisRequest, error) {
+	return am.ars.getAnalysById(uid, aid)
 }

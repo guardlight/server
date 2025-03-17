@@ -8,7 +8,7 @@ inpackage: True
 packages:
   github.com/guardlight/server/internal/analysismanager:
     interfaces:
-      analysisRecordSaver:
+      analysisRequestStore:
       jobManagerRequester:
       subsriber:
       analysisStore:

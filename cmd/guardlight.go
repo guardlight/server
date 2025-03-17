@@ -26,7 +26,7 @@ import (
 
 func init() {
 	env := getEnv("environment", "")
-	confFileDir := getEnv("env_file_dir", "")
+	confFileDir := getEnv("env_file_dir", "../")
 
 	getEnvFile := func() string {
 		switch env {
@@ -121,7 +121,7 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
-	zap.S().Info("Shutting down api...")
+	zap.S().Info("Shutting down server...")
 
 	// Close all database connection etc....
 

@@ -26,13 +26,13 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 
 	ama := NewAnalysisManagerAllocator(mockS, mockAs, mockJu)
 
-	ai := uuid.MustParse("674e46b6-a4f5-4b4f-bc16-c29ba80971c0")
+	arid := uuid.MustParse("674e46b6-a4f5-4b4f-bc16-c29ba80971c0")
 	jobId := uuid.MustParse("e007bc38-0373-4da6-895e-c76e9ee331e7")
 
 	t.Run("parser_result_success", func(t *testing.T) {
 		pr := parsercontract.ParserResponse{
 			JobId:      jobId,
-			AnalysisId: ai,
+			AnalysisId: arid,
 			Text:       "This is a book",
 			Status:     parsercontract.ParseSuccess,
 		}
@@ -44,13 +44,15 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 			Data: dat,
 		}
 
-		mockAs.EXPECT().updateProcessedText(ai, "This is a book").Return(nil)
+		mockAs.EXPECT().updateProcessedText(arid, "This is a book").Return(nil)
 		mockJu.EXPECT().UpdateJobStatus(jobId, jobmanager.Finished, "", 0).Return(nil)
+
+		aid := uuid.MustParse("8e1305f1-3fae-44e5-8a4f-9f815321ae8c")
 
 		ans := []Analysis{
 			{
-				Id:                uuid.MustParse("8e1305f1-3fae-44e5-8a4f-9f815321ae8c"),
-				AnalysisRequestId: ai,
+				Id:                aid,
+				AnalysisRequestId: arid,
 				AnalyzerKey:       "word_search",
 				ThemeId:           uuid.MustParse("bd2d2784-0fcb-4526-ad3c-76d00964f4de"),
 				Status:            AnalysisWaiting,
@@ -66,7 +68,7 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 			},
 		}
 
-		mockAs.EXPECT().getAllAnalysisByAnalysisRecordId(ai).Return(ans, nil)
+		mockAs.EXPECT().getAllAnalysisByAnalysisRecordId(arid).Return(ans, nil)
 
 		jid := uuid.MustParse("45826a77-8377-4cce-9388-6f8f2154f998")
 		ar := jobmanager.AnalyzerJobData{
@@ -75,7 +77,7 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 			Topic: "analyzer.word_search",
 			AnalyzerData: analyzercontract.AnalyzerRequest{
 				JobId:      jid,
-				AnalysisId: ai,
+				AnalysisId: aid,
 				Content:    "This is a book",
 				Inputs: []analyzercontract.AnalysisInput{
 					{
@@ -86,7 +88,7 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 			},
 		}
 
-		mockAs.EXPECT().updateAnalysisJobs(ai, []SingleJobProgress{
+		mockAs.EXPECT().updateAnalysisJobs(aid, []SingleJobProgress{
 			{
 				JobId:  jid,
 				Status: AnalysisWaiting,
@@ -102,7 +104,7 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 	t.Run("parser_result_failed", func(t *testing.T) {
 		pr := parsercontract.ParserResponse{
 			JobId:      jobId,
-			AnalysisId: ai,
+			AnalysisId: arid,
 			Text:       "Error parsing",
 			Status:     parsercontract.ParseError,
 		}
@@ -114,7 +116,7 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 			Data: dat,
 		}
 
-		mockAs.EXPECT().updateProcessedText(ai, "Error parsing").Return(nil)
+		mockAs.EXPECT().updateProcessedText(arid, "Error parsing").Return(nil)
 		mockJu.EXPECT().UpdateJobStatus(jobId, jobmanager.Error, "Error parsing", 0).Return(nil)
 
 		mockAs.AssertNotCalled(t, "getAllAnalysisByAnalysisRecordId")
@@ -127,4 +129,7 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 
 }
 
-// TODO Add processAnalyzerResult
+func TestAnalysis(t *testing.T) {
+	// mockAs.EXPECT().updateAnalysisJobProgress(aid, jid, AnalysisFinished, []string{}, 0).Return(nil)
+	// TODO Add processAnalyzerResult
+}

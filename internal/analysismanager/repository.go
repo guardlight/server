@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/samber/lo"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
@@ -69,7 +70,7 @@ func (amr AnalysisManagerRepository) getAllAnalysisByAnalysisRecordId(id uuid.UU
 func (amr AnalysisManagerRepository) updateAnalysisJobs(ai uuid.UUID, jbs []SingleJobProgress) error {
 	res := amr.db.
 		Model(Analysis{
-			AnalysisRequestId: ai,
+			Id: ai,
 		}).
 		Updates(Analysis{Jobs: jbs})
 
@@ -85,6 +86,70 @@ func (amr AnalysisManagerRepository) updateAnalysisJobs(ai uuid.UUID, jbs []Sing
 	return nil
 }
 
-func (amr AnalysisManagerRepository) updateAnalysisJobProgress(ai uuid.UUID, jid uuid.UUID, status AnalysisStatus) error {
+func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32) error {
+	a := Analysis{Id: aid}
+	if err := amr.db.First(&a).Error; err != nil {
+		return err
+	}
+
+	newJs := lo.Map(a.Jobs, func(s SingleJobProgress, _ int) SingleJobProgress {
+		if s.JobId == jid {
+			return SingleJobProgress{
+				JobId:  jid,
+				Status: status,
+			}
+		}
+		return s
+	})
+
+	newCon := append(a.Content, content...)
+
+	completedJobs := len(lo.Filter(newJs, func(j SingleJobProgress, _ int) bool { return j.Status == AnalysisFinished }))
+
+	newSc := (a.Score*float32(completedJobs-1) + score) / float32(completedJobs)
+
+	newStatus := func() AnalysisStatus {
+		if completedJobs == len(newJs) {
+			return AnalysisFinished
+		} else {
+			return AnalysisInprogress
+		}
+	}()
+
+	resp := amr.db.Model(&a).Updates(Analysis{
+		Jobs:    newJs,
+		Content: newCon,
+		Score:   newSc,
+		Status:  newStatus,
+	})
+
+	if resp.Error != nil {
+		return resp.Error
+	}
+
 	return nil
+}
+
+func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error) {
+	var ars []AnalysisRequest
+	if err := amr.db.Model(AnalysisRequest{UserId: id}).Find(&ars).Error; err != nil {
+		zap.S().Errorw("Could not get analyses", "user_id", id)
+		return nil, err
+	}
+	return ars, nil
+}
+
+func (amr AnalysisManagerRepository) getAnalysById(uid uuid.UUID, aid uuid.UUID) (AnalysisRequest, error) {
+	var ar AnalysisRequest
+
+	resp := amr.db.
+		Model(AnalysisRequest{}).
+		Where("user_id = ? AND id = ?", uid, aid).
+		First(&ar)
+
+	if err := resp.Error; err != nil {
+		zap.S().Errorw("Could not get analyses", "user_id", uid, "analysis_id", aid)
+		return AnalysisRequest{}, err
+	}
+	return ar, nil
 }
