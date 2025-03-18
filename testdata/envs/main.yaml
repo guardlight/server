@@ -14,7 +14,7 @@ database:
   url: postgresql://root@127.0.0.1:26257/guardlight_development_test?sslmode=disable
   name: guardlight_development_test
 orchestrator:
-  scheduleRateCron: "*/5 * * * * *"
+  scheduleRateCron: "* * * * * *"
 parsers:
   - type: freetext
     image: builtin

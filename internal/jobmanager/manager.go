@@ -2,6 +2,7 @@ package jobmanager
 
 import (
 	"encoding/json"
+	"unsafe"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -69,6 +70,7 @@ func (jm *JobManager) EnqueueJob(id uuid.UUID, jType JobType, groupKey string, d
 		return err
 	}
 
+	zap.S().Infow("Job Enqueued", "job_id", id, "group_key", groupKey, "job_type", jType, "data_size", unsafe.Sizeof(data))
 	return nil
 }
 
@@ -81,5 +83,10 @@ func (jm *JobManager) GetAllNonFinishedJobs() ([]Job, error) {
 }
 
 func (jm *JobManager) UpdateJobStatus(id uuid.UUID, s JobStatus, sd string, rc int) error {
-	return jm.js.updateJobStatus(id, s, sd, rc)
+	err := jm.js.updateJobStatus(id, s, sd, rc)
+	if err != nil {
+		return err
+	}
+	zap.S().Infow("Job Status Updated", "job_id", id, "status", s, "dessription", sd)
+	return nil
 }

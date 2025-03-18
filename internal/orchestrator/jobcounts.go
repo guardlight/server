@@ -8,14 +8,23 @@ func jc() map[string]int {
 	return make(map[string]int)
 }
 
-func (jc jobCounts) build(j []jobmanager.Job) {
-	for _, job := range j {
+func (j jobCounts) build(js []jobmanager.Job) {
+	clear(j)
+	for _, job := range js {
 		if job.Status == jobmanager.Inprogress {
-			jc[job.GroupKey]++
+			j[job.GroupKey]++
 		}
 	}
 }
 
-func (jc jobCounts) inc(t string) {
-	jc[t]++
+func (j jobCounts) t(t string) int {
+	return j[t] + 1
+}
+
+func (j jobCounts) inc(t string) {
+	j[t]++
+}
+
+func (j jobCounts) dec(t string) {
+	j[t]--
 }

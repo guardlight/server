@@ -50,7 +50,7 @@ func NewOrchestrator(jm jobManager, tc taskCreater, ns natsSender) (*Orchestrato
 }
 
 func (o *Orchestrator) checkForJobs() {
-	zap.S().Infow("Checking for jobs")
+	zap.S().Infow("Checking For Jobs")
 	nfj, _ := o.jm.GetAllNonFinishedJobs()
 	o.jcs.build(nfj)
 
@@ -59,10 +59,11 @@ func (o *Orchestrator) checkForJobs() {
 			o.processJob(job)
 		}
 	}
+	zap.S().Infow("Relevant Jobs Processed")
 }
 
 func (o *Orchestrator) processJob(j jobmanager.Job) {
-	zap.S().Infow("Found job", "job_id", j.Id)
+	zap.S().Infow("Processing Job", "job_id", j.Id)
 	if j.Type == jobmanager.Parse {
 		o.processParseJob(j)
 	} else if j.Type == jobmanager.Analyze {
@@ -84,22 +85,30 @@ func (o *Orchestrator) processParseJob(j jobmanager.Job) {
 	p, ok := config.Get().GetParser(f.Type)
 	if !ok {
 		zap.S().Errorw("Parser type not found", "error", err)
-		o.updateJobStatus(j.Id, jobmanager.Error, "Parser type not found", 3)
+		o.updateJobStatus(j.Id, jobmanager.Queued, "Parser type not found", 3)
 		return
 	}
 
-	if o.jcs[string(j.GroupKey)]+1 <= p.Concurrency {
+	if o.jcs.t(j.GroupKey) <= p.Concurrency {
 		if f.Image == "builtin" {
-			zap.S().Infow("using builtin parser")
+			zap.S().Infow("Using parser", "type", f.Image)
 		} else {
 			// Start docker container and wait, with max duration.
 		}
-		o.ns.Publish(f.Topic, f.ParserData)
-		zap.S().Infow("Sent data for parsing")
-		o.jcs.inc(string(j.Type))
-		o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
+		o.jcs.inc(j.GroupKey)
+		err = o.ns.Publish(f.Topic, f.ParserData)
+		if err != nil {
+			o.jcs.dec(j.GroupKey)
+			o.updateJobStatus(j.Id, jobmanager.Queued, "", j.RetryCount+1)
+			return
+		}
+		err = o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
+		if err != nil {
+			o.jcs.dec(j.GroupKey)
+			return
+		}
 	} else {
-		zap.S().Infow("Job still queued")
+		zap.S().Infow("Job Still Queued", "job_type", j.Id, "group_key", j.GroupKey)
 	}
 }
 
@@ -115,29 +124,46 @@ func (o *Orchestrator) processAnalyzeJob(j jobmanager.Job) {
 	a, ok := config.Get().GetAnalyzer(f.Type)
 	if !ok {
 		zap.S().Errorw("Analyzer not found", "error", err)
-		o.updateJobStatus(j.Id, jobmanager.Error, "Analyzer not found", 3)
+		o.updateJobStatus(j.Id, jobmanager.Queued, "Analyzer not found", 3)
 		return
 	}
 
-	if o.jcs[string(j.GroupKey)]+1 <= a.Concurrency {
+	if o.jcs.t(j.GroupKey) <= a.Concurrency {
 		if f.Image == "builtin" {
-			zap.S().Infow("using builtin analyzer")
+			zap.S().Infow("Using analyzer", "type", f.Image)
 		} else {
 			// Start docker container and wait, with max duration.
 		}
-		o.ns.Publish(f.Topic, f.AnalyzerData)
-		zap.S().Infow("Sent data for analyzing")
-		o.jcs.inc(string(j.Type))
-		o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
+		o.jcs.inc(j.GroupKey)
+		err = o.ns.Publish(f.Topic, f.AnalyzerData)
+		if err != nil {
+			o.jcs.dec(j.GroupKey)
+			o.updateJobStatus(j.Id, jobmanager.Queued, "", j.RetryCount+1)
+			return
+		}
+		err = o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
+		if err != nil {
+			o.jcs.dec(j.GroupKey)
+			return
+		}
+
 	} else {
-		zap.S().Infow("Job still queued")
+		zap.S().Infow("Job Still Queued", "job_type", j.Id, "group_key", j.GroupKey)
 	}
 }
 
-func (o *Orchestrator) updateJobStatus(id uuid.UUID, js jobmanager.JobStatus, jsd string, rc int) {
-	zap.S().Infow("Updating job status", "status", js, "description", jsd)
+func (o *Orchestrator) updateJobStatus(id uuid.UUID, js jobmanager.JobStatus, jsd string, rc int) error {
+	if rc >= 3 {
+		js = jobmanager.Error
+	}
 	err := o.jm.UpdateJobStatus(id, js, jsd, rc)
 	if err != nil {
-		zap.S().Errorw("Can really not update job status", "status", js, "description", jsd)
+		// if js == jobmanager.Error {
+		// 	zap.S().Errorw("Can really not update job status", "status", js, "description", jsd)
+		// 	return nil
+		// }
+		return err
+
 	}
+	return nil
 }

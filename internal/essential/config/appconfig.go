@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
@@ -26,6 +27,12 @@ type GLConfig struct {
 	Console      console      `koanf:"console"`
 	Parsers      []parser     `koanf:"parsers"`
 	Analyzers    []analyzer   `koanf:"analyzers"`
+	Users        []user       `koanf:"users"`
+}
+
+type user struct {
+	Username string    `koanf:"username"`
+	Id       uuid.UUID `koanf:"id"`
 }
 
 type server struct {

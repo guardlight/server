@@ -78,7 +78,7 @@ func (ama *AnalysisManagerAllocator) processParserResult(m *nats.Msg) {
 		zap.S().Errorw("Could not update job status", "error", err)
 		return
 	}
-	zap.S().Infow("Parser result processed")
+	zap.S().Infow("Parser Result Processed", "job_id", pr.JobId, "status", pr.Status)
 
 	ama.allocateAnalyzeJobs(pr.AnalysisId, pr.Text)
 }
@@ -132,7 +132,6 @@ func (ama *AnalysisManagerAllocator) buildJobsForAnalyzer(a Analysis, text strin
 			}
 			gk := fmt.Sprintf("analyzer.%s", analyzerFromConfig.Key)
 			ama.ju.EnqueueJob(jid, jobmanager.Analyze, gk, ajd)
-			zap.S().Infow("Analyzer job submitted", "job_id", jid)
 		}
 	} else {
 		zap.S().Errorw("Model not supported", "model", analyzerFromConfig.Model)

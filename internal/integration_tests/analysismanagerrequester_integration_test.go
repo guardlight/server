@@ -14,7 +14,6 @@ import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/google/uuid"
 	"github.com/guardlight/server/internal/analysismanager"
-	"github.com/guardlight/server/internal/api/analysisapi"
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/essential/glsecurity"
 	"github.com/guardlight/server/internal/essential/logging"
@@ -55,7 +54,7 @@ func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
 	s.analysisManagerRepository = analysismanager.NewAnalysisManagerRepository(s.db)
 	analysisManangerRequester := analysismanager.NewAnalysisManangerRequester(jobManager, s.analysisManagerRepository)
 
-	analysisapi.NewAnalysisRequestController(s.router.Group(""), analysisManangerRequester)
+	analysismanager.NewAnalysisRequestController(s.router.Group(""), analysisManangerRequester)
 
 	sqlDb, _ := s.db.DB()
 	fixtures, err := testfixtures.New(

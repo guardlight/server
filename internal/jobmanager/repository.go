@@ -1,6 +1,8 @@
 package jobmanager
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -48,6 +50,11 @@ func (jmr JobManagerRepository) updateJobStatus(id uuid.UUID, s JobStatus, sd st
 	if res.Error != nil {
 		zap.S().Errorw("Could not update job", "error", res.Error)
 		return res.Error
+	}
+
+	if res.RowsAffected == 0 {
+		zap.S().Errorw("No records updated", "job_type", id)
+		return errors.New("no records affected after update")
 	}
 
 	return nil

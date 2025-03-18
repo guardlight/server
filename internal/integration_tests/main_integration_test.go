@@ -14,13 +14,12 @@ import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/google/uuid"
 	"github.com/guardlight/server/internal/analysismanager"
-	"github.com/guardlight/server/internal/api"
-	"github.com/guardlight/server/internal/api/analysisapi"
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/essential/glsecurity"
 	"github.com/guardlight/server/internal/essential/logging"
 	"github.com/guardlight/server/internal/essential/testcontainers"
 	"github.com/guardlight/server/internal/infrastructure/database"
+	router "github.com/guardlight/server/internal/infrastructure/http"
 	"github.com/guardlight/server/internal/infrastructure/messaging"
 	"github.com/guardlight/server/internal/jobmanager"
 	"github.com/guardlight/server/internal/natsclient"
@@ -42,8 +41,8 @@ type TestSuiteMainIntegration struct {
 }
 
 func (s *TestSuiteMainIntegration) SetupSuite() {
-	config.SetupConfig("../../testdata/envs/main.yaml")
 	logging.SetupLogging("test")
+	config.SetupConfig("../../testdata/envs/main.yaml")
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer ctxCancel()
 
@@ -75,7 +74,7 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 	amr := analysismanager.NewAnalysisManagerRepository(s.db)
 
 	// Controller Groups
-	s.router = api.NewRouter(logging.GetLogger())
+	s.router = router.NewRouter(logging.GetLogger())
 	baseGroup := s.router.Group("")
 
 	err = natsmessaging.NewNatsServer()
@@ -102,10 +101,10 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm)
 
 	// Controllers
-	analysisapi.NewAnalysisRequestController(baseGroup, am)
+	analysismanager.NewAnalysisRequestController(baseGroup, am)
 
 	// Start the server
-	go api.LiveOrLetDie(s.router)
+	go router.LiveOrLetDie(s.router)
 
 	zap.S().Info("Setted up")
 }
@@ -177,9 +176,9 @@ func (s *TestSuiteMainIntegration) TestRequestTillResult() {
 
 	var arResult analysismanager.AnalysisRequest
 	s.Eventually(func() bool {
-		err := s.db.First(&arResult).Error
+		err := s.db.Preload("Analysis").First(&arResult).Error
 		s.Assert().NoError(err)
-		return arResult.Id != uuid.Nil
+		return arResult.Analysis[0].Status == analysismanager.AnalysisFinished
 	}, 30*time.Second, time.Second, "No record found in wait duration")
 
 	reqResult, err := http.NewRequest("GET", "/analysis/analyses", nil)
@@ -229,4 +228,6 @@ func (s *TestSuiteMainIntegration) TestRequestTillResult() {
 	arReqSpecific := &analysismanager.AnalysisRequest{}
 	json.Unmarshal(wResultSpecific.Body.Bytes(), arReqSpecific)
 	s.Assert().Equal(arReqSpecific.Id, arResult.Id)
+
+	s.Assert().Equal(arReqSpecific.Analysis[0].Status, analysismanager.AnalysisFinished)
 }

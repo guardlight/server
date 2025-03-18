@@ -32,5 +32,6 @@ func (nc *NatsClient) Publish(topic string, payload interface{}) error {
 		return err
 	}
 	nc.n.Publish(topic, data)
+	zap.S().Infow("Published Data", "topic", topic)
 	return nil
 }

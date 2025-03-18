@@ -1,11 +1,10 @@
-package analysisapi
+package analysismanager
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/guardlight/server/internal/analysismanager"
 	"github.com/guardlight/server/internal/essential/glerror"
 	"github.com/guardlight/server/internal/essential/glsecurity"
 	"github.com/guardlight/server/pkg/analysisrequest"
@@ -13,10 +12,10 @@ import (
 )
 
 type AnalysisRequestController struct {
-	manager *analysismanager.AnalysisManagerRequester
+	manager *AnalysisManagerRequester
 }
 
-func NewAnalysisRequestController(group *gin.RouterGroup, manager *analysismanager.AnalysisManagerRequester) *AnalysisRequestController {
+func NewAnalysisRequestController(group *gin.RouterGroup, manager *AnalysisManagerRequester) *AnalysisRequestController {
 	arc := &AnalysisRequestController{
 		manager: manager,
 	}
@@ -45,8 +44,8 @@ func (arc *AnalysisRequestController) analysisRequest(c *gin.Context) {
 	if err != nil {
 		zap.S().Errorw("error creating analysis request", "error", err)
 		switch err {
-		case analysismanager.ErrInvalidAnalyzer:
-		case analysismanager.ErrInvalidParser:
+		case ErrInvalidAnalyzer:
+		case ErrInvalidParser:
 			c.JSON(glerror.BadRequestError())
 			return
 		default:

@@ -8,13 +8,12 @@ import (
 	"time"
 
 	"github.com/guardlight/server/internal/analysismanager"
-	"github.com/guardlight/server/internal/api"
-	"github.com/guardlight/server/internal/api/analysisapi"
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/essential/logging"
 	"github.com/guardlight/server/internal/essential/testcontainers"
 	"github.com/guardlight/server/internal/health"
 	"github.com/guardlight/server/internal/infrastructure/database"
+	"github.com/guardlight/server/internal/infrastructure/http"
 	"github.com/guardlight/server/internal/infrastructure/messaging"
 	"github.com/guardlight/server/internal/jobmanager"
 	"github.com/guardlight/server/internal/natsclient"
@@ -92,7 +91,7 @@ func main() {
 	amr := analysismanager.NewAnalysisManagerRepository(db)
 
 	// Controller Groups
-	mainRouter := api.NewRouter(logging.GetLogger())
+	mainRouter := http.NewRouter(logging.GetLogger())
 	baseGroup := mainRouter.Group("")
 
 	// Services
@@ -113,10 +112,10 @@ func main() {
 
 	// Controllers
 	health.NewHealthController(baseGroup)
-	analysisapi.NewAnalysisRequestController(baseGroup, am)
+	analysismanager.NewAnalysisRequestController(baseGroup, am)
 
 	// Start the server
-	go api.LiveOrLetDie(mainRouter)
+	go http.LiveOrLetDie(mainRouter)
 
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
@@ -130,7 +129,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	api.LetDie(ctx)
+	http.LetDie(ctx)
 	sch.Gos.Shutdown()
 
 	// catching ctx.Done(). timeout of 5 seconds.

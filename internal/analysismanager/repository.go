@@ -127,6 +127,11 @@ func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, ji
 		return resp.Error
 	}
 
+	if resp.RowsAffected == 0 {
+		zap.S().Errorw("No records updated", "analysis_id", aid)
+		return errors.New("no records affected after update")
+	}
+
 	return nil
 }
 
