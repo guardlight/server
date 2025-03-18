@@ -90,16 +90,16 @@ func (o *Orchestrator) processParseJob(j jobmanager.Job) {
 
 	if o.jcs[string(j.GroupKey)]+1 <= p.Concurrency {
 		if f.Image == "builtin" {
-			zap.S().Infow("using builtin parser", "data", f)
+			zap.S().Infow("using builtin parser")
 		} else {
 			// Start docker container and wait, with max duration.
 		}
 		o.ns.Publish(f.Topic, f.ParserData)
-		zap.S().Infow("Sent data for parsing", "data", f)
+		zap.S().Infow("Sent data for parsing")
 		o.jcs.inc(string(j.Type))
 		o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
 	} else {
-		zap.S().Infow("Job still queued", "data", f)
+		zap.S().Infow("Job still queued")
 	}
 }
 
@@ -121,16 +121,16 @@ func (o *Orchestrator) processAnalyzeJob(j jobmanager.Job) {
 
 	if o.jcs[string(j.GroupKey)]+1 <= a.Concurrency {
 		if f.Image == "builtin" {
-			zap.S().Infow("using builtin analyzer", "data", f)
+			zap.S().Infow("using builtin analyzer")
 		} else {
 			// Start docker container and wait, with max duration.
 		}
 		o.ns.Publish(f.Topic, f.AnalyzerData)
-		zap.S().Infow("Sent data for analyzing", "data", f)
+		zap.S().Infow("Sent data for analyzing")
 		o.jcs.inc(string(j.Type))
 		o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
 	} else {
-		zap.S().Infow("Job still queued", "data", f)
+		zap.S().Infow("Job still queued")
 	}
 }
 

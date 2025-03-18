@@ -144,6 +144,8 @@ func (amr AnalysisManagerRepository) getAnalysById(uid uuid.UUID, aid uuid.UUID)
 
 	resp := amr.db.
 		Model(AnalysisRequest{}).
+		Preload("AnalysisRequestSteps").
+		Preload("Analysis").
 		Where("user_id = ? AND id = ?", uid, aid).
 		First(&ar)
 
