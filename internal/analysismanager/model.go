@@ -37,7 +37,7 @@ const (
 )
 
 type AnalysisRequest struct {
-	Id                   uuid.UUID             `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Id                   uuid.UUID             `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
 	UserId               uuid.UUID             `gorm:"column:user_id"`
 	Title                string                `gorm:"column:title"`
 	AnalysisRequestSteps []AnalysisRequestStep `gorm:"foreignKey:AnalysisRequestId"`
@@ -46,7 +46,7 @@ type AnalysisRequest struct {
 }
 
 type AnalysisRequestStep struct {
-	Id                uuid.UUID                 `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Id                uuid.UUID                 `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
 	AnalysisRequestId uuid.UUID                 `gorm:"column:analysis_request_id;primaryKey;type:uuid"`
 	Index             int                       `gorm:"column:index"`
 	StepType          AnalysisRequestStepType   `gorm:"column:step_type"`
@@ -55,7 +55,7 @@ type AnalysisRequestStep struct {
 }
 
 type RawData struct {
-	Id                uuid.UUID `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Id                uuid.UUID `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
 	AnalysisRequestId uuid.UUID `gorm:"column:analysis_request_id;primaryKey;type:uuid"`
 	Hash              string    `gorm:"column:hash"`
 	Content           []byte    `gorm:"column:content;type:bytea"`
@@ -64,7 +64,7 @@ type RawData struct {
 }
 
 type Analysis struct {
-	Id                uuid.UUID      `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()"`
+	Id                uuid.UUID      `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
 	AnalysisRequestId uuid.UUID      `gorm:"column:analysis_request_id;primaryKey;type:uuid"`
 	AnalyzerKey       string         `gorm:"column:analyzer_key"`
 	ThemeId           uuid.UUID      `gorm:"column:theme_id"`

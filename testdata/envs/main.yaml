@@ -1,36 +1,43 @@
+analyzers:
+    - concurrency: 4
+      contextWindow: 16000
+      description: Uses a basic word list to scan content for.
+      image: builtin
+      inputs:
+        - description: Words in this list will immediatly flag the content.
+          key: strict_words
+          name: Strict Words
+          type: textarea
+      key: word_search
+      model: text
+      name: Word Search Analyzer
+console:
+    jwt:
+        maxAge: 3600
+        signingKey: qQJsN7FPjMUMGLzr8xRmBKGyYdRM81Go
+cors:
+    origin: http://192.168.178.142:3000
+database:
+    name: guardlight_development_test
+    password: root
+    port: 5432
+    server: 127.0.0.1
+    user: root
 domain: 192.168.178.142
 env: development
-server:
-  host: 0.0.0.0
-  port: 6660
-cors:
-  origins:
-    - http://192.168.178.142:3000
-console:
-  jwt:
-    maxAge: 3600
-    signingKey: qQJsN7FPjMUMGLzr8xRmBKGyYdRM81Go
-database:
-  url: postgresql://root@127.0.0.1:26257/guardlight_development_test?sslmode=disable
-  name: guardlight_development_test
 orchestrator:
-  scheduleRateCron: "* * * * * *"
+    scheduleRateCron: '* * * * * *'
 parsers:
-  - type: freetext
-    image: builtin
-    name: Freetext parsers
-    description: Parses a text to an utf-8 formated text.
-    concurrency: 1
-analyzers:
-  - key: word_search
-    image: builtin
-    name: Word Search Analyzer
-    description: Uses a basic word list to scan content for.
-    contextWindow: 16000
-    model: text
-    concurrency: 4
-    inputs:
-      - key: strict_words
-        name: Strict Words
-        description: Words in this list will immediatly flag the content.
-        type: textarea
+    - concurrency: 1
+      description: Parses a text to an utf-8 formated text.
+      image: builtin
+      name: Freetext parsers
+      type: freetext
+server:
+    host: 0.0.0.0
+    port: 6660
+tz: UTC
+users:
+    - id: fc28fb4c-2280-49f5-a3ba-f99ed8f8843c
+      password: F$srR%U*nDmIO7i+
+      username: admin@guardlight.org

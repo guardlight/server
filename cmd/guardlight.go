@@ -24,17 +24,17 @@ import (
 )
 
 func init() {
-	env := getEnv("environment", "")
+	env := getEnv("environment", "production")
 	confFileDir := getEnv("env_file_dir", "../")
 
 	getEnvFile := func() string {
 		switch env {
 		case "development":
-			return confFileDir + "env-development.yaml"
+			return confFileDir + "config-development.yaml"
 		// case "staging":
 		// 	return confFileDir + "env-staging.yaml"
 		case "production":
-			return confFileDir + "env-production.yaml"
+			return confFileDir + "config.yaml"
 		default:
 			panic("ENVIRONMENT variable not set")
 		}
@@ -58,7 +58,7 @@ func getEnv(key, fallback string) string {
 func main() {
 	quit := make(chan os.Signal, 1)
 
-	loc, err := time.LoadLocation("Europe/Amsterdam")
+	loc, err := time.LoadLocation(config.Get().Timezone)
 	if err != nil {
 		zap.S().Errorw("Could not load timezone", "error", err)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -66,17 +66,19 @@ func main() {
 
 	GlExternalServers()
 
-	dbUrl := config.Get().Database.Url
+	dsn := config.Get().GetDbDsn()
 	if config.Get().IsDevelopment() {
-		zap.S().Info("Starting staging cockroach database container")
 		ctx, ctxCancel := context.WithTimeout(context.Background(), time.Hour)
 		defer ctxCancel()
-		csqlContainer, err := testcontainers.NewCockroachSQLContainer(ctx)
+		csqlContainer, err := testcontainers.NewPostgresContainer(ctx)
 		if err != nil {
 			zap.S().Fatalw("database container cannot start", "error", err)
 		}
-		dbUrl = csqlContainer.GetDSN()
-		zap.S().Infow("starting staging database", "url", dbUrl)
+		dsn, err := csqlContainer.ConnectionString(ctx)
+		if err != nil {
+			zap.S().Fatalw("cannot get connection string", "error", err)
+		}
+		zap.S().Infow("starting staging database", "url", dsn)
 	}
 
 	// Messaging
@@ -84,7 +86,7 @@ func main() {
 	GLAdapters(ncon)
 
 	// Database
-	db := database.InitDatabase(dbUrl)
+	db := database.InitDatabase(dsn)
 
 	// Repositories
 	jmr := jobmanager.NewJobManagerRepository(db)

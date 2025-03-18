@@ -3,7 +3,6 @@ package database
 import (
 	"time"
 
-	"github.com/guardlight/server/internal/essential/config"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -11,10 +10,7 @@ import (
 	"moul.io/zapgorm2"
 )
 
-func InitDatabase(databaseUrl string) *gorm.DB {
-	dbName := config.Get().Database.Name
-	connectionString := databaseUrl + "&application_name=" + dbName + "&timezone=UTC"
-
+func InitDatabase(dsn string) *gorm.DB {
 	lgr := zapgorm2.New(zap.L())
 	lgr.SetAsDefault()
 	lgr.LogLevel = logger.LogLevel(zap.S().Level())
@@ -25,7 +21,7 @@ func InitDatabase(databaseUrl string) *gorm.DB {
 		},
 	}
 
-	db, err := gorm.Open(postgres.Open(connectionString), gormConfig)
+	db, err := gorm.Open(postgres.Open(dsn), gormConfig)
 	if err != nil {
 		zap.S().DPanicw("Cannot open database connection", "error", err)
 	}

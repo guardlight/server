@@ -37,12 +37,14 @@ func (sama *TestSuiteAnalysisManagerAllocatorIntegration) SetupSuite() {
 	logging.SetupLogging("test")
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer ctxCancel()
-	csqlContainer, err := testcontainers.NewCockroachSQLContainer(ctx)
+	sqlContainer, err := testcontainers.NewPostgresContainer(ctx)
 	sama.Require().NoError(err)
 
-	sama.db = database.InitDatabase(csqlContainer.GetDSN())
+	conString, err := sqlContainer.ConnectionString(ctx)
+	sama.Require().NoError(err)
+	sama.db = database.InitDatabase(conString)
 	sama.db.Logger = logger.Default.LogMode(logger.Info)
-	zap.S().Infow("connection details", "url", csqlContainer.GetDSN())
+	zap.S().Infow("connection details", "url", conString)
 
 	jmr := jobmanager.NewJobManagerRepository(sama.db)
 	jobManager := jobmanager.NewJobMananger(jmr)

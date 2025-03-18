@@ -2,17 +2,19 @@ domain: 192.168.178.142
 env: development
 server:
   host: 0.0.0.0
-  port: 6660
+  port: 6842
 cors:
-  origins:
-    - http://192.168.178.142:3000
+  origin: http://192.168.178.142:3000
 console:
   jwt:
     maxAge: 3600
     signingKey: qQJsN7FPjMUMGLzr8xRmBKGyYdRM81Go
 database:
   url: postgresql://root@127.0.0.1:26257/guardlight_development_test?sslmode=disable
+  server: 127.0.0.1:26257
   name: guardlight_development_test
+  user: root
+  password: d
 orchestrator:
   scheduleRateCron: "* * * * * *"
 parsers:

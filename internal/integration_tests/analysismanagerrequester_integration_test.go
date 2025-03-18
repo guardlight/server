@@ -39,12 +39,14 @@ func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
 	logging.SetupLogging("test")
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer ctxCancel()
-	csqlContainer, err := testcontainers.NewCockroachSQLContainer(ctx)
+	sqlContainer, err := testcontainers.NewPostgresContainer(ctx)
 	s.Require().NoError(err)
 
-	s.db = database.InitDatabase(csqlContainer.GetDSN())
+	conString, err := sqlContainer.ConnectionString(ctx)
+	s.Require().NoError(err)
+	s.db = database.InitDatabase(conString)
 	s.db.Logger = logger.Default.LogMode(logger.Info)
-	zap.S().Infow("connection details", "url", csqlContainer.GetDSN())
+	zap.S().Infow("connection details", "url", conString)
 
 	s.router = gin.Default()
 

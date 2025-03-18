@@ -4,15 +4,17 @@ server:
   host: 0.0.0.0
   port: 6660
 cors:
-  origins:
-    - http://192.168.178.142:3000
+  origin: http://192.168.178.142:3000
 console:
   jwt:
     maxAge: 3600
     signingKey: qQJsN7FPjMUMGLzr8xRmBKGyYdRM81Go
 database:
-  url: postgresql://root@127.0.0.1:26257/guardlight_development_test?sslmode=disable
   name: guardlight_development_test
+  password: root
+  port: 5432
+  server: 127.0.0.1
+  user: root
 orchestrator:
   scheduleRateCron: "* * * * * *"
 parsers:

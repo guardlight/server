@@ -46,10 +46,12 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 	ctx, ctxCancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer ctxCancel()
 
-	csqlContainer, err := testcontainers.NewCockroachSQLContainer(ctx)
+	sqlContainer, err := testcontainers.NewPostgresContainer(ctx)
 	s.Require().NoError(err)
 
-	s.db = database.InitDatabase(csqlContainer.GetDSN())
+	conString, err := sqlContainer.ConnectionString(ctx)
+	s.Require().NoError(err)
+	s.db = database.InitDatabase(conString)
 
 	sqlDb, _ := s.db.DB()
 	fixtures, err := testfixtures.New(

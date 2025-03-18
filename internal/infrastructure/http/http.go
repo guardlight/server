@@ -55,7 +55,7 @@ func LetDie(ctx context.Context) {
 
 func useCors() gin.HandlerFunc {
 	return cors.New(cors.Config{
-		AllowOrigins:     config.Get().Cors.Origins,
+		AllowOrigins:     []string{config.Get().Cors.Origin},
 		AllowMethods:     []string{"GET, POST, PATCH, PUT, DELETE, OPTIONS"},
 		AllowHeaders:     []string{"Accept, Accept-Encoding, Authorization, Cache-Control, Content-Type, Content-Length, Origin, X-Real-IP, X-CSRF-Token, X-Auth-Key"},
 		ExposeHeaders:    []string{"Content-Length"},
