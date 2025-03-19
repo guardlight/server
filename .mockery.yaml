@@ -21,3 +21,6 @@ packages:
       jobManager:
       taskCreater:
       natsSender:
+  github.com/guardlight/server/internal/theme:
+    interfaces:
+      themeStore:

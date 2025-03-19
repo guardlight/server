@@ -206,9 +206,11 @@ func hasValidAnalyzers(arDto *analysisrequest.AnalysisRequest) bool {
 }
 
 func (am *AnalysisManagerRequester) GetAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error) {
+	// TODO Map to UI friendly model
 	return am.ars.getAnalysesByUserId(id)
 }
 
 func (am *AnalysisManagerRequester) GetAnalysById(uid uuid.UUID, aid uuid.UUID) (AnalysisRequest, error) {
+	// TODO Map to UI friendly model
 	return am.ars.getAnalysById(uid, aid)
 }

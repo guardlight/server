@@ -85,11 +85,11 @@ type analyzer struct {
 	ContextWindow int             `koanf:"contextWindow" default:"-"`
 	Model         string          `koanf:"model" default:"-"`
 	Concurrency   int             `koanf:"concurrency" default:"-"`
-	Inputs        []analyzerInput `koanf:"inputs" default:"-"`
+	Inputs        []AnalyzerInput `koanf:"inputs" default:"-"`
 	Image         string          `koanf:"image" default:"-"`
 }
 
-type analyzerInput struct {
+type AnalyzerInput struct {
 	Key         string `koanf:"key" default:"-"`
 	Name        string `koanf:"name"  default:"-"`
 	Description string `koanf:"description" default:"-"`
@@ -203,7 +203,7 @@ func configBasicAdapters(defaultedConfig *GLConfig) {
 		Model:         "text",
 		Concurrency:   4,
 		Image:         "builtin",
-		Inputs: []analyzerInput{
+		Inputs: []AnalyzerInput{
 			{
 				Key:         "strict_words",
 				Name:        "Strict Words",
