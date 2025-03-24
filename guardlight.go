@@ -10,7 +10,7 @@ import (
 
 func init() {
 	env := getEnv("environment", "production")
-	confFileDir := getEnv("env_file_dir", "../")
+	confFileDir := getEnv("env_file_dir", "./")
 
 	getEnvFile := func() string {
 		switch env {

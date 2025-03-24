@@ -13,6 +13,29 @@ func TestGetTheme(t *testing.T) {
 
 	uid := uuid.MustParse("c5fdf7a6-ec31-49d5-af69-6a77bb6e43fe")
 
+	defaultEmptyThemeDto := ThemeDto{
+		Id:    uuid.Nil,
+		Title: "",
+		Analyzers: []AnalyzerDto{
+			{
+				Key:          "word_search",
+				Name:         "Word Search Analyzer",
+				Description:  "Uses a basic word list to scan content for.",
+				ChangeStatus: New,
+				Inputs: []AnalyzerInputDto{
+					{
+						Key:          "strict_words",
+						Value:        "",
+						Name:         "Strict Words",
+						Description:  "Words in this list will immediatly flag the content.",
+						Type:         "textarea",
+						ChangeStatus: New,
+					},
+				},
+			},
+		},
+	}
+
 	var tests = []struct {
 		name   string
 		input  []Theme
@@ -27,9 +50,7 @@ func TestGetTheme(t *testing.T) {
 					Title:  "Test Theme",
 					Analyzers: []Analyzer{
 						{
-							Key:         "word_search",
-							Name:        "Word Search",
-							Description: "Description of analyzer",
+							Key: "word_search",
 							Inputs: []AnalyzerInput{
 								{
 									Key:   "strict_words",
@@ -47,19 +68,23 @@ func TestGetTheme(t *testing.T) {
 					Analyzers: []AnalyzerDto{
 						{
 							Key:          "word_search",
-							Name:         "Word Search",
-							Description:  "Description of analyzer",
+							Name:         "Word Search Analyzer",
+							Description:  "Uses a basic word list to scan content for.",
 							ChangeStatus: Same,
 							Inputs: []AnalyzerInputDto{
 								{
 									Key:          "strict_words",
 									Value:        "Running, Walking",
+									Name:         "Strict Words",
+									Description:  "Words in this list will immediatly flag the content.",
+									Type:         "textarea",
 									ChangeStatus: Same,
 								},
 							},
 						},
 					},
 				},
+				defaultEmptyThemeDto,
 			},
 		},
 		{
@@ -86,12 +111,16 @@ func TestGetTheme(t *testing.T) {
 								{
 									Key:          "strict_words",
 									Value:        "",
+									Name:         "Strict Words",
+									Description:  "Words in this list will immediatly flag the content.",
+									Type:         "textarea",
 									ChangeStatus: New,
 								},
 							},
 						},
 					},
 				},
+				defaultEmptyThemeDto,
 			},
 		},
 		{
@@ -103,9 +132,7 @@ func TestGetTheme(t *testing.T) {
 					Title:  "Test Theme",
 					Analyzers: []Analyzer{
 						{
-							Key:         "super_ai",
-							Name:        "Super AI analyzer",
-							Description: "Description of super AI analyzer.",
+							Key: "super_ai",
 							Inputs: []AnalyzerInput{
 								{
 									Key:   "command_prompt",
@@ -123,13 +150,16 @@ func TestGetTheme(t *testing.T) {
 					Analyzers: []AnalyzerDto{
 						{
 							Key:          "super_ai",
-							Name:         "Super AI analyzer",
-							Description:  "Description of super AI analyzer.",
+							Name:         "",
+							Description:  "",
 							ChangeStatus: Removed,
 							Inputs: []AnalyzerInputDto{
 								{
 									Key:          "command_prompt",
 									Value:        "Is there walking?",
+									Name:         "",
+									Description:  "",
+									Type:         "",
 									ChangeStatus: Removed,
 								},
 							},
@@ -143,12 +173,16 @@ func TestGetTheme(t *testing.T) {
 								{
 									Key:          "strict_words",
 									Value:        "",
+									Name:         "Strict Words",
+									Description:  "Words in this list will immediatly flag the content.",
+									Type:         "textarea",
 									ChangeStatus: New,
 								},
 							},
 						},
 					},
 				},
+				defaultEmptyThemeDto,
 			},
 		},
 		{
@@ -160,9 +194,7 @@ func TestGetTheme(t *testing.T) {
 					Title:  "Test Theme",
 					Analyzers: []Analyzer{
 						{
-							Key:         "word_search",
-							Name:        "Word Search",
-							Description: "Description of analyzer",
+							Key: "word_search",
 							Inputs: []AnalyzerInput{
 								{
 									Key:   "another_text_input",
@@ -180,24 +212,31 @@ func TestGetTheme(t *testing.T) {
 					Analyzers: []AnalyzerDto{
 						{
 							Key:          "word_search",
-							Name:         "Word Search",
-							Description:  "Description of analyzer",
+							Name:         "Word Search Analyzer",
+							Description:  "Uses a basic word list to scan content for.",
 							ChangeStatus: Changed,
 							Inputs: []AnalyzerInputDto{
 								{
 									Key:          "another_text_input",
 									Value:        "Something else",
+									Name:         "",
+									Description:  "",
+									Type:         "",
 									ChangeStatus: Removed,
 								},
 								{
 									Key:          "strict_words",
 									Value:        "",
+									Name:         "Strict Words",
+									Description:  "Words in this list will immediatly flag the content.",
+									Type:         "textarea",
 									ChangeStatus: New,
 								},
 							},
 						},
 					},
 				},
+				defaultEmptyThemeDto,
 			},
 		},
 	}

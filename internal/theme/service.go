@@ -44,10 +44,8 @@ func mapDtoToEntity(tDto ThemeDto, uid uuid.UUID) Theme {
 
 func mapAnalyzerDtoToEntity(aDto AnalyzerDto, _ int) Analyzer {
 	return Analyzer{
-		Key:         aDto.Key,
-		Name:        aDto.Name,
-		Description: aDto.Description,
-		Inputs:      lo.Map(aDto.Inputs, mapInputDtoToEntity),
+		Key:    aDto.Key,
+		Inputs: lo.Map(aDto.Inputs, mapInputDtoToEntity),
 	}
 }
 
@@ -63,6 +61,15 @@ func (ts *ThemeService) getAllThemesByUserId(id uuid.UUID) ([]ThemeDto, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Add an empty theme to populate it with all new fields to the UI
+	dbThemes = append(dbThemes, Theme{
+		Id:          uuid.Nil,
+		UserId:      id,
+		Title:       "",
+		Description: "",
+		Analyzers:   []Analyzer{},
+	})
 
 	return lo.Map(dbThemes, mergeThemesFromConfig), nil
 }
@@ -94,8 +101,6 @@ func mergeThemesFromConfig(t Theme, _ int) ThemeDto {
 func mergeAnalyzerFromConfig(a Analyzer, _ int) AnalyzerDto {
 	ad := AnalyzerDto{
 		Key:          a.Key,
-		Name:         a.Name,
-		Description:  a.Description,
 		ChangeStatus: Same,
 	}
 
@@ -108,6 +113,8 @@ func mergeAnalyzerFromConfig(a Analyzer, _ int) AnalyzerDto {
 	}
 
 	ad.Inputs = mergeAnalyzerInputsFromConfig(a.Inputs, aConf.Inputs)
+	ad.Name = aConf.Name
+	ad.Description = aConf.Description
 
 	// Merged inputs contains a Removed or New input
 	if ok := lo.ContainsBy(ad.Inputs, func(a AnalyzerInputDto) bool { return a.ChangeStatus == Removed || a.ChangeStatus == New }); ok {
@@ -128,8 +135,12 @@ func mergeAnalyzerInputsFromConfig(in []AnalyzerInput, inConf []config.AnalyzerI
 			Value:        i.Value,
 			ChangeStatus: Same,
 		}
-		if ok := lo.ContainsBy(inConf, func(a config.AnalyzerInput) bool { return a.Key == i.Key }); !ok {
+		if inp, ok := lo.Find(inConf, func(a config.AnalyzerInput) bool { return a.Key == i.Key }); !ok {
 			aid.ChangeStatus = Removed
+		} else {
+			aid.Name = inp.Name
+			aid.Description = inp.Description
+			aid.Type = inp.Type
 		}
 		aiDtos = append(aiDtos, aid)
 	}
@@ -141,6 +152,9 @@ func mergeAnalyzerInputsFromConfig(in []AnalyzerInput, inConf []config.AnalyzerI
 				Key:          ic.Key,
 				Value:        "",
 				ChangeStatus: New,
+				Name:         ic.Name,
+				Description:  ic.Description,
+				Type:         ic.Type,
 			})
 		}
 	}

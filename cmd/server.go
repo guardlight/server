@@ -31,6 +31,7 @@ func Server() {
 		zap.S().Errorw("Could not load timezone", "error", err)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	}
+	os.Setenv("TZ", "")
 
 	GlExternalServers()
 
@@ -42,7 +43,7 @@ func Server() {
 		if err != nil {
 			zap.S().Fatalw("database container cannot start", "error", err)
 		}
-		dsn, err := csqlContainer.ConnectionString(ctx)
+		dsn, err := csqlContainer.ConnectionString(ctx, "timezone=Europe/Amsterdam")
 		if err != nil {
 			zap.S().Fatalw("cannot get connection string", "error", err)
 		}

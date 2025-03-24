@@ -40,4 +40,5 @@ tz: UTC
 users:
     - id: fc28fb4c-2280-49f5-a3ba-f99ed8f8843c
       password: F$srR%U*nDmIO7i+
+      role: admin
       username: admin@guardlight.org

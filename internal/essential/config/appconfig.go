@@ -37,6 +37,7 @@ type GLConfig struct {
 type User struct {
 	Username string    `koanf:"username" default:"-"`
 	Password string    `koanf:"password" default:"-"`
+	Role     string    `koanf:"role" default:"-"`
 	Id       uuid.UUID `koanf:"id" default:"-"`
 }
 
@@ -127,6 +128,7 @@ func SetupConfig(envFilePath string) {
 		k.Set("tz", tz)
 	}
 
+	configSetEnvironment(k)
 	// Generate signing key
 	configSigningKey(k)
 	configAdminUser(k)
@@ -160,6 +162,13 @@ func SetupConfig(envFilePath string) {
 	conf = ffc
 	// zap.S().Infow("configuration loaded", "config", conf)
 	zap.S().Infow("configuration loaded", "file", envFilePath)
+}
+
+func configSetEnvironment(k *koanf.Koanf) {
+	value, ok := os.LookupEnv("environment")
+	if ok {
+		k.Set("env", value)
+	}
 }
 
 func Get() GLConfig {
@@ -197,7 +206,7 @@ func (fc GLConfig) GetAnalyzer(analyzerKey string) (analyzer, bool) {
 func configBasicAdapters(defaultedConfig *GLConfig) {
 	defaultedConfig.Analyzers = append(defaultedConfig.Analyzers, analyzer{
 		Key:           "word_search",
-		Name:          "Word Search Analyzer",
+		Name:          "Word Search",
 		Description:   "Uses a basic word list to scan content.",
 		ContextWindow: 32000,
 		Model:         "text",
@@ -243,6 +252,7 @@ func configAdminUser(k *koanf.Koanf) {
 		users = append(users, User{
 			Username: "admin@guardlight.org",
 			Password: lo.RandomString(16, lo.AllCharset),
+			Role:     "admin",
 			Id:       uuid.New(),
 		})
 		k.Set("users", users)
