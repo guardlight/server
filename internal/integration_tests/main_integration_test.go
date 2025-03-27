@@ -25,6 +25,7 @@ import (
 	"github.com/guardlight/server/internal/natsclient"
 	"github.com/guardlight/server/internal/orchestrator"
 	"github.com/guardlight/server/internal/scheduler"
+	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/pkg/analysisrequest"
 	"github.com/guardlight/server/pkg/gladapters/analyzers"
 	"github.com/guardlight/server/pkg/gladapters/parsers"
@@ -74,6 +75,7 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 	// Repositories
 	jmr := jobmanager.NewJobManagerRepository(s.db)
 	amr := analysismanager.NewAnalysisManagerRepository(s.db)
+	tsr := theme.NewAnalysisManagerRepository(s.db)
 
 	// Controller Groups
 	s.router = router.NewRouter(logging.GetLogger())
@@ -99,11 +101,13 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 		zap.S().Errorw("Could not create orhestrator", "error", err)
 		s.Assert().NoError(err)
 	}
+	ts := theme.NewThemeService(tsr)
+	ars := analysismanager.NewAnalysisResultService(amr, ts)
 	am := analysismanager.NewAnalysisManangerRequester(jm, amr)
 	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm)
 
 	// Controllers
-	analysismanager.NewAnalysisRequestController(baseGroup, am)
+	analysismanager.NewAnalysisRequestController(baseGroup, am, ars)
 
 	// Start the server
 	go router.LiveOrLetDie(s.router)
@@ -140,8 +144,7 @@ func (s *TestSuiteMainIntegration) TestRequestTillResult() {
 				Id:    uuid.MustParse("2864d1b0-411a-4c6c-932a-61acddd67019"),
 				Analyzers: []analysisrequest.Analyzer{
 					{
-						Key:       "word_search",
-						Threshold: 2,
+						Key: "word_search",
 						Inputs: []analysisrequest.AnalyzerInput{
 							{
 								Key:   "strict_words",

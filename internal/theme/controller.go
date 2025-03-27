@@ -50,7 +50,7 @@ func (tc *ThemeController) updateTheme(c *gin.Context) {
 func (tc *ThemeController) getAllThemes(c *gin.Context) {
 	uid := glsecurity.GetUserIdFromContextParsed(c)
 
-	t, err := tc.s.getAllThemesByUserId(uid)
+	t, err := tc.s.GetAllThemesByUserId(uid)
 	if err != nil {
 		zap.S().Errorw("error gettings themes", "error", err)
 		c.JSON(glerror.InternalServerError())

@@ -19,6 +19,7 @@ import (
 	"github.com/guardlight/server/internal/natsclient"
 	"github.com/guardlight/server/internal/orchestrator"
 	"github.com/guardlight/server/internal/scheduler"
+	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/servers/natsmessaging"
 	"go.uber.org/zap"
 )
@@ -60,6 +61,7 @@ func Server() {
 	// Repositories
 	jmr := jobmanager.NewJobManagerRepository(db)
 	amr := analysismanager.NewAnalysisManagerRepository(db)
+	tsr := theme.NewAnalysisManagerRepository(db)
 
 	// Controller Groups
 	mainRouter := http.NewRouter(logging.GetLogger())
@@ -78,12 +80,14 @@ func Server() {
 		zap.S().Errorw("Could not create orhestrator", "error", err)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	}
+	ts := theme.NewThemeService(tsr)
+	ars := analysismanager.NewAnalysisResultService(amr, ts)
 	am := analysismanager.NewAnalysisManangerRequester(jm, amr)
 	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm)
 
 	// Controllers
 	health.NewHealthController(baseGroup)
-	analysismanager.NewAnalysisRequestController(baseGroup, am)
+	analysismanager.NewAnalysisRequestController(baseGroup, am, ars)
 
 	// Start the server
 	go http.LiveOrLetDie(mainRouter)

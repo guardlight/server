@@ -20,6 +20,7 @@ import (
 	"github.com/guardlight/server/internal/essential/testcontainers"
 	"github.com/guardlight/server/internal/infrastructure/database"
 	"github.com/guardlight/server/internal/jobmanager"
+	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/pkg/analysisrequest"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
@@ -54,9 +55,14 @@ func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
 	jobManager := jobmanager.NewJobMananger(jmr)
 
 	s.analysisManagerRepository = analysismanager.NewAnalysisManagerRepository(s.db)
+	tsr := theme.NewAnalysisManagerRepository(s.db)
+
+	ts := theme.NewThemeService(tsr)
+	ars := analysismanager.NewAnalysisResultService(s.analysisManagerRepository, ts)
+
 	analysisManangerRequester := analysismanager.NewAnalysisManangerRequester(jobManager, s.analysisManagerRepository)
 
-	analysismanager.NewAnalysisRequestController(s.router.Group(""), analysisManangerRequester)
+	analysismanager.NewAnalysisRequestController(s.router.Group(""), analysisManangerRequester, ars)
 
 	sqlDb, _ := s.db.DB()
 	fixtures, err := testfixtures.New(
@@ -100,8 +106,7 @@ func (s *TestSuiteAnalysisManagerIntegration) TestSubmitAnalysisRequestUntilPars
 				Id:    uuid.MustParse("2864d1b0-411a-4c6c-932a-61acddd67019"),
 				Analyzers: []analysisrequest.Analyzer{
 					{
-						Key:       "word_search",
-						Threshold: 2,
+						Key: "word_search",
 						Inputs: []analysisrequest.AnalyzerInput{
 							{
 								Key:   "strict_words",
@@ -177,8 +182,7 @@ func (s *TestSuiteAnalysisManagerIntegration) TestSubmitAnalysisRequestUntilPars
 				Id:    uuid.MustParse("2864d1b0-411a-4c6c-932a-61acddd67019"),
 				Analyzers: []analysisrequest.Analyzer{
 					{
-						Key:       "word_search",
-						Threshold: 2,
+						Key: "word_search",
 						Inputs: []analysisrequest.AnalyzerInput{
 							{
 								Key:   "strict_words",

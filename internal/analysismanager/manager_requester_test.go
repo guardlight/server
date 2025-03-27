@@ -11,12 +11,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var userId = uuid.MustParse("f6bec23c-5106-4805-980f-9c9c1c050af4")
-
 func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 	mockAnalysisRecordSaver := NewMockanalysisRequestStore(t)
 	mockJobManager := NewMockjobManagerRequester(t)
-	config.SetupConfig("../../env-test.yaml")
+	config.SetupConfig("../../testdata/envs/analysismanangerequester.yaml")
+
+	userId := uuid.MustParse("f6bec23c-5106-4805-980f-9c9c1c050af4")
 
 	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver)
 
@@ -50,9 +50,8 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 					Id:    uuid.MustParse("2864d1b0-411a-4c6c-932a-61acddd67019"),
 					Analyzers: []analysisrequest.Analyzer{
 						{
-							Key:       "unknown_analyzer",
-							Threshold: 2,
-							Inputs:    []analysisrequest.AnalyzerInput{},
+							Key:    "unknown_analyzer",
+							Inputs: []analysisrequest.AnalyzerInput{},
 						},
 					},
 				},
@@ -78,9 +77,8 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 					Id:    uuid.MustParse("2864d1b0-411a-4c6c-932a-61acddd67019"),
 					Analyzers: []analysisrequest.Analyzer{
 						{
-							Key:       "word_search",
-							Threshold: 2,
-							Inputs:    []analysisrequest.AnalyzerInput{},
+							Key:    "word_search",
+							Inputs: []analysisrequest.AnalyzerInput{},
 						},
 					},
 				},
@@ -97,7 +95,9 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 func TestAnalysisRequestSuccess(t *testing.T) {
 	mockAnalysisRecordSaver := NewMockanalysisRequestStore(t)
 	mockJobManager := NewMockjobManagerRequester(t)
-	config.SetupConfig("../../env-test.yaml")
+	config.SetupConfig("../../testdata/envs/analysismanangerequester.yaml")
+
+	userId := uuid.MustParse("f6bec23c-5106-4805-980f-9c9c1c050af4")
 
 	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver)
 
@@ -117,8 +117,7 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 				Id:    uuid.MustParse("2864d1b0-411a-4c6c-932a-61acddd67019"),
 				Analyzers: []analysisrequest.Analyzer{
 					{
-						Key:       "word_search",
-						Threshold: 2,
+						Key: "word_search",
 						Inputs: []analysisrequest.AnalyzerInput{
 							{
 								Key:   "strict_words",
@@ -133,8 +132,7 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 				Id:    uuid.MustParse("3ab4a569-4de4-4206-a4fe-b4d2ddac3f6c"),
 				Analyzers: []analysisrequest.Analyzer{
 					{
-						Key:       "word_search",
-						Threshold: 2,
+						Key: "word_search",
 						Inputs: []analysisrequest.AnalyzerInput{
 							{
 								Key:   "strict_words",
@@ -144,49 +142,6 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 					},
 				},
 			},
-		},
-	}
-
-	steps := []AnalysisRequestStep{
-		{
-			Id:                uuid.Nil,
-			AnalysisRequestId: uuid.Nil,
-			Index:             0,
-			StepType:          Create,
-			Status:            Finished,
-			StatusDescription: "",
-		},
-		{
-			Id:                uuid.Nil,
-			AnalysisRequestId: uuid.Nil,
-			Index:             1,
-			StepType:          Parse,
-			Status:            Waiting,
-			StatusDescription: "",
-		},
-		{
-			Id:                uuid.Nil,
-			AnalysisRequestId: uuid.Nil,
-			Index:             2,
-			StepType:          Analyze,
-			Status:            Waiting,
-			StatusDescription: "",
-		},
-		{
-			Id:                uuid.Nil,
-			AnalysisRequestId: uuid.Nil,
-			Index:             3,
-			StepType:          Analyze,
-			Status:            Waiting,
-			StatusDescription: "",
-		},
-		{
-			Id:                uuid.Nil,
-			AnalysisRequestId: uuid.Nil,
-			Index:             4,
-			StepType:          Report,
-			Status:            Waiting,
-			StatusDescription: "",
 		},
 	}
 
@@ -203,7 +158,6 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 			AnalyzerKey:       "word_search",
 			ThemeId:           uuid.MustParse("2864d1b0-411a-4c6c-932a-61acddd67019"),
 			Status:            AnalysisWaiting,
-			Threshold:         2,
 			Score:             0,
 			Content:           Content{},
 			Inputs: []AnalysisInput{
@@ -220,7 +174,6 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 			AnalyzerKey:       "word_search",
 			ThemeId:           uuid.MustParse("3ab4a569-4de4-4206-a4fe-b4d2ddac3f6c"),
 			Status:            AnalysisWaiting,
-			Threshold:         2,
 			Score:             0,
 			Content:           Content{},
 			Inputs: []AnalysisInput{
@@ -234,11 +187,10 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 	}
 
 	arDb := &AnalysisRequest{
-		Title:                "test analysis",
-		UserId:               userId,
-		AnalysisRequestSteps: steps,
-		RawData:              rawData,
-		Analysis:             as,
+		Title:    "test analysis",
+		UserId:   userId,
+		RawData:  rawData,
+		Analysis: as,
 	}
 
 	analysisId := uuid.MustParse("75d25964-6d59-4f88-97f8-dfd3afe96c62")

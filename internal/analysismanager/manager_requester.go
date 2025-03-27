@@ -23,8 +23,6 @@ var (
 
 type analysisRequestStore interface {
 	createAnalysisRequest(analysisRequest *AnalysisRequest) error
-	getAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error)
-	getAnalysById(uid uuid.UUID, aid uuid.UUID) (AnalysisRequest, error)
 }
 
 type jobManagerRequester interface {
@@ -56,19 +54,17 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		return ErrInvalidAnalyzer
 	}
 
-	steps := createSteps(arDto)
-
 	rawData := createRawData(arDto)
 
 	analysisParts := createAnalysis(arDto)
 
 	ar := &AnalysisRequest{
-		Id:                   uuid.Nil,
-		UserId:               ui,
-		Title:                arDto.Title,
-		AnalysisRequestSteps: steps,
-		RawData:              rawData,
-		Analysis:             analysisParts,
+		Id:          uuid.Nil,
+		UserId:      ui,
+		Title:       arDto.Title,
+		ContentType: string(arDto.ContentType),
+		RawData:     rawData,
+		Analysis:    analysisParts,
 	}
 	err := am.ars.createAnalysisRequest(ar)
 	if err != nil {
@@ -110,7 +106,6 @@ func createAnalysis(arDto *analysisrequest.AnalysisRequest) []Analysis {
 				AnalyzerKey:       a.Key,
 				ThemeId:           t.Id,
 				Status:            AnalysisWaiting,
-				Threshold:         a.Threshold,
 				Score:             0,
 				Inputs:            ainputs,
 				Content:           []string{},
@@ -134,54 +129,8 @@ func createRawData(arDto *analysisrequest.AnalysisRequest) RawData {
 	}
 }
 
-func createSteps(arDto *analysisrequest.AnalysisRequest) []AnalysisRequestStep {
-
-	steps := make([]AnalysisRequestStep, 0)
-
-	steps = append(steps, AnalysisRequestStep{
-		Id:                uuid.Nil,
-		AnalysisRequestId: uuid.Nil,
-		Index:             0,
-		StepType:          Create,
-		Status:            Finished,
-		StatusDescription: "",
-	})
-
-	steps = append(steps, AnalysisRequestStep{
-		Id:                uuid.Nil,
-		AnalysisRequestId: uuid.Nil,
-		Index:             1,
-		StepType:          Parse,
-		Status:            Waiting,
-		StatusDescription: "",
-	})
-
-	for iTheme, theme := range arDto.Themes {
-		for iAnalyzer := range theme.Analyzers {
-			steps = append(steps, AnalysisRequestStep{
-				Id:                uuid.Nil,
-				AnalysisRequestId: uuid.Nil,
-				Index:             2 + iTheme + iAnalyzer,
-				StepType:          Analyze,
-				Status:            Waiting,
-				StatusDescription: "",
-			})
-		}
-	}
-
-	steps = append(steps, AnalysisRequestStep{
-		Id:                uuid.Nil,
-		AnalysisRequestId: uuid.Nil,
-		Index:             len(steps),
-		StepType:          Report,
-		Status:            Waiting,
-		StatusDescription: "",
-	})
-
-	return steps
-}
-
 func hasValidAnalyzers(arDto *analysisrequest.AnalysisRequest) bool {
+	// Check if Analyzer:Input:Threshold is part of request
 	analyzersFromRequest := lo.FlatMap(arDto.Themes, func(t analysisrequest.Theme, _ int) []analysisrequest.Analyzer {
 		return t.Analyzers
 	})
@@ -203,14 +152,4 @@ func hasValidAnalyzers(arDto *analysisrequest.AnalysisRequest) bool {
 	}
 
 	return true
-}
-
-func (am *AnalysisManagerRequester) GetAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error) {
-	// TODO Map to UI friendly model
-	return am.ars.getAnalysesByUserId(id)
-}
-
-func (am *AnalysisManagerRequester) GetAnalysById(uid uuid.UUID, aid uuid.UUID) (AnalysisRequest, error) {
-	// TODO Map to UI friendly model
-	return am.ars.getAnalysById(uid, aid)
 }

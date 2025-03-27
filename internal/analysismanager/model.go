@@ -37,21 +37,12 @@ const (
 )
 
 type AnalysisRequest struct {
-	Id                   uuid.UUID             `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
-	UserId               uuid.UUID             `gorm:"column:user_id"`
-	Title                string                `gorm:"column:title"`
-	AnalysisRequestSteps []AnalysisRequestStep `gorm:"foreignKey:AnalysisRequestId"`
-	RawData              RawData               `gorm:"foreignKey:AnalysisRequestId"`
-	Analysis             []Analysis            `gorm:"foreignKey:AnalysisRequestId"`
-}
-
-type AnalysisRequestStep struct {
-	Id                uuid.UUID                 `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
-	AnalysisRequestId uuid.UUID                 `gorm:"column:analysis_request_id;primaryKey;type:uuid"`
-	Index             int                       `gorm:"column:index"`
-	StepType          AnalysisRequestStepType   `gorm:"column:step_type"`
-	Status            AnalysisRequestStepStatus `gorm:"column:status"`
-	StatusDescription string                    `gorm:"status_decsription"`
+	Id          uuid.UUID  `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
+	UserId      uuid.UUID  `gorm:"column:user_id"`
+	Title       string     `gorm:"column:title"`
+	ContentType string     `gorm:"column:content_type"`
+	RawData     RawData    `gorm:"foreignKey:AnalysisRequestId"`
+	Analysis    []Analysis `gorm:"foreignKey:AnalysisRequestId"`
 }
 
 type RawData struct {
@@ -69,7 +60,6 @@ type Analysis struct {
 	AnalyzerKey       string         `gorm:"column:analyzer_key"`
 	ThemeId           uuid.UUID      `gorm:"column:theme_id"`
 	Status            AnalysisStatus `gorm:"column:status"`
-	Threshold         int            `gorm:"column:threshold"`
 	Score             float32        `gorm:"column:score"`
 	Content           Content        `gorm:"column:content;type:jsonb"`
 	Inputs            Inputs         `gorm:"column:inputs;type:jsonb"`

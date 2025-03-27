@@ -22,7 +22,7 @@ func NewThemeService(ts themeStore) *ThemeService {
 }
 
 func (ts *ThemeService) updateTheme(tDto ThemeDto, uid uuid.UUID) error {
-	// TODO Validate theme
+	// TODO Validate theme -- Eg. Must contain Analysis:Input:Theshold
 
 	t := mapDtoToEntity(tDto, uid)
 	err := ts.ts.updateTheme(t, uid)
@@ -56,7 +56,7 @@ func mapInputDtoToEntity(iDto AnalyzerInputDto, _ int) AnalyzerInput {
 	}
 }
 
-func (ts *ThemeService) getAllThemesByUserId(id uuid.UUID) ([]ThemeDto, error) {
+func (ts *ThemeService) GetAllThemesByUserId(id uuid.UUID) ([]ThemeDto, error) {
 	dbThemes, err := ts.ts.getAllThemesByUserId(id)
 	if err != nil {
 		return nil, err

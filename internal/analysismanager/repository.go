@@ -16,7 +16,6 @@ type AnalysisManagerRepository struct {
 func NewAnalysisManagerRepository(db *gorm.DB) *AnalysisManagerRepository {
 	if err := db.AutoMigrate(
 		&AnalysisRequest{},
-		&AnalysisRequestStep{},
 		&RawData{},
 		&Analysis{},
 	); err != nil {

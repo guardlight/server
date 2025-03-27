@@ -159,6 +159,9 @@ func SetupConfig(envFilePath string) {
 		zap.S().Infow("config", "config", ffc)
 	}
 
+	// TODO Validate config --> All data should be loaded and can be validated to ensure all is set.
+	// Eg. All analyzers hould have a 'threshold' input
+
 	conf = ffc
 	// zap.S().Infow("configuration loaded", "config", conf)
 	zap.S().Infow("configuration loaded", "file", envFilePath)
@@ -214,9 +217,15 @@ func configBasicAdapters(defaultedConfig *GLConfig) {
 		Image:         "builtin",
 		Inputs: []AnalyzerInput{
 			{
+				Key:         "threshold",
+				Name:        "Threshold",
+				Description: "Allows you to specificy at which point the analyzer should flag the media content.",
+				Type:        "threshold",
+			},
+			{
 				Key:         "strict_words",
 				Name:        "Strict Words",
-				Description: "Words in this list will flag content.",
+				Description: "Words in this list will be used to flag media content.",
 				Type:        "textarea",
 			},
 		},

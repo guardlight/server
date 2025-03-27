@@ -247,7 +247,7 @@ func TestGetTheme(t *testing.T) {
 			mts.EXPECT().getAllThemesByUserId(uid).Return(tt.input, nil)
 			ts := NewThemeService(mts)
 
-			res, err := ts.getAllThemesByUserId(uid)
+			res, err := ts.GetAllThemesByUserId(uid)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.expect, res)
 		})

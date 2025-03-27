@@ -30,9 +30,8 @@ type Theme struct {
 }
 
 type Analyzer struct {
-	Key       string          `json:"key"`
-	Threshold int             `json:"Threshold"`
-	Inputs    []AnalyzerInput `json:"inputs"`
+	Key    string          `json:"key"`
+	Inputs []AnalyzerInput `json:"inputs"`
 }
 
 type AnalyzerInput struct {

@@ -13,6 +13,8 @@ packages:
       subsriber:
       analysisStore:
       jobber:
+      themeService:
+      analysisGetter:
   github.com/guardlight/server/internal/jobmanager:
     interfaces:
       jobStore:

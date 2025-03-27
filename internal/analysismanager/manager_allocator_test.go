@@ -56,7 +56,6 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 				AnalyzerKey:       "word_search",
 				ThemeId:           uuid.MustParse("bd2d2784-0fcb-4526-ad3c-76d00964f4de"),
 				Status:            AnalysisWaiting,
-				Threshold:         2,
 				Score:             0,
 				Inputs: []AnalysisInput{
 					{
