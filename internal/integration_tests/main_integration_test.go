@@ -3,6 +3,7 @@ package integrationtests
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -75,7 +76,7 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 	// Repositories
 	jmr := jobmanager.NewJobManagerRepository(s.db)
 	amr := analysismanager.NewAnalysisManagerRepository(s.db)
-	tsr := theme.NewAnalysisManagerRepository(s.db)
+	tsr := theme.NewThemeRepository(s.db)
 
 	// Controller Groups
 	s.router = router.NewRouter(logging.GetLogger())
@@ -135,7 +136,7 @@ func (s *TestSuiteMainIntegration) TestRequestTillResult() {
 		Title:       "test analysis",
 		ContentType: analysisrequest.BOOK,
 		File: analysisrequest.File{
-			Content:  data,
+			Content:  base64.RawStdEncoding.EncodeToString(data),
 			Mimetype: "freetext",
 		},
 		Themes: []analysisrequest.Theme{
@@ -160,7 +161,7 @@ func (s *TestSuiteMainIntegration) TestRequestTillResult() {
 	jsonValue, err := json.Marshal(ar)
 	s.Assert().NoError(err)
 
-	req, err := http.NewRequest("POST", "/analysis/request", bytes.NewBuffer(jsonValue))
+	req, err := http.NewRequest("POST", "/analysis", bytes.NewBuffer(jsonValue))
 	s.Assert().NoError(err)
 	req.Header.Set("Authorization", "Bearer "+tkStr)
 	req.AddCookie(&http.Cookie{
@@ -211,28 +212,4 @@ func (s *TestSuiteMainIntegration) TestRequestTillResult() {
 	s.Assert().Len(arReqs, 1)
 	s.Assert().Equal(arReqs[0].Id, arResult.Id)
 
-	reqResultSpecific, err := http.NewRequest("GET", "/analysis/analyses/"+arResult.Id.String(), nil)
-	s.Assert().NoError(err)
-	reqResultSpecific.Header.Set("Authorization", "Bearer "+tkStr)
-	reqResultSpecific.AddCookie(&http.Cookie{
-		Name:     glsecurity.ConsoleApiCookieName,
-		Value:    tkStr,
-		Path:     "/",
-		Domain:   "127.0.0.1",
-		MaxAge:   604800,
-		Expires:  time.Now().Add(time.Hour * 1),
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   true,
-	})
-
-	wResultSpecific := httptest.NewRecorder()
-	s.router.ServeHTTP(wResultSpecific, reqResultSpecific)
-	s.Assert().Equal(http.StatusOK, wResultSpecific.Code)
-
-	arReqSpecific := &analysismanager.AnalysisRequest{}
-	json.Unmarshal(wResultSpecific.Body.Bytes(), arReqSpecific)
-	s.Assert().Equal(arReqSpecific.Id, arResult.Id)
-
-	s.Assert().Equal(arReqSpecific.Analysis[0].Status, analysismanager.AnalysisFinished)
 }

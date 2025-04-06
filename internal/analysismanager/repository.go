@@ -103,7 +103,7 @@ func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, ji
 
 	newCon := append(a.Content, content...)
 
-	completedJobs := len(lo.Filter(newJs, func(j SingleJobProgress, _ int) bool { return j.Status == AnalysisFinished }))
+	completedJobs := lo.CountBy(newJs, func(j SingleJobProgress) bool { return j.Status == AnalysisFinished })
 
 	newSc := (a.Score*float32(completedJobs-1) + score) / float32(completedJobs)
 
@@ -114,6 +114,9 @@ func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, ji
 			return AnalysisInprogress
 		}
 	}()
+	if newStatus == AnalysisFinished {
+		zap.S().Infow("Analysis completed", "analysis_id", aid, "job_id", jid)
+	}
 
 	resp := amr.db.Model(&a).Updates(Analysis{
 		Jobs:    newJs,
@@ -136,7 +139,7 @@ func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, ji
 
 func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error) {
 	var ars []AnalysisRequest
-	if err := amr.db.Model(AnalysisRequest{UserId: id}).Find(&ars).Error; err != nil {
+	if err := amr.db.Preload("Analysis").Model(AnalysisRequest{UserId: id}).Find(&ars).Error; err != nil {
 		zap.S().Errorw("Could not get analyses", "user_id", id)
 		return nil, err
 	}

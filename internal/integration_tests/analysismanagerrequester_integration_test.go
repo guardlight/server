@@ -3,6 +3,7 @@ package integrationtests
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -55,7 +56,7 @@ func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
 	jobManager := jobmanager.NewJobMananger(jmr)
 
 	s.analysisManagerRepository = analysismanager.NewAnalysisManagerRepository(s.db)
-	tsr := theme.NewAnalysisManagerRepository(s.db)
+	tsr := theme.NewThemeRepository(s.db)
 
 	ts := theme.NewThemeService(tsr)
 	ars := analysismanager.NewAnalysisResultService(s.analysisManagerRepository, ts)
@@ -97,7 +98,7 @@ func (s *TestSuiteAnalysisManagerIntegration) TestSubmitAnalysisRequestUntilPars
 		Title:       "test analysis",
 		ContentType: analysisrequest.MOVIE,
 		File: analysisrequest.File{
-			Content:  []byte("Running and walking"),
+			Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
 			Mimetype: "freetext",
 		},
 		Themes: []analysisrequest.Theme{
@@ -173,7 +174,7 @@ func (s *TestSuiteAnalysisManagerIntegration) TestSubmitAnalysisRequestUntilPars
 		Title:       "test analysis",
 		ContentType: analysisrequest.MOVIE,
 		File: analysisrequest.File{
-			Content:  epubFile,
+			Content:  base64.RawStdEncoding.EncodeToString(epubFile),
 			Mimetype: "freetext",
 		},
 		Themes: []analysisrequest.Theme{

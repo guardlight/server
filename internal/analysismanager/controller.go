@@ -23,8 +23,8 @@ func NewAnalysisRequestController(group *gin.RouterGroup, manager *AnalysisManag
 
 	analysisGroup := group.Group("analysis")
 	analysisGroup.Use(glsecurity.UseGuardlightAuth())
-	analysisGroup.POST("request", arc.analysisRequest)
-	analysisGroup.GET("analyses", arc.analyses)
+	analysisGroup.POST("", arc.analysisRequest)
+	analysisGroup.GET("", arc.analyses)
 
 	return arc
 }

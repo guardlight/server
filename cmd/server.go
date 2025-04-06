@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/guardlight/server/internal/analysismanager"
+	"github.com/guardlight/server/internal/auth"
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/essential/logging"
 	"github.com/guardlight/server/internal/essential/testcontainers"
@@ -18,6 +19,7 @@ import (
 	"github.com/guardlight/server/internal/jobmanager"
 	"github.com/guardlight/server/internal/natsclient"
 	"github.com/guardlight/server/internal/orchestrator"
+	"github.com/guardlight/server/internal/parser"
 	"github.com/guardlight/server/internal/scheduler"
 	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/servers/natsmessaging"
@@ -44,7 +46,7 @@ func Server() {
 		if err != nil {
 			zap.S().Fatalw("database container cannot start", "error", err)
 		}
-		dsn, err := csqlContainer.ConnectionString(ctx, "timezone=Europe/Amsterdam")
+		dsn, err = csqlContainer.ConnectionString(ctx, "timezone=Europe/Amsterdam")
 		if err != nil {
 			zap.S().Fatalw("cannot get connection string", "error", err)
 		}
@@ -61,7 +63,7 @@ func Server() {
 	// Repositories
 	jmr := jobmanager.NewJobManagerRepository(db)
 	amr := analysismanager.NewAnalysisManagerRepository(db)
-	tsr := theme.NewAnalysisManagerRepository(db)
+	tsr := theme.NewThemeRepository(db)
 
 	// Controller Groups
 	mainRouter := http.NewRouter(logging.GetLogger())
@@ -88,6 +90,13 @@ func Server() {
 	// Controllers
 	health.NewHealthController(baseGroup)
 	analysismanager.NewAnalysisRequestController(baseGroup, am, ars)
+	parser.NewParserController(baseGroup)
+	theme.NewThemeController(baseGroup, ts)
+	auth.NewAuthenticationController(baseGroup)
+
+	if config.Get().IsDevelopment() {
+		database.LoadMockData(db)
+	}
 
 	// Start the server
 	go http.LiveOrLetDie(mainRouter)

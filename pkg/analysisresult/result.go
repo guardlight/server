@@ -12,7 +12,7 @@ type Analysis struct {
 type Theme struct {
 	Id        uuid.UUID  `json:"id"`
 	Title     string     `json:"title"`
-	Analyzers []Analyzer `json:"analyzer"`
+	Analyzers []Analyzer `json:"analyzers"`
 }
 
 type Analyzer struct {

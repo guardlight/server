@@ -19,7 +19,7 @@ type AnalysisRequest struct {
 }
 
 type File struct {
-	Content  []byte `json:"content"`
+	Content  string `json:"content"`
 	Mimetype string `json:"mimetype"`
 }
 

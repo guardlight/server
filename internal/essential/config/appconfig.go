@@ -29,7 +29,7 @@ type GLConfig struct {
 	Database     database     `koanf:"database"`
 	Orchestrator orchestrator `koanf:"orchestrator"`
 	Console      console      `koanf:"console"`
-	Parsers      []parser     `koanf:"parsers"`
+	Parsers      []Parser     `koanf:"parsers"`
 	Analyzers    []analyzer   `koanf:"analyzers"`
 	Users        []User       `koanf:"users"`
 }
@@ -71,7 +71,7 @@ type console struct {
 	Jwt jwt `koanf:"jwt"`
 }
 
-type parser struct {
+type Parser struct {
 	Type        string `koanf:"type" default:"-"`
 	Name        string `koanf:"name" default:"-"`
 	Description string `koanf:"description" default:"-"`
@@ -159,8 +159,10 @@ func SetupConfig(envFilePath string) {
 		zap.S().Infow("config", "config", ffc)
 	}
 
-	// TODO Validate config --> All data should be loaded and can be validated to ensure all is set.
-	// Eg. All analyzers hould have a 'threshold' input
+	err = validateAnalyzers(ffc)
+	if err != nil {
+		zap.S().Fatalw("Invalid analyzer config", "error", err)
+	}
 
 	conf = ffc
 	// zap.S().Infow("configuration loaded", "config", conf)
@@ -194,8 +196,8 @@ func (fc GLConfig) IsDevelopment() bool {
 	return fc.Env == "development"
 }
 
-func (fc GLConfig) GetParser(parserType string) (parser, bool) {
-	return lo.Find(Get().Parsers, func(a parser) bool {
+func (fc GLConfig) GetParser(parserType string) (Parser, bool) {
+	return lo.Find(Get().Parsers, func(a Parser) bool {
 		return a.Type == parserType
 	})
 }
@@ -231,9 +233,9 @@ func configBasicAdapters(defaultedConfig *GLConfig) {
 		},
 	})
 
-	defaultedConfig.Parsers = append(defaultedConfig.Parsers, parser{
+	defaultedConfig.Parsers = append(defaultedConfig.Parsers, Parser{
 		Type:        "freetext",
-		Name:        "Freetext Parser",
+		Name:        "Freetext",
 		Description: "Parses a text to an utf-8 formated text.",
 		Concurrency: 4,
 		Image:       "builtin",
@@ -267,4 +269,15 @@ func configAdminUser(k *koanf.Koanf) {
 		k.Set("users", users)
 		zap.S().Info("Created Admin User. Admin Password: " + users[0].Password)
 	}
+}
+
+func validateAnalyzers(gc *GLConfig) error {
+	for _, a := range gc.Analyzers {
+		if ok := lo.ContainsBy(a.Inputs, func(i AnalyzerInput) bool {
+			return i.Key == "threshold"
+		}); !ok {
+			return fmt.Errorf("threshold input not found in %s analyzer", a.Key)
+		}
+	}
+	return nil
 }

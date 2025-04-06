@@ -3,9 +3,17 @@
         {
             "previewLimit": 50,
             "server": "localhost",
-            "driver": "CockroachDB",
-            "name": "test",
-            "connectString": "postgresql://root@localhost:57539/guardlight_development_test?sslmode=disable"
+            "driver": "PostgreSQL",
+            "connectString": "postgres://root:root@localhost:54947/guardlight_test?timezone=Europe/Amsterdam",
+            "name": "Test"
         }
-    ]
+    ],
+    "yaml.schemas": {
+        "file:///Users/marnovanniekerk/.vscode/extensions/mastersam.maestro-workbench-0.9.3/schema/schema.v0.json": [
+            "maestro/**/*.yaml",
+            "maestro/**/*.yml",
+            "**/.maestro/**/*.yaml",
+            "**/.maestro/**/*.yml"
+        ]
+    }
 }

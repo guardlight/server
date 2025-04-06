@@ -1,0 +1,38 @@
+- id: 86bd2bef-e19b-4a0d-aa6c-ff897eaa4f8b
+  user_id: fc28fb4c-2280-49f5-a3ba-f99ed8f8843c
+  title: "Test Theme"
+  description: "Test theme configuration description"
+  analyzers: [
+    {
+      key: "word_search",
+      inputs: [
+        {
+          key: "strict_words",
+          value: "Walking, Magic"
+        },
+        {
+          key: "threshold",
+          value: "0.12"
+        },
+      ]
+    },
+  ]
+- id: 68a34b94-d3ae-4f1f-9790-3f355f2b2a5a
+  user_id: fc28fb4c-2280-49f5-a3ba-f99ed8f8843c
+  title: "Christian Sensitivity"
+  description: "A theme related to christian sensitivity and how it's used in media."
+  analyzers: [
+    {
+      key: "word_search",
+      inputs: [
+        {
+          key: "strict_words",
+          value: "God, Jesus, Christ, Lord"
+        },
+        {
+          key: "threshold",
+          value: "-1"
+        },
+      ]
+    },
+  ]

@@ -34,7 +34,7 @@ func (ac *AuthenticationController) login(c *gin.Context) {
 	}
 
 	u, ok := lo.Find(config.Get().Users, func(u config.User) bool {
-		return u.Username == ar.Username
+		return u.Username == ar.Username && u.Password == ar.Password
 	})
 	if !ok {
 		zap.S().Errorw("error authorizing user", "error", err)

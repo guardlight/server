@@ -20,7 +20,7 @@ func NewThemeController(group *gin.RouterGroup, s *ThemeService) *ThemeControlle
 
 	analysisGroup := group.Group("theme")
 	analysisGroup.Use(glsecurity.UseGuardlightAuth())
-	analysisGroup.PUT("", tc.updateTheme)
+	analysisGroup.POST("", tc.updateTheme)
 	analysisGroup.GET("", tc.getAllThemes)
 
 	return tc

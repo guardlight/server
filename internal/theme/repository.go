@@ -12,7 +12,7 @@ type ThemeRepository struct {
 	db *gorm.DB
 }
 
-func NewAnalysisManagerRepository(db *gorm.DB) *ThemeRepository {
+func NewThemeRepository(db *gorm.DB) *ThemeRepository {
 	if err := db.AutoMigrate(
 		&Theme{},
 	); err != nil {
@@ -34,14 +34,20 @@ func (tr *ThemeRepository) getAllThemesByUserId(id uuid.UUID) ([]Theme, error) {
 	return ts, nil
 }
 
-func (tr *ThemeRepository) updateTheme(t Theme, uid uuid.UUID) error {
-	res := tr.db.Model(Theme{
-		Id:     t.Id,
-		UserId: uid,
-	}).Updates(Theme{
-		Title:     t.Title,
-		Analyzers: t.Analyzers,
-	})
+func (tr *ThemeRepository) updateTheme(t *Theme, uid uuid.UUID) error {
+	res := func() *gorm.DB {
+		if t.Id == uuid.Nil {
+			return tr.db.Save(t)
+		} else {
+			return tr.db.Model(Theme{
+				Id:     t.Id,
+				UserId: uid,
+			}).Updates(Theme{
+				Title:     t.Title,
+				Analyzers: t.Analyzers,
+			})
+		}
+	}()
 
 	if res.Error != nil {
 		zap.S().Errorw("Could not update theme", "error", res.Error)

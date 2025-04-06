@@ -8,7 +8,7 @@ import (
 
 type themeStore interface {
 	getAllThemesByUserId(id uuid.UUID) ([]Theme, error)
-	updateTheme(t Theme, uid uuid.UUID) error
+	updateTheme(t *Theme, uid uuid.UUID) error
 }
 
 type ThemeService struct {
@@ -25,7 +25,7 @@ func (ts *ThemeService) updateTheme(tDto ThemeDto, uid uuid.UUID) error {
 	// TODO Validate theme -- Eg. Must contain Analysis:Input:Theshold
 
 	t := mapDtoToEntity(tDto, uid)
-	err := ts.ts.updateTheme(t, uid)
+	err := ts.ts.updateTheme(&t, uid)
 	if err != nil {
 		return err
 	}
@@ -35,10 +35,11 @@ func (ts *ThemeService) updateTheme(tDto ThemeDto, uid uuid.UUID) error {
 
 func mapDtoToEntity(tDto ThemeDto, uid uuid.UUID) Theme {
 	return Theme{
-		Id:        tDto.Id,
-		UserId:    uid,
-		Title:     tDto.Title,
-		Analyzers: lo.Map(tDto.Analyzers, mapAnalyzerDtoToEntity),
+		Id:          tDto.Id,
+		UserId:      uid,
+		Title:       tDto.Title,
+		Description: tDto.Description,
+		Analyzers:   lo.Map(tDto.Analyzers, mapAnalyzerDtoToEntity),
 	}
 }
 
@@ -76,8 +77,9 @@ func (ts *ThemeService) GetAllThemesByUserId(id uuid.UUID) ([]ThemeDto, error) {
 
 func mergeThemesFromConfig(t Theme, _ int) ThemeDto {
 	tDto := ThemeDto{
-		Id:    t.Id,
-		Title: t.Title,
+		Id:          t.Id,
+		Title:       t.Title,
+		Description: t.Description,
 		// Contains all Same, Removed and Changed analyzers
 		Analyzers: lo.Map(t.Analyzers, mergeAnalyzerFromConfig),
 	}

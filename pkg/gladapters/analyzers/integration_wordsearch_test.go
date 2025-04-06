@@ -39,7 +39,7 @@ func TestFreetextParserSuiteRun(t *testing.T) {
 func (s *TestSuiteWordsearchAnalyzerIntegration) TestWordsearchAnalyzer() {
 	NewWordsearchAnalyzer(s.ncon)
 
-	parsedText, err := os.ReadFile("../../../testdata/epubs/lion-parsed.txt")
+	parsedText, err := os.ReadFile("../../../testdata/epubs/tes.txt")
 	s.Assert().NoError(err)
 
 	jid := uuid.MustParse("1d36a166-2fb9-4028-ad2f-c184980eb33e")
@@ -52,7 +52,7 @@ func (s *TestSuiteWordsearchAnalyzerIntegration) TestWordsearchAnalyzer() {
 		Inputs: []analyzercontract.AnalysisInput{
 			{
 				Key:   "strict_words",
-				Value: "Magic, Stair, stairs, I do",
+				Value: "Roomate",
 			},
 		},
 	}
@@ -70,6 +70,48 @@ func (s *TestSuiteWordsearchAnalyzerIntegration) TestWordsearchAnalyzer() {
 		err := json.Unmarshal(m.Data, &t)
 		s.Assert().NoError(err)
 		s.Assert().Equal(jid, t.JobId)
+		s.Assert().NotEmpty(t.Results)
+		zap.S().Infow("Analyzer results", "results", t.Results)
+		// os.WriteFile("./test.txt", []byte(strings.Join(t.Results, "\n")), os.ModePerm)
+		wg.Done()
+	})
+
+	wg.Wait()
+
+}
+
+func (s *TestSuiteWordsearchAnalyzerIntegration) TestWordsearchAnalyzerSingle() {
+	NewWordsearchAnalyzer(s.ncon)
+
+	jid := uuid.MustParse("1d36a166-2fb9-4028-ad2f-c184980eb33e")
+	aid := uuid.MustParse("6a786e6d-e6f9-4ff8-a477-40ba73c6d6d1")
+
+	ar := analyzercontract.AnalyzerRequest{
+		JobId:      jid,
+		AnalysisId: aid,
+		Content:    string("Magic and Such."),
+		Inputs: []analyzercontract.AnalysisInput{
+			{
+				Key:   "strict_words",
+				Value: "Walking, Magic",
+			},
+		},
+	}
+
+	data, err := json.Marshal(ar)
+	s.Assert().NoError(err)
+
+	err = s.ncon.Publish("analyzer.word_search", data)
+	s.Assert().NoError(err)
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	s.ncon.Subscribe("analyzer.result", func(m *nats.Msg) {
+		var t analyzercontract.AnalyzerResponse
+		err := json.Unmarshal(m.Data, &t)
+		s.Assert().NoError(err)
+		s.Assert().Equal(jid, t.JobId)
+		s.Assert().NotEmpty(t.Results)
 		zap.S().Infow("Analyzer results", "results", t.Results)
 		// os.WriteFile("./test.txt", []byte(strings.Join(t.Results, "\n")), os.ModePerm)
 		wg.Done()

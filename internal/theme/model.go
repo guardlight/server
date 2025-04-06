@@ -1,13 +1,18 @@
 package theme
 
-import "github.com/google/uuid"
+import (
+	"database/sql/driver"
+	"encoding/json"
+
+	"github.com/google/uuid"
+)
 
 type Theme struct {
-	Id          uuid.UUID  `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
-	UserId      uuid.UUID  `gorm:"column:user_id"`
-	Title       string     `gorm:"column:title"`
-	Description string     `gorm:"column:description"`
-	Analyzers   []Analyzer `gorm:"column:analyzers;type:jsonb"`
+	Id          uuid.UUID `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
+	UserId      uuid.UUID `gorm:"column:user_id"`
+	Title       string    `gorm:"column:title"`
+	Description string    `gorm:"column:description"`
+	Analyzers   Analyzers `gorm:"column:analyzers;type:jsonb"`
 }
 
 type Analyzer struct {
@@ -18,6 +23,16 @@ type Analyzer struct {
 type AnalyzerInput struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+type Analyzers []Analyzer
+
+func (c Analyzers) Value() (driver.Value, error) {
+	return json.Marshal(c)
+}
+
+func (c *Analyzers) Scan(src any) error {
+	return json.Unmarshal(src.([]byte), &c)
 }
 
 type ChangeStatus string

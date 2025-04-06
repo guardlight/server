@@ -2,6 +2,7 @@ package analysismanager
 
 import (
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -54,7 +55,11 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		return ErrInvalidAnalyzer
 	}
 
-	rawData := createRawData(arDto)
+	bContent, err := base64.StdEncoding.DecodeString(arDto.File.Content)
+	if err != nil {
+		return err
+	}
+	rawData := createRawData(arDto, bContent)
 
 	analysisParts := createAnalysis(arDto)
 
@@ -66,7 +71,7 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		RawData:     rawData,
 		Analysis:    analysisParts,
 	}
-	err := am.ars.createAnalysisRequest(ar)
+	err = am.ars.createAnalysisRequest(ar)
 	if err != nil {
 		return err
 	}
@@ -80,7 +85,7 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		ParserData: parsercontract.ParserRequest{
 			JobId:      jobId,
 			AnalysisId: ar.Id,
-			Content:    arDto.File.Content,
+			Content:    bContent,
 		},
 	}
 	gk := fmt.Sprintf("parser.%s", p.Type)
@@ -117,13 +122,13 @@ func createAnalysis(arDto *analysisrequest.AnalysisRequest) []Analysis {
 	return as
 }
 
-func createRawData(arDto *analysisrequest.AnalysisRequest) RawData {
-	hash := md5.Sum(arDto.File.Content)
+func createRawData(arDto *analysisrequest.AnalysisRequest, bdata []byte) RawData {
+	hash := md5.Sum(bdata)
 
 	return RawData{
 		Id:                uuid.Nil,
 		AnalysisRequestId: uuid.Nil,
-		Content:           arDto.File.Content,
+		Content:           bdata,
 		FileType:          arDto.File.Mimetype,
 		Hash:              hex.EncodeToString(hash[:]),
 	}

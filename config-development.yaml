@@ -8,17 +8,21 @@ analyzers:
           key: strict_words
           name: Strict Words
           type: textarea
+        - description: The threshold is the predefined value that triggers the analyzer to flag content when the value is reached or exceeded.
+          key: threshold
+          name: Threshold
+          type: threshold
       key: word_search
       model: text
       name: Word Search
 console:
     jwt:
-        maxAge: 3600
+        maxAge: 36000
         signingKey: qQJsN7FPjMUMGLzr8xRmBKGyYdRM81Go
 cors:
-    origin: http://192.168.178.142:3000
+    origin: http://192.168.178.142:4000
 database:
-    name: guardlight
+    name: guardlight_test
     password: root
     port: 5432
     server: 127.0.0.1
@@ -31,7 +35,7 @@ parsers:
     - concurrency: 1
       description: Parses a text to an utf-8 formated text.
       image: builtin
-      name: Freetext parsers
+      name: Freetext
       type: freetext
 server:
     host: 0.0.0.0
@@ -39,6 +43,6 @@ server:
 tz: UTC
 users:
     - id: fc28fb4c-2280-49f5-a3ba-f99ed8f8843c
-      password: F$srR%U*nDmIO7i+
+      password: a
       role: admin
-      username: admin@guardlight.org
+      username: a

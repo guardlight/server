@@ -79,7 +79,7 @@ func (_c *MockthemeStore_getAllThemesByUserId_Call) RunAndReturn(run func(uuid.U
 }
 
 // updateTheme provides a mock function with given fields: t, uid
-func (_m *MockthemeStore) updateTheme(t Theme, uid uuid.UUID) error {
+func (_m *MockthemeStore) updateTheme(t *Theme, uid uuid.UUID) error {
 	ret := _m.Called(t, uid)
 
 	if len(ret) == 0 {
@@ -87,7 +87,7 @@ func (_m *MockthemeStore) updateTheme(t Theme, uid uuid.UUID) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(Theme, uuid.UUID) error); ok {
+	if rf, ok := ret.Get(0).(func(*Theme, uuid.UUID) error); ok {
 		r0 = rf(t, uid)
 	} else {
 		r0 = ret.Error(0)
@@ -102,15 +102,15 @@ type MockthemeStore_updateTheme_Call struct {
 }
 
 // updateTheme is a helper method to define mock.On call
-//   - t Theme
+//   - t *Theme
 //   - uid uuid.UUID
 func (_e *MockthemeStore_Expecter) updateTheme(t interface{}, uid interface{}) *MockthemeStore_updateTheme_Call {
 	return &MockthemeStore_updateTheme_Call{Call: _e.mock.On("updateTheme", t, uid)}
 }
 
-func (_c *MockthemeStore_updateTheme_Call) Run(run func(t Theme, uid uuid.UUID)) *MockthemeStore_updateTheme_Call {
+func (_c *MockthemeStore_updateTheme_Call) Run(run func(t *Theme, uid uuid.UUID)) *MockthemeStore_updateTheme_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(Theme), args[1].(uuid.UUID))
+		run(args[0].(*Theme), args[1].(uuid.UUID))
 	})
 	return _c
 }
@@ -120,7 +120,7 @@ func (_c *MockthemeStore_updateTheme_Call) Return(_a0 error) *MockthemeStore_upd
 	return _c
 }
 
-func (_c *MockthemeStore_updateTheme_Call) RunAndReturn(run func(Theme, uuid.UUID) error) *MockthemeStore_updateTheme_Call {
+func (_c *MockthemeStore_updateTheme_Call) RunAndReturn(run func(*Theme, uuid.UUID) error) *MockthemeStore_updateTheme_Call {
 	_c.Call.Return(run)
 	return _c
 }

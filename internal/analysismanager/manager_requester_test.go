@@ -1,6 +1,7 @@
 package analysismanager
 
 import (
+	"encoding/base64"
 	"testing"
 
 	"github.com/google/uuid"
@@ -25,7 +26,7 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 			Title:       "test analysis",
 			ContentType: analysisrequest.MOVIE,
 			File: analysisrequest.File{
-				Content:  []byte("Running and walking"),
+				Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
 				Mimetype: "Unknown File Type",
 			},
 			Themes: []analysisrequest.Theme{},
@@ -41,7 +42,7 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 			Title:       "test analysis",
 			ContentType: analysisrequest.MOVIE,
 			File: analysisrequest.File{
-				Content:  []byte("Running and walking"),
+				Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
 				Mimetype: "freetext",
 			},
 			Themes: []analysisrequest.Theme{
@@ -68,7 +69,7 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 			Title:       "test analysis",
 			ContentType: analysisrequest.MOVIE,
 			File: analysisrequest.File{
-				Content:  []byte("Running and walking"),
+				Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
 				Mimetype: "freetext",
 			},
 			Themes: []analysisrequest.Theme{
@@ -108,7 +109,7 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 		Title:       "test analysis",
 		ContentType: analysisrequest.MOVIE,
 		File: analysisrequest.File{
-			Content:  []byte("Running and walking"),
+			Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
 			Mimetype: "freetext",
 		},
 		Themes: []analysisrequest.Theme{

@@ -155,13 +155,13 @@ func (ama *AnalysisManagerAllocator) processAnalyzerResult(m *nats.Msg) {
 		zap.S().Errorw("Could not update analysis progress", "error", err)
 		return
 	}
+	zap.S().Infow("Analysis job progress updated", "analysis_id", ar.AnalysisId, "job_id", ar.JobId)
 
 	err = ama.ju.UpdateJobStatus(ar.JobId, jobmanager.Finished, "", 0)
 	if err != nil {
 		zap.S().Errorw("Could not update job status", "error", err)
 		return
 	}
-	zap.S().Infow("Analyzer result processed")
 
 	// if contributeToPublicMADB (MADB=Media Analysis Database)
 
