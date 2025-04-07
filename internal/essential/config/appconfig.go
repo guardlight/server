@@ -47,7 +47,7 @@ type server struct {
 }
 
 type cors struct {
-	Origin string `koanf:"origin" default:"0.0.0.0"`
+	Origin string `koanf:"origin" default:"http://0.0.0.0"`
 }
 
 type database struct {
@@ -149,7 +149,10 @@ func SetupConfig(envFilePath string) {
 	// Load environment variables from environment with ORBIT_ prefix.
 	// Will override properties from the file
 	k.Load(env.Provider(glEnvPrefix, ".", func(s string) string {
-		return strings.Replace(strings.ToLower(strings.TrimPrefix(s, glEnvPrefix)), "_", ".", -1)
+
+		ff := strings.Replace(strings.ToLower(strings.TrimPrefix(s, glEnvPrefix)), "_", ".", -1)
+		zap.S().Infow("config item", "item", s, "ff_item", ff)
+		return ff
 	}), nil)
 
 	ffc := &GLConfig{}
@@ -181,7 +184,7 @@ func Get() GLConfig {
 }
 
 func (fc GLConfig) GetDbDsn() string {
-	return fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?timezone=%s", Get().Database.Name, Get().Database.Password, Get().Database.Server, Get().Database.Port, Get().Database.Name, Get().Timezone)
+	return fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?timezone=%s", Get().Database.User, Get().Database.Password, Get().Database.Server, Get().Database.Port, Get().Database.Name, Get().Timezone)
 }
 
 func (fc GLConfig) IsProduction() bool {

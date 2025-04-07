@@ -20,14 +20,14 @@ console:
         maxAge: 36000
         signingKey: qQJsN7FPjMUMGLzr8xRmBKGyYdRM81Go
 cors:
-    origin: http://192.168.178.142:4000
+    origin: http://10.236.104.202:4000
 database:
     name: guardlight_test
     password: root
     port: 5432
     server: 127.0.0.1
     user: root
-domain: 192.168.178.142
+domain: 10.236.104.202
 env: development
 orchestrator:
     scheduleRateCron: '* * * * * *'

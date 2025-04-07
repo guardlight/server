@@ -52,7 +52,7 @@ func (ac *AuthenticationController) login(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(glsecurity.ConsoleApiCookieName, tkStr, config.Get().Console.Jwt.MaxAge, "/", config.Get().Domain, config.Get().IsProduction(), true)
+	c.SetCookie(glsecurity.ConsoleApiCookieName, tkStr, config.Get().Console.Jwt.MaxAge, "/", config.Get().Domain, false, true)
 	c.JSON(http.StatusOK, gin.H{"authenticationStatus": "Authenticated"})
 }
 
