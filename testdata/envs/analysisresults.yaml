@@ -15,6 +15,7 @@ analyzers:
       key: word_search
       model: text
       name: Word Search Analyzer
+      external: true
 console:
     jwt:
         maxAge: 3600
@@ -37,6 +38,7 @@ parsers:
       image: builtin
       name: Freetext parsers
       type: freetext
+      external: true
 server:
     host: 0.0.0.0
     port: 6660

@@ -1,6 +1,7 @@
 package parsers
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"regexp"
 	"strings"
@@ -30,7 +31,12 @@ func (fp *freetextParser) parseFreetext(m *nats.Msg) {
 		return
 	}
 
-	sc := parse(pr.Content)
+	bContent, err := base64.StdEncoding.DecodeString(pr.Content)
+	if err != nil {
+		fp.makeParserErrorResponse(&pr, err)
+		return
+	}
+	sc := parse(bContent)
 
 	presp := parsercontract.ParserResponse{
 		JobId:      pr.JobId,

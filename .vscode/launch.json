@@ -12,8 +12,8 @@
             "program": "./",
             "env": {
                 "environment": "development"
-            }
+            },
         }
         
-    ]
+    ],
 }

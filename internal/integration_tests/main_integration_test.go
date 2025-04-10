@@ -84,7 +84,7 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 
 	err = natsmessaging.NewNatsServer()
 	s.Assert().NoError(err)
-	ncon := messaging.InitNats(natsmessaging.GetNatsUrl(), natsmessaging.GetServer())
+	ncon := messaging.InitNatsInProcess(natsmessaging.GetServer())
 
 	parsers.NewFreetextParser(ncon)
 	analyzers.NewWordsearchAnalyzer(ncon)
@@ -136,7 +136,7 @@ func (s *TestSuiteMainIntegration) TestRequestTillResult() {
 		Title:       "test analysis",
 		ContentType: analysisrequest.BOOK,
 		File: analysisrequest.File{
-			Content:  base64.RawStdEncoding.EncodeToString(data),
+			Content:  base64.StdEncoding.EncodeToString(data),
 			Mimetype: "freetext",
 		},
 		Themes: []analysisrequest.Theme{

@@ -8,9 +8,14 @@ analyzers:
           key: strict_words
           name: Strict Words
           type: textarea
+        - description: The threshold is the predefined value that triggers the analyzer to flag content when the value is reached or exceeded.
+          key: threshold
+          name: Threshold
+          type: threshold
       key: word_search
       model: text
       name: Word Search Analyzer
+      external: true
 console:
     jwt:
         maxAge: 3600
@@ -33,6 +38,7 @@ parsers:
       image: builtin
       name: Freetext parsers
       type: freetext
+      external: true
 server:
     host: 0.0.0.0
     port: 6660

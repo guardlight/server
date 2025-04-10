@@ -2,6 +2,7 @@ analyzers:
     - concurrency: 4
       contextWindow: 16000
       description: Uses a basic word list to scan content for.
+      external: true
       image: builtin
       inputs:
         - description: Words in this list will immediatly flag the content.
@@ -29,11 +30,17 @@ database:
     user: root
 domain: 10.236.104.202
 env: development
+nats:
+    password: bi7Y0YmHby5Hasfo2n0sOEuc9R1VxzND
+    port: 4222
+    server: ""
+    user: gl_nats_user
 orchestrator:
     scheduleRateCron: '* * * * * *'
 parsers:
     - concurrency: 1
       description: Parses a text to an utf-8 formated text.
+      external: true
       image: builtin
       name: Freetext
       type: freetext

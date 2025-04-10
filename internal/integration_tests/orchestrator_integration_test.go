@@ -45,6 +45,7 @@ func (s *TestSuiteOrchestratorIntegration) SetupSuite() {
 	conString, err := sqlContainer.ConnectionString(ctx)
 	s.Require().NoError(err)
 
+	zap.S().Infow("Connection string", "url", conString)
 	s.db = database.InitDatabase(conString)
 
 	jmr := jobmanager.NewJobManagerRepository(s.db)
@@ -57,7 +58,6 @@ func (s *TestSuiteOrchestratorIntegration) SetupSuite() {
 		testfixtures.FilesMultiTables(
 			"../../testdata/fixtures/orchestrator.yaml",
 		),
-		testfixtures.UseDropConstraint(),
 	)
 	s.Assert().NoError(err)
 
@@ -75,7 +75,7 @@ func (s *TestSuiteOrchestratorIntegration) TestOrchestratorSetup() {
 	err := natsmessaging.NewNatsServer()
 	s.Assert().NoError(err)
 
-	ncon := messaging.InitNats(natsmessaging.GetNatsUrl(), natsmessaging.GetServer())
+	ncon := messaging.InitNatsInProcess(natsmessaging.GetServer())
 	loc, err := time.LoadLocation("Europe/Amsterdam")
 	s.Assert().NoError(err)
 	sch, err := scheduler.NewScheduler(loc)

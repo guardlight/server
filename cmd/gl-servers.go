@@ -5,7 +5,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func GlExternalServers() {
+func GlNatsServer() {
 	// Messaging - Nats server
 	err := natsmessaging.NewNatsServer()
 	if err != nil {

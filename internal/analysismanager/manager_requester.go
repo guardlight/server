@@ -85,7 +85,7 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		ParserData: parsercontract.ParserRequest{
 			JobId:      jobId,
 			AnalysisId: ar.Id,
-			Content:    bContent,
+			Content:    arDto.File.Content,
 		},
 	}
 	gk := fmt.Sprintf("parser.%s", p.Type)

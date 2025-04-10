@@ -51,7 +51,7 @@ func (sama *TestSuiteAnalysisManagerAllocatorIntegration) SetupSuite() {
 
 	err = natsmessaging.NewNatsServer()
 	sama.Require().NoError(err)
-	sama.ncon = messaging.InitNats(natsmessaging.GetNatsUrl(), natsmessaging.GetServer())
+	sama.ncon = messaging.InitNatsInProcess(natsmessaging.GetServer())
 	sama.analysisManagerRepository = analysismanager.NewAnalysisManagerRepository(sama.db)
 	_ = analysismanager.NewAnalysisManagerAllocator(sama.ncon, sama.analysisManagerRepository, jobManager)
 

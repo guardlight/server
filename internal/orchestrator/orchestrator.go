@@ -90,9 +90,12 @@ func (o *Orchestrator) processParseJob(j jobmanager.Job) {
 	}
 
 	if o.jcs.t(j.GroupKey) <= p.Concurrency {
-		if f.Image == "builtin" {
-			zap.S().Infow("Using parser", "type", f.Image)
+		if p.External {
+			zap.S().Infow("Using external parser container", "type", f.Image, "type", p.Type)
 		} else {
+			o.updateJobStatus(j.Id, jobmanager.Error, "External=false not supported yet", 0)
+			// REMOVE WHEN docker support is implemented.
+
 			// Start docker container and wait, with max duration.
 		}
 		o.jcs.inc(j.GroupKey)
@@ -129,9 +132,12 @@ func (o *Orchestrator) processAnalyzeJob(j jobmanager.Job) {
 	}
 
 	if o.jcs.t(j.GroupKey) <= a.Concurrency {
-		if f.Image == "builtin" {
-			zap.S().Infow("Using analyzer", "type", f.Image)
+		if a.External {
+			zap.S().Infow("Using external analyzer container", "type", f.Image, "key", a.Key)
 		} else {
+			o.updateJobStatus(j.Id, jobmanager.Error, "External=false not supported yet", 0)
+			// REMOVE WHEN docker support is implemented.
+
 			// Start docker container and wait, with max duration.
 		}
 		o.jcs.inc(j.GroupKey)

@@ -23,6 +23,7 @@ import (
 	"github.com/guardlight/server/internal/scheduler"
 	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/servers/natsmessaging"
+	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
 )
 
@@ -35,8 +36,6 @@ func Server() {
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	}
 	os.Setenv("TZ", "")
-
-	GlExternalServers()
 
 	dsn := config.Get().GetDbDsn()
 	if config.Get().IsDevelopment() {
@@ -53,8 +52,16 @@ func Server() {
 		zap.S().Infow("starting staging database", "url", dsn)
 	}
 
+	zap.S().Infow("natsc", "c", config.Get().Nats)
 	// Messaging
-	ncon := messaging.InitNats(natsmessaging.GetNatsUrl(), natsmessaging.GetServer())
+	var ncon *nats.Conn
+	if config.Get().Nats.Server == "" {
+		GlNatsServer()
+		ncon = messaging.InitNatsInProcess(natsmessaging.GetServer())
+	} else {
+		ncon = messaging.InitNats()
+	}
+
 	GLAdapters(ncon)
 
 	// Database

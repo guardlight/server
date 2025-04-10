@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/guardlight/server/internal/essential/config"
 	"github.com/nats-io/nats-server/v2/server"
 	"go.uber.org/zap"
 )
@@ -15,10 +16,24 @@ var (
 func NewNatsServer() error {
 
 	opts := &server.Options{
-		DontListen: true,
+		HTTPPort: 8222,
+		Port:     4222,
+		Users: []*server.User{
+			{
+				Username: config.Get().Nats.User,
+				Password: config.Get().Nats.Password,
+			},
+		},
 		JetStream:  true,
 		MaxPayload: 20 * 1_000_000,
 	}
+
+	// Use external nats if Nats.Server is set
+	if config.Get().Nats.Server != "" {
+		opts.Host = config.Get().Server.Host
+		opts.Port = config.Get().Nats.Port
+	}
+
 	ns, err := server.NewServer(opts)
 	if err != nil {
 		zap.S().Errorw("Could not create nats server", "error", err)

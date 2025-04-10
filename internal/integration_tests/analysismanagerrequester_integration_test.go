@@ -98,7 +98,7 @@ func (s *TestSuiteAnalysisManagerIntegration) TestSubmitAnalysisRequestUntilPars
 		Title:       "test analysis",
 		ContentType: analysisrequest.MOVIE,
 		File: analysisrequest.File{
-			Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
+			Content:  base64.StdEncoding.EncodeToString([]byte("Running and walking")),
 			Mimetype: "freetext",
 		},
 		Themes: []analysisrequest.Theme{
@@ -174,7 +174,7 @@ func (s *TestSuiteAnalysisManagerIntegration) TestSubmitAnalysisRequestUntilPars
 		Title:       "test analysis",
 		ContentType: analysisrequest.MOVIE,
 		File: analysisrequest.File{
-			Content:  base64.RawStdEncoding.EncodeToString(epubFile),
+			Content:  base64.StdEncoding.EncodeToString(epubFile),
 			Mimetype: "freetext",
 		},
 		Themes: []analysisrequest.Theme{

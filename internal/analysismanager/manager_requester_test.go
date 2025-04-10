@@ -26,7 +26,7 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 			Title:       "test analysis",
 			ContentType: analysisrequest.MOVIE,
 			File: analysisrequest.File{
-				Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
+				Content:  base64.StdEncoding.EncodeToString([]byte("Running and walking")),
 				Mimetype: "Unknown File Type",
 			},
 			Themes: []analysisrequest.Theme{},
@@ -42,7 +42,7 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 			Title:       "test analysis",
 			ContentType: analysisrequest.MOVIE,
 			File: analysisrequest.File{
-				Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
+				Content:  base64.StdEncoding.EncodeToString([]byte("Running and walking")),
 				Mimetype: "freetext",
 			},
 			Themes: []analysisrequest.Theme{
@@ -69,7 +69,7 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 			Title:       "test analysis",
 			ContentType: analysisrequest.MOVIE,
 			File: analysisrequest.File{
-				Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
+				Content:  base64.StdEncoding.EncodeToString([]byte("Running and walking")),
 				Mimetype: "freetext",
 			},
 			Themes: []analysisrequest.Theme{
@@ -109,7 +109,7 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 		Title:       "test analysis",
 		ContentType: analysisrequest.MOVIE,
 		File: analysisrequest.File{
-			Content:  base64.RawStdEncoding.EncodeToString([]byte("Running and walking")),
+			Content:  base64.StdEncoding.EncodeToString([]byte("Running and walking")),
 			Mimetype: "freetext",
 		},
 		Themes: []analysisrequest.Theme{
@@ -207,7 +207,7 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 		ParserData: parsercontract.ParserRequest{
 			JobId:      jobId,
 			AnalysisId: analysisId,
-			Content:    []byte("Running and walking"),
+			Content:    base64.StdEncoding.EncodeToString([]byte("Running and walking")),
 		},
 	}
 

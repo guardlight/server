@@ -1,6 +1,7 @@
 package parsers
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"os"
 	"sync"
@@ -27,7 +28,7 @@ func (s *TestSuiteFreetextParserIntegration) SetupSuite() {
 	err := natsmessaging.NewNatsServer()
 	s.Assert().NoError(err)
 
-	s.ncon = messaging.InitNats(natsmessaging.GetNatsUrl(), natsmessaging.GetServer())
+	s.ncon = messaging.InitNatsInProcess(natsmessaging.GetServer())
 
 	zap.S().Info("Setted up")
 }
@@ -47,7 +48,7 @@ func (s *TestSuiteFreetextParserIntegration) TestParser() {
 	pr := parsercontract.ParserRequest{
 		JobId:      jid,
 		AnalysisId: aid,
-		Content:    freetext,
+		Content:    base64.StdEncoding.EncodeToString(freetext),
 	}
 
 	data, err := json.Marshal(pr)

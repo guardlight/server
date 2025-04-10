@@ -1,6 +1,7 @@
 package orchestrator
 
 import (
+	"encoding/base64"
 	"testing"
 
 	"github.com/google/uuid"
@@ -16,7 +17,7 @@ func TestAnalysisOrchestratorStart(t *testing.T) {
 	mockJm := NewMockjobManager(t)
 	mockTc := NewMocktaskCreater(t)
 	mockNs := NewMocknatsSender(t)
-	config.SetupConfig("../../env-test.yaml")
+	config.SetupConfig("../../testdata/envs/orchestrator.yaml")
 	logging.SetupLogging("test")
 
 	mockTc.EXPECT().NewJob(mock.AnythingOfType("cronJobDefinition"), mock.AnythingOfType("Task"), mock.AnythingOfType("JobOption")).Return(nil, nil)
@@ -41,7 +42,7 @@ func TestAnalysisOrchestratorStart(t *testing.T) {
 	pr := parsercontract.ParserRequest{
 		JobId:      jobId,
 		AnalysisId: uuid.MustParse("165c0cff-9395-4b10-8636-9d65b3d364ef"),
-		Content:    []byte("Running and Walking"),
+		Content:    base64.StdEncoding.EncodeToString([]byte("Running and Walking")),
 	}
 	mockNs.EXPECT().Publish("parser.freetext", pr).Return(nil)
 
@@ -54,8 +55,8 @@ func TestAnalysisOrchestratorDoNothing(t *testing.T) {
 	mockJm := NewMockjobManager(t)
 	mockTc := NewMocktaskCreater(t)
 	mockNs := NewMocknatsSender(t)
-	config.SetupConfig("../../env-test.yaml")
-	logging.SetupLogging("test")
+
+	config.SetupConfig("../../testdata/envs/orchestrator.yaml")
 
 	mockTc.EXPECT().NewJob(mock.AnythingOfType("cronJobDefinition"), mock.AnythingOfType("Task"), mock.AnythingOfType("JobOption")).Return(nil, nil)
 
@@ -74,6 +75,7 @@ func TestAnalysisOrchestratorDoNothing(t *testing.T) {
 			Status:            jobmanager.Inprogress,
 			StatusDescription: "",
 			RetryCount:        0,
+			GroupKey:          "parser.freetext",
 			Type:              jobmanager.Parse,
 			Data:              []byte("{\"type\":\"freetext\",\"topic\":\"parser.freetext\",\"parserData\":{\"jobId\":\"83ee678d-ef1d-4a9d-8264-5079f5696a8f\",\"analysisId\":\"165c0cff-9395-4b10-8636-9d65b3d364ef\",\"Content\":\"UnVubmluZyBhbmQgV2Fsa2luZw==\"}}"),
 		},
@@ -93,7 +95,7 @@ func TestAnalysisOrchestratorStartNew(t *testing.T) {
 	mockJm := NewMockjobManager(t)
 	mockTc := NewMocktaskCreater(t)
 	mockNs := NewMocknatsSender(t)
-	config.SetupConfig("../../env-test.yaml")
+	config.SetupConfig("../../testdata/envs/orchestrator.yaml")
 	logging.SetupLogging("test")
 
 	mockTc.EXPECT().NewJob(mock.AnythingOfType("cronJobDefinition"), mock.AnythingOfType("Task"), mock.AnythingOfType("JobOption")).Return(nil, nil)
@@ -127,7 +129,7 @@ func TestAnalysisOrchestratorStartNew(t *testing.T) {
 	pr := parsercontract.ParserRequest{
 		JobId:      jobId,
 		AnalysisId: uuid.MustParse("dcfd5683-bccc-42b0-963a-93fc97ecf67d"),
-		Content:    []byte("Running and Walking"),
+		Content:    base64.StdEncoding.EncodeToString([]byte("Running and Walking")),
 	}
 	mockNs.EXPECT().Publish("parser.freetext", pr).Return(nil)
 
@@ -140,7 +142,7 @@ func TestAnalysisOrchestratorFailed(t *testing.T) {
 	mockJm := NewMockjobManager(t)
 	mockTc := NewMocktaskCreater(t)
 	mockNs := NewMocknatsSender(t)
-	config.SetupConfig("../../env-test.yaml")
+	config.SetupConfig("../../testdata/envs/orchestrator.yaml")
 	logging.SetupLogging("test")
 
 	mockTc.EXPECT().NewJob(mock.AnythingOfType("cronJobDefinition"), mock.AnythingOfType("Task"), mock.AnythingOfType("JobOption")).Return(nil, nil)
@@ -171,7 +173,7 @@ func TestAnalysisOrchestratorCannotUnmarshal(t *testing.T) {
 	mockJm := NewMockjobManager(t)
 	mockTc := NewMocktaskCreater(t)
 	mockNs := NewMocknatsSender(t)
-	config.SetupConfig("../../env-test.yaml")
+	config.SetupConfig("../../testdata/envs/orchestrator.yaml")
 	logging.SetupLogging("test")
 
 	mockTc.EXPECT().NewJob(mock.AnythingOfType("cronJobDefinition"), mock.AnythingOfType("Task"), mock.AnythingOfType("JobOption")).Return(nil, nil)

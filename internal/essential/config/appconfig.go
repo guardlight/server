@@ -29,9 +29,17 @@ type GLConfig struct {
 	Database     database     `koanf:"database"`
 	Orchestrator orchestrator `koanf:"orchestrator"`
 	Console      console      `koanf:"console"`
+	Nats         nats         `koanf:"nats"`
 	Parsers      []Parser     `koanf:"parsers"`
 	Analyzers    []analyzer   `koanf:"analyzers"`
 	Users        []User       `koanf:"users"`
+}
+
+type nats struct {
+	Server   string `koanf:"server" default:"-"`
+	Port     int    `koanf:"port" default:"4222"`
+	User     string `koanf:"user" default:"-"`
+	Password string `koanf:"password" default:"-"`
 }
 
 type User struct {
@@ -77,6 +85,7 @@ type Parser struct {
 	Description string `koanf:"description" default:"-"`
 	Concurrency int    `koanf:"concurrency" default:"-"`
 	Image       string `koanf:"image" default:"-"`
+	External    bool   `koanf:"external" default:"-"`
 }
 
 type analyzer struct {
@@ -88,6 +97,7 @@ type analyzer struct {
 	Concurrency   int             `koanf:"concurrency" default:"-"`
 	Inputs        []AnalyzerInput `koanf:"inputs" default:"-"`
 	Image         string          `koanf:"image" default:"-"`
+	External      bool            `koanf:"external" default:"-"`
 }
 
 type AnalyzerInput struct {
@@ -132,6 +142,7 @@ func SetupConfig(envFilePath string) {
 	// Generate signing key
 	configSigningKey(k)
 	configAdminUser(k)
+	configNatsCredentials(k)
 
 	data, err := yaml.Parser().Marshal(k.Raw())
 	if err != nil {
@@ -149,10 +160,7 @@ func SetupConfig(envFilePath string) {
 	// Load environment variables from environment with ORBIT_ prefix.
 	// Will override properties from the file
 	k.Load(env.Provider(glEnvPrefix, ".", func(s string) string {
-
-		ff := strings.Replace(strings.ToLower(strings.TrimPrefix(s, glEnvPrefix)), "_", ".", -1)
-		zap.S().Infow("config item", "item", s, "ff_item", ff)
-		return ff
+		return strings.Replace(strings.ToLower(strings.TrimPrefix(s, glEnvPrefix)), "_", ".", -1)
 	}), nil)
 
 	ffc := &GLConfig{}
@@ -220,6 +228,7 @@ func configBasicAdapters(defaultedConfig *GLConfig) {
 		Model:         "text",
 		Concurrency:   4,
 		Image:         "builtin",
+		External:      true,
 		Inputs: []AnalyzerInput{
 			{
 				Key:         "threshold",
@@ -242,6 +251,7 @@ func configBasicAdapters(defaultedConfig *GLConfig) {
 		Description: "Parses a text to an utf-8 formated text.",
 		Concurrency: 4,
 		Image:       "builtin",
+		External:    true,
 	})
 }
 
@@ -265,7 +275,7 @@ func configAdminUser(k *koanf.Koanf) {
 	if len(users) == 0 {
 		users = append(users, User{
 			Username: "admin@guardlight.org",
-			Password: lo.RandomString(16, lo.AllCharset),
+			Password: lo.RandomString(16, lo.AlphanumericCharset),
 			Role:     "admin",
 			Id:       uuid.New(),
 		})
@@ -283,4 +293,25 @@ func validateAnalyzers(gc *GLConfig) error {
 		}
 	}
 	return nil
+}
+
+func configNatsCredentials(k *koanf.Koanf) {
+	nsKey := k.Get("nats.server")
+
+	// Use internal NATS if server is not specified
+	if nsKey == nil || nsKey == "" {
+
+		// Set the internal NATS user to use
+		nuKey := k.Get("nats.user")
+		if nuKey == nil || nuKey == "" {
+			k.Set("nats.user", "gl_nats_user")
+		}
+
+		npKey := k.Get("nats.password")
+		if npKey == nil || npKey == "" {
+			k.Set("nats.password", lo.RandomString(16, lo.AlphanumericCharset))
+		}
+
+	}
+
 }

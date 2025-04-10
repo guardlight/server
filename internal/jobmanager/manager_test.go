@@ -1,6 +1,7 @@
 package jobmanager
 
 import (
+	"encoding/base64"
 	"testing"
 
 	"github.com/google/uuid"
@@ -26,7 +27,7 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 		ParserData: parsercontract.ParserRequest{
 			JobId:      jobId,
 			AnalysisId: analysisId,
-			Content:    []byte("Content goes here as byte array"),
+			Content:    base64.StdEncoding.EncodeToString([]byte("Content goes here as byte array")),
 		},
 	}
 

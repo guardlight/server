@@ -27,7 +27,7 @@ func (s *TestSuiteWordsearchAnalyzerIntegration) SetupSuite() {
 	err := natsmessaging.NewNatsServer()
 	s.Assert().NoError(err)
 
-	s.ncon = messaging.InitNats(natsmessaging.GetNatsUrl(), natsmessaging.GetServer())
+	s.ncon = messaging.InitNatsInProcess(natsmessaging.GetServer())
 
 	zap.S().Info("Setted up")
 }

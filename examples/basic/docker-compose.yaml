@@ -9,14 +9,14 @@ services:
             - POSTGRES_DATABASE=guardlight
 
     server:
-        image: ghcr.io/guardlight/server
+        image: ghcr.io/guardlight/server:main
         ports:
             - 6842:6842
         entrypoint:
             - GUARDLIGHT_DATABASE_USER=guardlight
             - GUARDLIGHT_DATABASE_PASSWORD=securePassword
             - GUARDLIGHT_DATABASE_NAME=guardlight
-            - GUARDLIGHT_DATABASE_SERVER=<DATABASE_IP>
+            - GUARDLIGHT_DATABASE_SERVER=database
             - GUARDLIGHT_DATABASE_PORT=5432
             - GUARDLIGHT_CORS_ORIGIN=http://<CONSOLE_IP>:<CONSOLE_PORT>
             - GUARDLIGHT_DOMAIN=<SERVER_IP>
@@ -24,7 +24,7 @@ services:
             - database
 
     console:
-        image: ghcr.io/guardlight/console
+        image: ghcr.io/guardlight/console:main
         environment:
             - GL_SERVER_URL=<SERVER_IP>:<SERVER_PORT>
         depends_on:

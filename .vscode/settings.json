@@ -4,8 +4,15 @@
             "previewLimit": 50,
             "server": "localhost",
             "driver": "PostgreSQL",
-            "connectString": "postgres://root:root@localhost:54947/guardlight_test?timezone=Europe/Amsterdam",
+            "connectString": "postgres://root:root@localhost:8080/guardlight_test?timezone=Europe/Amsterdam",
             "name": "Test"
+        },
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "connectString": "postgres://root:root@localhost:61153/guardlight_development_test?",
+            "name": "IntTest"
         }
     ],
     "yaml.schemas": {
