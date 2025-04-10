@@ -11,7 +11,8 @@
             "mode": "auto",
             "program": "./",
             "env": {
-                "environment": "development"
+                "environment": "development",
+                "SHOW_CONFIG": "f"
             },
         }
         

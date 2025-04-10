@@ -51,8 +51,6 @@ func Server() {
 		}
 		zap.S().Infow("starting staging database", "url", dsn)
 	}
-
-	zap.S().Infow("natsc", "c", config.Get().Nats)
 	// Messaging
 	var ncon *nats.Conn
 	if config.Get().Nats.Server == "" {
