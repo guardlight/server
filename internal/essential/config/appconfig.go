@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/creasty/defaults"
@@ -151,8 +152,12 @@ func SetupConfig(envFilePath string) {
 	}
 
 	// Write to a new YAML file
-	err = os.WriteFile(envFilePath, data, 0644)
-	if err != nil {
+	if err := os.MkdirAll(filepath.Dir(envFilePath), os.ModePerm); err != nil {
+		zap.S().Fatalw("error creating directories for config file", "error", err)
+		return
+	}
+
+	if err := os.WriteFile(envFilePath, data, 0644); err != nil {
 		zap.S().Fatalw("error writing config to file", "error", err)
 		return
 	}
@@ -170,8 +175,7 @@ func SetupConfig(envFilePath string) {
 		zap.S().Infow("config", "config", ffc)
 	}
 
-	err = validateAnalyzers(ffc)
-	if err != nil {
+	if err := validateAnalyzers(ffc); err != nil {
 		zap.S().Fatalw("Invalid analyzer config", "error", err)
 	}
 

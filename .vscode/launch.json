@@ -12,7 +12,7 @@
             "program": "./",
             "env": {
                 "environment": "development",
-                "SHOW_CONFIG": "f"
+                "SHOW_CONFIG": "f",
             },
         }
         
