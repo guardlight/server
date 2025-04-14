@@ -78,6 +78,64 @@ func (_c *MockanalysisStore_getAllAnalysisByAnalysisRecordId_Call) RunAndReturn(
 	return _c
 }
 
+// getUserIdByAnalysisId provides a mock function with given fields: analysisId
+func (_m *MockanalysisStore) getUserIdByAnalysisId(analysisId uuid.UUID) (uuid.UUID, error) {
+	ret := _m.Called(analysisId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for getUserIdByAnalysisId")
+	}
+
+	var r0 uuid.UUID
+	var r1 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID) (uuid.UUID, error)); ok {
+		return rf(analysisId)
+	}
+	if rf, ok := ret.Get(0).(func(uuid.UUID) uuid.UUID); ok {
+		r0 = rf(analysisId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(uuid.UUID)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
+		r1 = rf(analysisId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockanalysisStore_getUserIdByAnalysisId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'getUserIdByAnalysisId'
+type MockanalysisStore_getUserIdByAnalysisId_Call struct {
+	*mock.Call
+}
+
+// getUserIdByAnalysisId is a helper method to define mock.On call
+//   - analysisId uuid.UUID
+func (_e *MockanalysisStore_Expecter) getUserIdByAnalysisId(analysisId interface{}) *MockanalysisStore_getUserIdByAnalysisId_Call {
+	return &MockanalysisStore_getUserIdByAnalysisId_Call{Call: _e.mock.On("getUserIdByAnalysisId", analysisId)}
+}
+
+func (_c *MockanalysisStore_getUserIdByAnalysisId_Call) Run(run func(analysisId uuid.UUID)) *MockanalysisStore_getUserIdByAnalysisId_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(uuid.UUID))
+	})
+	return _c
+}
+
+func (_c *MockanalysisStore_getUserIdByAnalysisId_Call) Return(_a0 uuid.UUID, _a1 error) *MockanalysisStore_getUserIdByAnalysisId_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockanalysisStore_getUserIdByAnalysisId_Call) RunAndReturn(run func(uuid.UUID) (uuid.UUID, error)) *MockanalysisStore_getUserIdByAnalysisId_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // updateAnalysisJobProgress provides a mock function with given fields: aid, jid, status, content, score
 func (_m *MockanalysisStore) updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32) error {
 	ret := _m.Called(aid, jid, status, content, score)

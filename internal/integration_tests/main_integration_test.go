@@ -26,6 +26,7 @@ import (
 	"github.com/guardlight/server/internal/natsclient"
 	"github.com/guardlight/server/internal/orchestrator"
 	"github.com/guardlight/server/internal/scheduler"
+	"github.com/guardlight/server/internal/ssemanager"
 	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/pkg/analysisrequest"
 	"github.com/guardlight/server/pkg/gladapters/analyzers"
@@ -103,9 +104,10 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 		s.Assert().NoError(err)
 	}
 	ts := theme.NewThemeService(tsr)
+	ssem := ssemanager.NewSseMananger()
 	ars := analysismanager.NewAnalysisResultService(amr, ts)
 	am := analysismanager.NewAnalysisManangerRequester(jm, amr)
-	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm)
+	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm, ssem)
 
 	// Controllers
 	analysismanager.NewAnalysisRequestController(baseGroup, am, ars)

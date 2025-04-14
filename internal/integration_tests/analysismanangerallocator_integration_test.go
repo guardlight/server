@@ -15,6 +15,7 @@ import (
 	"github.com/guardlight/server/internal/infrastructure/database"
 	"github.com/guardlight/server/internal/infrastructure/messaging"
 	"github.com/guardlight/server/internal/jobmanager"
+	"github.com/guardlight/server/internal/ssemanager"
 	"github.com/guardlight/server/pkg/analyzercontract"
 	"github.com/guardlight/server/pkg/parsercontract"
 	"github.com/guardlight/server/servers/natsmessaging"
@@ -49,11 +50,13 @@ func (sama *TestSuiteAnalysisManagerAllocatorIntegration) SetupSuite() {
 	jmr := jobmanager.NewJobManagerRepository(sama.db)
 	jobManager := jobmanager.NewJobMananger(jmr)
 
+	ssem := ssemanager.NewSseMananger()
+
 	err = natsmessaging.NewNatsServer()
 	sama.Require().NoError(err)
 	sama.ncon = messaging.InitNatsInProcess(natsmessaging.GetServer())
 	sama.analysisManagerRepository = analysismanager.NewAnalysisManagerRepository(sama.db)
-	_ = analysismanager.NewAnalysisManagerAllocator(sama.ncon, sama.analysisManagerRepository, jobManager)
+	_ = analysismanager.NewAnalysisManagerAllocator(sama.ncon, sama.analysisManagerRepository, jobManager, ssem)
 
 	sqlDb, err := sama.db.DB()
 	sama.Require().NoError(err)

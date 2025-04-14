@@ -30,6 +30,11 @@ database:
     user: root
 domain: 192.168.178.142
 env: development
+nats:
+    password: zboVIZlXzDzGSrzr
+    port: 4222
+    server: ""
+    user: gl_nats_user
 orchestrator:
     scheduleRateCron: '* * * * * *'
 parsers:

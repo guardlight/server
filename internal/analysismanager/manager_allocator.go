@@ -7,6 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/jobmanager"
+	"github.com/guardlight/server/internal/ssemanager"
 	"github.com/guardlight/server/pkg/analyzercontract"
 	"github.com/guardlight/server/pkg/parsercontract"
 	"github.com/nats-io/nats.go"
@@ -19,6 +20,7 @@ type analysisStore interface {
 	getAllAnalysisByAnalysisRecordId(id uuid.UUID) ([]Analysis, error)
 	updateAnalysisJobs(ai uuid.UUID, jbs []SingleJobProgress) error
 	updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32) error
+	getUserIdByAnalysisId(analysisId uuid.UUID) (uuid.UUID, error)
 }
 
 type subsriber interface {
@@ -31,15 +33,21 @@ type jobber interface {
 	jobmanager.Enqueuer
 }
 
-type AnalysisManagerAllocator struct {
-	as analysisStore
-	ju jobber
+type sseEventSender interface {
+	SendEvent(userId uuid.UUID, e ssemanager.SseEvent)
 }
 
-func NewAnalysisManagerAllocator(s subsriber, as analysisStore, ju jobber) *AnalysisManagerAllocator {
+type AnalysisManagerAllocator struct {
+	as  analysisStore
+	ju  jobber
+	sse sseEventSender
+}
+
+func NewAnalysisManagerAllocator(s subsriber, as analysisStore, ju jobber, sse sseEventSender) *AnalysisManagerAllocator {
 	ama := &AnalysisManagerAllocator{
-		as: as,
-		ju: ju,
+		as:  as,
+		ju:  ju,
+		sse: sse,
 	}
 
 	s.Subscribe("parser.result", ama.processParserResult)
@@ -162,6 +170,19 @@ func (ama *AnalysisManagerAllocator) processAnalyzerResult(m *nats.Msg) {
 		zap.S().Errorw("Could not update job status", "error", err)
 		return
 	}
+
+	// send update to SseManager
+	uid, err := ama.as.getUserIdByAnalysisId(ar.AnalysisId)
+	if err != nil {
+		return
+	}
+	zap.S().Info(uid)
+
+	ama.sse.SendEvent(uid, ssemanager.SseEvent{
+		Type:   ssemanager.TypeUpdate,
+		Action: ssemanager.ActionAnalysisDone,
+		Data:   ar.AnalysisId.String(),
+	})
 
 	// if contributeToPublicMADB (MADB=Media Analysis Database)
 

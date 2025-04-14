@@ -162,3 +162,21 @@ func (amr AnalysisManagerRepository) getAnalysById(uid uuid.UUID, aid uuid.UUID)
 	}
 	return ar, nil
 }
+
+func (amr AnalysisManagerRepository) getUserIdByAnalysisId(analysisId uuid.UUID) (uuid.UUID, error) {
+	var userId string
+
+	err := amr.db.
+		Table("analyses").
+		Select("analysis_requests.user_id").
+		Joins("LEFT JOIN analysis_requests ON analyses.analysis_request_id = analysis_requests.id").
+		Where("analyses.id = ?", analysisId).
+		Scan(&userId).Error
+
+	if err != nil {
+		zap.S().Errorw("Could not resolve user ID from analysis ID", "analysis_id", analysisId, "error", err)
+		return uuid.Nil, err
+	}
+
+	return uuid.MustParse(userId), nil
+}

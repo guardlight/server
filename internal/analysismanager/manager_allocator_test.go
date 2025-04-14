@@ -20,11 +20,12 @@ func TestAnalysisAllocatorParserResult(t *testing.T) {
 	mockS := NewMocksubsriber(t)
 	mockAs := NewMockanalysisStore(t)
 	mockJu := NewMockjobber(t)
+	mockSse := NewMocksseEventSender(t)
 
 	mockS.EXPECT().Subscribe("parser.result", mock.AnythingOfType("nats.MsgHandler")).Return(nil, nil)
 	mockS.EXPECT().Subscribe("analyzer.result", mock.AnythingOfType("nats.MsgHandler")).Return(nil, nil)
 
-	ama := NewAnalysisManagerAllocator(mockS, mockAs, mockJu)
+	ama := NewAnalysisManagerAllocator(mockS, mockAs, mockJu, mockSse)
 
 	arid := uuid.MustParse("674e46b6-a4f5-4b4f-bc16-c29ba80971c0")
 	jobId := uuid.MustParse("e007bc38-0373-4da6-895e-c76e9ee331e7")

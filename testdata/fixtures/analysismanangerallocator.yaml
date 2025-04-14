@@ -33,10 +33,9 @@ analyses:
     analyzer_key: word_search
     theme_id: 1717b65e-0c37-4e9e-afe8-d1680cfca018
     status: waiting
-    threshold: 2
     score: 0
     content: []
-    inputs: [{key: "strict_words", value: "Running, Walking"}]
+    inputs: [{key: "strict_words", value: "Running, Walking"}, {key: "threshold", value: "0"}]
     jobs: [
       {
         jobId: 829dc757-0820-4334-86c5-93c2b014c8a0,

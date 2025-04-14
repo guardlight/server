@@ -21,6 +21,7 @@ import (
 	"github.com/guardlight/server/internal/orchestrator"
 	"github.com/guardlight/server/internal/parser"
 	"github.com/guardlight/server/internal/scheduler"
+	"github.com/guardlight/server/internal/ssemanager"
 	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/servers/natsmessaging"
 	"github.com/nats-io/nats.go"
@@ -90,7 +91,8 @@ func Server() {
 	ts := theme.NewThemeService(tsr)
 	ars := analysismanager.NewAnalysisResultService(amr, ts)
 	am := analysismanager.NewAnalysisManangerRequester(jm, amr)
-	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm)
+	ssem := ssemanager.NewSseMananger()
+	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm, ssem)
 
 	// Controllers
 	health.NewHealthController(baseGroup)
@@ -98,6 +100,8 @@ func Server() {
 	parser.NewParserController(baseGroup)
 	theme.NewThemeController(baseGroup, ts)
 	auth.NewAuthenticationController(baseGroup)
+
+	ssemanager.NewSseController(baseGroup, ssem)
 
 	if config.Get().IsDevelopment() {
 		database.LoadMockData(db)
