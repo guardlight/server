@@ -72,6 +72,7 @@ func mapToAnalysisResult(ar AnalysisRequest, ts []theme.ThemeDto) analysisresult
 		Title:       ar.Title,
 		ContentType: ar.ContentType,
 		Themes:      themes,
+		CreatedAt:   ar.CreatedAt,
 	}
 
 	return a

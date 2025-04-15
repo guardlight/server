@@ -106,7 +106,7 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 	ts := theme.NewThemeService(tsr)
 	ssem := ssemanager.NewSseMananger()
 	ars := analysismanager.NewAnalysisResultService(amr, ts)
-	am := analysismanager.NewAnalysisManangerRequester(jm, amr)
+	am := analysismanager.NewAnalysisManangerRequester(jm, amr, ssem)
 	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm, ssem)
 
 	// Controllers

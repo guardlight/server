@@ -83,6 +83,7 @@ func Server() {
 		zap.S().Errorw("Could not create scheduler", "error", err)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	}
+	ssem := ssemanager.NewSseMananger()
 	_, err = orchestrator.NewOrchestrator(jm, sch.Gos, nc)
 	if err != nil {
 		zap.S().Errorw("Could not create orhestrator", "error", err)
@@ -90,8 +91,8 @@ func Server() {
 	}
 	ts := theme.NewThemeService(tsr)
 	ars := analysismanager.NewAnalysisResultService(amr, ts)
-	am := analysismanager.NewAnalysisManangerRequester(jm, amr)
-	ssem := ssemanager.NewSseMananger()
+	am := analysismanager.NewAnalysisManangerRequester(jm, amr, ssem)
+
 	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm, ssem)
 
 	// Controllers

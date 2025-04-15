@@ -1,12 +1,17 @@
 package analysisresult
 
-import "github.com/google/uuid"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Analysis struct {
 	Id          uuid.UUID `json:"id"`
 	Title       string    `json:"title"`
 	ContentType string    `json:"contentType"`
 	Themes      []Theme   `json:"themes"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type Theme struct {

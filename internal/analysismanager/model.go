@@ -3,6 +3,7 @@ package analysismanager
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -43,6 +44,7 @@ type AnalysisRequest struct {
 	ContentType string     `gorm:"column:content_type"`
 	RawData     RawData    `gorm:"foreignKey:AnalysisRequestId"`
 	Analysis    []Analysis `gorm:"foreignKey:AnalysisRequestId"`
+	CreatedAt   time.Time  `gorm:"column:created_at"`
 }
 
 type RawData struct {

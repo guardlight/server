@@ -15,11 +15,12 @@ import (
 func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 	mockAnalysisRecordSaver := NewMockanalysisRequestStore(t)
 	mockJobManager := NewMockjobManagerRequester(t)
+	mockSsem := NewMocksseEventSender(t)
 	config.SetupConfig("../../testdata/envs/analysismanangerequester.yaml")
 
 	userId := uuid.MustParse("f6bec23c-5106-4805-980f-9c9c1c050af4")
 
-	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver)
+	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver, mockSsem)
 
 	t.Run("parserFailed", func(t *testing.T) {
 		ar := &analysisrequest.AnalysisRequest{
@@ -96,11 +97,12 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 func TestAnalysisRequestSuccess(t *testing.T) {
 	mockAnalysisRecordSaver := NewMockanalysisRequestStore(t)
 	mockJobManager := NewMockjobManagerRequester(t)
+	mockSsem := NewMocksseEventSender(t)
 	config.SetupConfig("../../testdata/envs/analysismanangerequester.yaml")
 
 	userId := uuid.MustParse("f6bec23c-5106-4805-980f-9c9c1c050af4")
 
-	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver)
+	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver, mockSsem)
 
 	jobId := uuid.MustParse("0e4240a2-a099-4501-b373-7d982b5d5d5d")
 	mockJobManager.EXPECT().CreateId().Return(jobId)

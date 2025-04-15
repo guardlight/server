@@ -67,7 +67,7 @@ func useCors() gin.HandlerFunc {
 func UseRateLimiting() gin.HandlerFunc {
 
 	rate := limiter.Rate{
-		Period: 5 * time.Minute,
+		Period: time.Second,
 		Limit:  100,
 	}
 

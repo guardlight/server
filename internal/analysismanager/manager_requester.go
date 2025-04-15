@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/jobmanager"
+	"github.com/guardlight/server/internal/ssemanager"
 	"github.com/guardlight/server/pkg/analysisrequest"
 	"github.com/guardlight/server/pkg/parsercontract"
 	"github.com/samber/lo"
@@ -34,12 +35,14 @@ type jobManagerRequester interface {
 type AnalysisManagerRequester struct {
 	jobMananger jobManagerRequester
 	ars         analysisRequestStore
+	sse         sseEventSender
 }
 
-func NewAnalysisManangerRequester(jobMananger jobManagerRequester, ars analysisRequestStore) *AnalysisManagerRequester {
+func NewAnalysisManangerRequester(jobMananger jobManagerRequester, ars analysisRequestStore, sse sseEventSender) *AnalysisManagerRequester {
 	return &AnalysisManagerRequester{
 		jobMananger: jobMananger,
 		ars:         ars,
+		sse:         sse,
 	}
 }
 
@@ -90,6 +93,12 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 	}
 	gk := fmt.Sprintf("parser.%s", p.Type)
 	am.jobMananger.EnqueueJob(jobId, jobmanager.Parse, gk, jd)
+
+	am.sse.SendEvent(ui, ssemanager.SseEvent{
+		Type:   ssemanager.TypeUpdate,
+		Action: ssemanager.ActionAnalysisRequested,
+		Data:   ar.Id.String(),
+	})
 
 	return nil
 }

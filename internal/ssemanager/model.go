@@ -10,8 +10,9 @@ const (
 type ActionType string
 
 const (
-	ActionAnalysisDone ActionType = "analysis_done"
-	ActionBeat         ActionType = "beat"
+	ActionAnalysisDone      ActionType = "analysis_done"
+	ActionAnalysisRequested ActionType = "analysis_requested"
+	ActionBeat              ActionType = "beat"
 )
 
 type SseEvent struct {

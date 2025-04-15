@@ -2,6 +2,7 @@ analyzers:
     - concurrency: 4
       contextWindow: 16000
       description: Uses a basic word list to scan content for.
+      external: true
       image: builtin
       inputs:
         - description: Words in this list will immediatly flag the content.
@@ -15,7 +16,6 @@ analyzers:
       key: word_search
       model: text
       name: Word Search Analyzer
-      external: true
 console:
     jwt:
         maxAge: 3600
@@ -30,15 +30,20 @@ database:
     user: root
 domain: 192.168.178.142
 env: development
+nats:
+    password: e69xRumKG2Ty5Qe3
+    port: 4222
+    server: ""
+    user: gl_nats_user
 orchestrator:
     scheduleRateCron: '* * * * * *'
 parsers:
     - concurrency: 1
       description: Parses a text to an utf-8 formated text.
+      external: true
       image: builtin
       name: Freetext parsers
       type: freetext
-      external: true
 server:
     host: 0.0.0.0
     port: 6660

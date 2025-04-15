@@ -21,6 +21,7 @@ import (
 	"github.com/guardlight/server/internal/essential/testcontainers"
 	"github.com/guardlight/server/internal/infrastructure/database"
 	"github.com/guardlight/server/internal/jobmanager"
+	"github.com/guardlight/server/internal/ssemanager"
 	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/pkg/analysisrequest"
 	"github.com/stretchr/testify/suite"
@@ -54,6 +55,7 @@ func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
 
 	jmr := jobmanager.NewJobManagerRepository(s.db)
 	jobManager := jobmanager.NewJobMananger(jmr)
+	ssem := ssemanager.NewSseMananger()
 
 	s.analysisManagerRepository = analysismanager.NewAnalysisManagerRepository(s.db)
 	tsr := theme.NewThemeRepository(s.db)
@@ -61,7 +63,7 @@ func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
 	ts := theme.NewThemeService(tsr)
 	ars := analysismanager.NewAnalysisResultService(s.analysisManagerRepository, ts)
 
-	analysisManangerRequester := analysismanager.NewAnalysisManangerRequester(jobManager, s.analysisManagerRepository)
+	analysisManangerRequester := analysismanager.NewAnalysisManangerRequester(jobManager, s.analysisManagerRepository, ssem)
 
 	analysismanager.NewAnalysisRequestController(s.router.Group(""), analysisManangerRequester, ars)
 
