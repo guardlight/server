@@ -145,7 +145,7 @@ func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID, pag Pagin
 	totalPages := int(math.Ceil(float64(totalRows) / float64(pag.GetLimit())))
 
 	var ars []AnalysisRequest
-	if err := amr.db.Offset(pag.GetOffset()).Limit(pag.GetLimit()).Order("created_at ASC").Preload("Analysis").Model(AnalysisRequest{UserId: id}).Find(&ars).Error; err != nil {
+	if err := amr.db.Offset(pag.GetOffset()).Limit(pag.GetLimit()).Order("created_at DESC").Preload("Analysis").Model(AnalysisRequest{UserId: id}).Find(&ars).Error; err != nil {
 		zap.S().Errorw("Could not get analyses", "user_id", id)
 		return AnalysisResultPaginated{}, err
 	}
