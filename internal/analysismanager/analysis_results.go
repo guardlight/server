@@ -9,7 +9,7 @@ import (
 )
 
 type analysisGetter interface {
-	getAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error)
+	getAnalysesByUserId(id uuid.UUID, pag Pagination) (AnalysisResultPaginated, error)
 }
 
 type themeService interface {
@@ -28,24 +28,36 @@ func NewAnalysisResultService(ag analysisGetter, ts themeService) *AnalysisResul
 	}
 }
 
-func (ars *AnalysisResultService) GetAnalysesByUserId(id uuid.UUID) ([]analysisresult.Analysis, error) {
-	as, err := ars.ag.getAnalysesByUserId(id)
+func (ars *AnalysisResultService) GetAnalysesByUserId(id uuid.UUID, limit, page int) (analysisresult.AnalysisPaginated, error) {
+	as, err := ars.ag.getAnalysesByUserId(id, Pagination{Limit: limit, Page: page})
 	if err != nil {
-		return nil, err
+		return analysisresult.AnalysisPaginated{}, err
 	}
 
-	if len(as) == 0 {
-		return []analysisresult.Analysis{}, nil
+	if len(as.Requests) == 0 {
+		return analysisresult.AnalysisPaginated{
+			Limit:      as.Limit,
+			Page:       as.Page,
+			TotalPages: as.TotalPages,
+			Analyses:   []analysisresult.Analysis{},
+		}, nil
 	}
 
 	ts, err := ars.ts.GetAllThemesByUserId(id)
 	if err != nil {
-		return nil, err
+		return analysisresult.AnalysisPaginated{}, err
 	}
 
-	return lo.Map(as, func(ar AnalysisRequest, _ int) analysisresult.Analysis {
+	mpAns := lo.Map(as.Requests, func(ar AnalysisRequest, _ int) analysisresult.Analysis {
 		return mapToAnalysisResult(ar, ts)
-	}), nil
+	})
+
+	return analysisresult.AnalysisPaginated{
+		Limit:      as.Limit,
+		Page:       as.Page,
+		TotalPages: as.TotalPages,
+		Analyses:   mpAns,
+	}, nil
 
 }
 

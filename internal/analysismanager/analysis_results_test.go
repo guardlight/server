@@ -64,10 +64,10 @@ func TestAnalysisGetAllAnalysis(t *testing.T) {
 			},
 		}
 
-		mars.EXPECT().getAnalysesByUserId(userId).Return(as, nil)
+		mars.EXPECT().getAnalysesByUserId(userId, Pagination{Limit: 10, Page: 1}).Return(AnalysisResultPaginated{Limit: 10, Page: 1, TotalPages: 1, Requests: as}, nil)
 		mts.EXPECT().GetAllThemesByUserId(userId).Return(ts, nil)
 
-		res, err := analyzerResults.GetAnalysesByUserId(userId)
+		res, err := analyzerResults.GetAnalysesByUserId(userId, 10, 1)
 		assert.NoError(t, err)
 
 		asRes := []analysisresult.Analysis{
@@ -107,7 +107,7 @@ func TestAnalysisGetAllAnalysis(t *testing.T) {
 			},
 		}
 
-		assert.Equal(t, asRes, res)
+		assert.Equal(t, analysisresult.AnalysisPaginated{Limit: 10, Page: 1, TotalPages: 1, Analyses: asRes}, res)
 
 	})
 

@@ -2,6 +2,7 @@ package analysismanager
 
 import (
 	"errors"
+	"math"
 
 	"github.com/google/uuid"
 	"github.com/samber/lo"
@@ -137,13 +138,23 @@ func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, ji
 	return nil
 }
 
-func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error) {
+func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID, pag Pagination) (AnalysisResultPaginated, error) {
+	var totalRows int64
+	amr.db.Model(AnalysisRequest{}).Count(&totalRows)
+
+	totalPages := int(math.Ceil(float64(totalRows) / float64(pag.GetLimit())))
+
 	var ars []AnalysisRequest
-	if err := amr.db.Preload("Analysis").Model(AnalysisRequest{UserId: id}).Find(&ars).Error; err != nil {
+	if err := amr.db.Offset(pag.GetOffset()).Limit(pag.GetLimit()).Preload("Analysis").Model(AnalysisRequest{UserId: id}).Find(&ars).Error; err != nil {
 		zap.S().Errorw("Could not get analyses", "user_id", id)
-		return nil, err
+		return AnalysisResultPaginated{}, err
 	}
-	return ars, nil
+	return AnalysisResultPaginated{
+		Limit:      pag.GetLimit(),
+		TotalPages: totalPages,
+		Page:       pag.GetPage(),
+		Requests:   ars,
+	}, nil
 }
 
 func (amr AnalysisManagerRepository) getAnalysById(uid uuid.UUID, aid uuid.UUID) (AnalysisRequest, error) {

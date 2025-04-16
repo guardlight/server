@@ -6,6 +6,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type AnalysisPaginated struct {
+	Limit      int        `json:"limit"`
+	Page       int        `json:"page"`
+	TotalPages int        `json:"totalPages"`
+	Analyses   []Analysis `json:"analyses"`
+}
+
 type Analysis struct {
 	Id          uuid.UUID `json:"id"`
 	Title       string    `json:"title"`

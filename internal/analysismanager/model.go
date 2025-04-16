@@ -106,3 +106,33 @@ func (as JobsProgress) Value() (driver.Value, error) {
 func (as *JobsProgress) Scan(src interface{}) error {
 	return json.Unmarshal(src.([]byte), &as)
 }
+
+type AnalysisResultPaginated struct {
+	Limit      int
+	Page       int
+	TotalPages int
+	Requests   []AnalysisRequest
+}
+
+type Pagination struct {
+	Limit int
+	Page  int
+}
+
+func (p *Pagination) GetOffset() int {
+	return (p.GetPage() - 1) * p.GetLimit()
+}
+
+func (p *Pagination) GetLimit() int {
+	if p.Limit == 0 {
+		p.Limit = 10
+	}
+	return p.Limit
+}
+
+func (p *Pagination) GetPage() int {
+	if p.Page == 0 {
+		p.Page = 1
+	}
+	return p.Page
+}

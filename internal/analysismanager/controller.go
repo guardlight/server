@@ -2,11 +2,13 @@ package analysismanager
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/guardlight/server/internal/essential/glerror"
 	"github.com/guardlight/server/internal/essential/glsecurity"
 	"github.com/guardlight/server/pkg/analysisrequest"
+	"github.com/samber/lo"
 	"go.uber.org/zap"
 )
 
@@ -60,7 +62,25 @@ func (arc *AnalysisRequestController) analysisRequest(c *gin.Context) {
 func (arc *AnalysisRequestController) analyses(c *gin.Context) {
 	uid := glsecurity.GetUserIdFromContextParsed(c)
 
-	ars, err := arc.ars.GetAnalysesByUserId(uid)
+	pgq := c.Query("page")
+	pgNr := lo.If(pgq == "", 0).ElseF(func() int {
+		page, err := strconv.Atoi(pgq)
+		if err != nil {
+			return 0
+		}
+		return page
+	})
+
+	pgl := c.Query("limit")
+	pgLim := lo.If(pgl == "", 0).ElseF(func() int {
+		lim, err := strconv.Atoi(pgl)
+		if err != nil {
+			return 0
+		}
+		return lim
+	})
+
+	ars, err := arc.ars.GetAnalysesByUserId(uid, pgLim, pgNr)
 	if err != nil {
 		zap.S().Errorw("error get analyses", "error", err)
 		c.JSON(glerror.InternalServerError())

@@ -20,29 +20,27 @@ func (_m *MockanalysisGetter) EXPECT() *MockanalysisGetter_Expecter {
 	return &MockanalysisGetter_Expecter{mock: &_m.Mock}
 }
 
-// getAnalysesByUserId provides a mock function with given fields: id
-func (_m *MockanalysisGetter) getAnalysesByUserId(id uuid.UUID) ([]AnalysisRequest, error) {
-	ret := _m.Called(id)
+// getAnalysesByUserId provides a mock function with given fields: id, pag
+func (_m *MockanalysisGetter) getAnalysesByUserId(id uuid.UUID, pag Pagination) (AnalysisResultPaginated, error) {
+	ret := _m.Called(id, pag)
 
 	if len(ret) == 0 {
 		panic("no return value specified for getAnalysesByUserId")
 	}
 
-	var r0 []AnalysisRequest
+	var r0 AnalysisResultPaginated
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID) ([]AnalysisRequest, error)); ok {
-		return rf(id)
+	if rf, ok := ret.Get(0).(func(uuid.UUID, Pagination) (AnalysisResultPaginated, error)); ok {
+		return rf(id, pag)
 	}
-	if rf, ok := ret.Get(0).(func(uuid.UUID) []AnalysisRequest); ok {
-		r0 = rf(id)
+	if rf, ok := ret.Get(0).(func(uuid.UUID, Pagination) AnalysisResultPaginated); ok {
+		r0 = rf(id, pag)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]AnalysisRequest)
-		}
+		r0 = ret.Get(0).(AnalysisResultPaginated)
 	}
 
-	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = rf(id)
+	if rf, ok := ret.Get(1).(func(uuid.UUID, Pagination) error); ok {
+		r1 = rf(id, pag)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -57,23 +55,24 @@ type MockanalysisGetter_getAnalysesByUserId_Call struct {
 
 // getAnalysesByUserId is a helper method to define mock.On call
 //   - id uuid.UUID
-func (_e *MockanalysisGetter_Expecter) getAnalysesByUserId(id interface{}) *MockanalysisGetter_getAnalysesByUserId_Call {
-	return &MockanalysisGetter_getAnalysesByUserId_Call{Call: _e.mock.On("getAnalysesByUserId", id)}
+//   - pag Pagination
+func (_e *MockanalysisGetter_Expecter) getAnalysesByUserId(id interface{}, pag interface{}) *MockanalysisGetter_getAnalysesByUserId_Call {
+	return &MockanalysisGetter_getAnalysesByUserId_Call{Call: _e.mock.On("getAnalysesByUserId", id, pag)}
 }
 
-func (_c *MockanalysisGetter_getAnalysesByUserId_Call) Run(run func(id uuid.UUID)) *MockanalysisGetter_getAnalysesByUserId_Call {
+func (_c *MockanalysisGetter_getAnalysesByUserId_Call) Run(run func(id uuid.UUID, pag Pagination)) *MockanalysisGetter_getAnalysesByUserId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID))
+		run(args[0].(uuid.UUID), args[1].(Pagination))
 	})
 	return _c
 }
 
-func (_c *MockanalysisGetter_getAnalysesByUserId_Call) Return(_a0 []AnalysisRequest, _a1 error) *MockanalysisGetter_getAnalysesByUserId_Call {
+func (_c *MockanalysisGetter_getAnalysesByUserId_Call) Return(_a0 AnalysisResultPaginated, _a1 error) *MockanalysisGetter_getAnalysesByUserId_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockanalysisGetter_getAnalysesByUserId_Call) RunAndReturn(run func(uuid.UUID) ([]AnalysisRequest, error)) *MockanalysisGetter_getAnalysesByUserId_Call {
+func (_c *MockanalysisGetter_getAnalysesByUserId_Call) RunAndReturn(run func(uuid.UUID, Pagination) (AnalysisResultPaginated, error)) *MockanalysisGetter_getAnalysesByUserId_Call {
 	_c.Call.Return(run)
 	return _c
 }
