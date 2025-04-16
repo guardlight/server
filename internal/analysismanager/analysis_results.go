@@ -10,6 +10,7 @@ import (
 
 type analysisGetter interface {
 	getAnalysesByUserId(id uuid.UUID, pag Pagination) (AnalysisResultPaginated, error)
+	getAnalysesByAnalysisIdAndUserId(id, arid uuid.UUID) (AnalysisRequest, error)
 }
 
 type themeService interface {
@@ -59,6 +60,20 @@ func (ars *AnalysisResultService) GetAnalysesByUserId(id uuid.UUID, limit, page 
 		Analyses:   mpAns,
 	}, nil
 
+}
+
+func (ars *AnalysisResultService) GetAnalysesByAnalysisIdAndUserId(uid, arid uuid.UUID) (analysisresult.Analysis, error) {
+	ar, err := ars.ag.getAnalysesByAnalysisIdAndUserId(uid, arid)
+	if err != nil {
+		return analysisresult.Analysis{}, err
+	}
+
+	ts, err := ars.ts.GetAllThemesByUserId(uid)
+	if err != nil {
+		return analysisresult.Analysis{}, err
+	}
+
+	return mapToAnalysisResult(ar, ts), nil
 }
 
 func mapToAnalysisResult(ar AnalysisRequest, ts []theme.ThemeDto) analysisresult.Analysis {

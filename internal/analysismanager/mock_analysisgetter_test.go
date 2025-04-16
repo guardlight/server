@@ -20,6 +20,63 @@ func (_m *MockanalysisGetter) EXPECT() *MockanalysisGetter_Expecter {
 	return &MockanalysisGetter_Expecter{mock: &_m.Mock}
 }
 
+// getAnalysesByAnalysisIdAndUserId provides a mock function with given fields: id, arid
+func (_m *MockanalysisGetter) getAnalysesByAnalysisIdAndUserId(id uuid.UUID, arid uuid.UUID) (AnalysisRequest, error) {
+	ret := _m.Called(id, arid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for getAnalysesByAnalysisIdAndUserId")
+	}
+
+	var r0 AnalysisRequest
+	var r1 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID, uuid.UUID) (AnalysisRequest, error)); ok {
+		return rf(id, arid)
+	}
+	if rf, ok := ret.Get(0).(func(uuid.UUID, uuid.UUID) AnalysisRequest); ok {
+		r0 = rf(id, arid)
+	} else {
+		r0 = ret.Get(0).(AnalysisRequest)
+	}
+
+	if rf, ok := ret.Get(1).(func(uuid.UUID, uuid.UUID) error); ok {
+		r1 = rf(id, arid)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'getAnalysesByAnalysisIdAndUserId'
+type MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call struct {
+	*mock.Call
+}
+
+// getAnalysesByAnalysisIdAndUserId is a helper method to define mock.On call
+//   - id uuid.UUID
+//   - arid uuid.UUID
+func (_e *MockanalysisGetter_Expecter) getAnalysesByAnalysisIdAndUserId(id interface{}, arid interface{}) *MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call {
+	return &MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call{Call: _e.mock.On("getAnalysesByAnalysisIdAndUserId", id, arid)}
+}
+
+func (_c *MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call) Run(run func(id uuid.UUID, arid uuid.UUID)) *MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(uuid.UUID), args[1].(uuid.UUID))
+	})
+	return _c
+}
+
+func (_c *MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call) Return(_a0 AnalysisRequest, _a1 error) *MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call) RunAndReturn(run func(uuid.UUID, uuid.UUID) (AnalysisRequest, error)) *MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // getAnalysesByUserId provides a mock function with given fields: id, pag
 func (_m *MockanalysisGetter) getAnalysesByUserId(id uuid.UUID, pag Pagination) (AnalysisResultPaginated, error) {
 	ret := _m.Called(id, pag)

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/guardlight/server/internal/essential/glerror"
 	"github.com/guardlight/server/internal/essential/glsecurity"
 	"github.com/guardlight/server/pkg/analysisrequest"
@@ -27,6 +28,7 @@ func NewAnalysisRequestController(group *gin.RouterGroup, manager *AnalysisManag
 	analysisGroup.Use(glsecurity.UseGuardlightAuth())
 	analysisGroup.POST("", arc.analysisRequest)
 	analysisGroup.GET("", arc.analyses)
+	analysisGroup.GET("/:arid", arc.analysisById)
 
 	return arc
 }
@@ -81,6 +83,25 @@ func (arc *AnalysisRequestController) analyses(c *gin.Context) {
 	})
 
 	ars, err := arc.ars.GetAnalysesByUserId(uid, pgLim, pgNr)
+	if err != nil {
+		zap.S().Errorw("error get analyses", "error", err)
+		c.JSON(glerror.InternalServerError())
+		return
+	}
+
+	c.JSON(http.StatusOK, ars)
+}
+
+func (arc *AnalysisRequestController) analysisById(c *gin.Context) {
+	uid := glsecurity.GetUserIdFromContextParsed(c)
+	arid, err := uuid.Parse(c.Param("arid"))
+	if err != nil {
+		zap.S().Errorw("Analysis Request id is not uuid", "error", err)
+		c.JSON(glerror.BadRequestError())
+		return
+	}
+
+	ars, err := arc.ars.GetAnalysesByAnalysisIdAndUserId(uid, arid)
 	if err != nil {
 		zap.S().Errorw("error get analyses", "error", err)
 		c.JSON(glerror.InternalServerError())
