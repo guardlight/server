@@ -61,7 +61,7 @@ func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
 	tsr := theme.NewThemeRepository(s.db)
 
 	ts := theme.NewThemeService(tsr)
-	ars := analysismanager.NewAnalysisResultService(s.analysisManagerRepository, ts)
+	ars := analysismanager.NewAnalysisResultService(s.analysisManagerRepository, s.analysisManagerRepository, ts)
 
 	analysisManangerRequester := analysismanager.NewAnalysisManangerRequester(jobManager, s.analysisManagerRepository, ssem)
 

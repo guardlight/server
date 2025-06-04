@@ -28,6 +28,7 @@ type Theme struct {
 }
 
 type Analyzer struct {
+	Id      uuid.UUID             `json:"id"`
 	Key     string                `json:"key"`
 	Name    string                `json:"name"`
 	Status  string                `json:"status"`

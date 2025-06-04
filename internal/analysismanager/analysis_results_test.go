@@ -12,11 +12,12 @@ import (
 
 func TestAnalysisGetAllAnalysis(t *testing.T) {
 	mars := NewMockanalysisGetter(t)
+	marsu := NewMockanalysisUpdater(t)
 	mts := NewMockthemeService(t)
 	config.SetupConfig("../../testdata/envs/analysisresults.yaml")
 
 	userId := uuid.MustParse("f6bec23c-5106-4805-980f-9c9c1c050af4")
-	analyzerResults := NewAnalysisResultService(mars, mts)
+	analyzerResults := NewAnalysisResultService(mars, marsu, mts)
 
 	t.Run("success", func(t *testing.T) {
 

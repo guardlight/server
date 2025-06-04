@@ -16,6 +16,7 @@ packages:
       themeService:
       analysisGetter:
       sseEventSender:
+      analysisUpdater:
   github.com/guardlight/server/internal/jobmanager:
     interfaces:
       jobStore:

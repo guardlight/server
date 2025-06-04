@@ -13,18 +13,24 @@ type analysisGetter interface {
 	getAnalysesByAnalysisIdAndUserId(id, arid uuid.UUID) (AnalysisRequest, error)
 }
 
+type analysisUpdater interface {
+	updateScore(id uuid.UUID, score float32) error
+}
+
 type themeService interface {
 	GetAllThemesByUserId(id uuid.UUID) ([]theme.ThemeDto, error)
 }
 
 type AnalysisResultService struct {
 	ag analysisGetter
+	au analysisUpdater
 	ts themeService
 }
 
-func NewAnalysisResultService(ag analysisGetter, ts themeService) *AnalysisResultService {
+func NewAnalysisResultService(ag analysisGetter, au analysisUpdater, ts themeService) *AnalysisResultService {
 	return &AnalysisResultService{
 		ag: ag,
+		au: au,
 		ts: ts,
 	}
 }
@@ -113,6 +119,7 @@ func mapToAnalyzerToResult(a Analysis) analysisresult.Analyzer {
 	}
 
 	return analysisresult.Analyzer{
+		Id:      a.Id,
 		Key:     a.AnalyzerKey,
 		Name:    aName,
 		Status:  string(a.Status),
@@ -129,4 +136,8 @@ func mapToAnalyzerToResult(a Analysis) analysisresult.Analyzer {
 			return analysisresult.AnalyzerJobProgress{Status: string(j.Status)}
 		}),
 	}
+}
+
+func (ars *AnalysisResultService) UpdateScore(id uuid.UUID, score float32) error {
+	return ars.au.updateScore(id, score)
 }

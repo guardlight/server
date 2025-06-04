@@ -90,7 +90,7 @@ func Server() {
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	}
 	ts := theme.NewThemeService(tsr)
-	ars := analysismanager.NewAnalysisResultService(amr, ts)
+	ars := analysismanager.NewAnalysisResultService(amr, amr, ts)
 	am := analysismanager.NewAnalysisManangerRequester(jm, amr, ssem)
 
 	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm, ssem)

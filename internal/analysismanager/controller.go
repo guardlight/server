@@ -29,6 +29,7 @@ func NewAnalysisRequestController(group *gin.RouterGroup, manager *AnalysisManag
 	analysisGroup.POST("", arc.analysisRequest)
 	analysisGroup.GET("", arc.analyses)
 	analysisGroup.GET("/:arid", arc.analysisById)
+	analysisGroup.POST("/update/score", arc.updateAnalysisScore)
 
 	return arc
 }
@@ -109,4 +110,27 @@ func (arc *AnalysisRequestController) analysisById(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, ars)
+}
+
+func (arc *AnalysisRequestController) updateAnalysisScore(c *gin.Context) {
+	_ = glsecurity.GetUserIdFromContextParsed(c)
+
+	aus := &analysisrequest.AnalysisUpdateScore{}
+	err := glsecurity.ReuseBindAndValidate(c, aus)
+	if err != nil {
+		zap.S().Errorw("error validating analysis request", "error", err)
+		c.JSON(glerror.BadRequestError())
+		return
+	}
+
+	err = arc.ars.UpdateScore(aus.Id, aus.Score)
+	if err != nil {
+		zap.S().Errorw("error get analyses", "error", err)
+		c.JSON(glerror.InternalServerError())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "ok",
+	})
 }

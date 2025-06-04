@@ -190,3 +190,19 @@ func (amr AnalysisManagerRepository) getUserIdByAnalysisId(analysisId uuid.UUID)
 
 	return uuid.MustParse(userId), nil
 }
+
+func (amr AnalysisManagerRepository) updateScore(analysisId uuid.UUID, score float32) error {
+
+	err := amr.db.
+		Model(Analysis{
+			Id: analysisId,
+		}).
+		Updates(Analysis{Score: score}).Error
+
+	if err != nil {
+		zap.S().Errorw("Could not resolve user ID from analysis ID", "analysis_id", analysisId, "error", err)
+		return err
+	}
+
+	return nil
+}

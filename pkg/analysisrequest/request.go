@@ -38,3 +38,8 @@ type AnalyzerInput struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
+
+type AnalysisUpdateScore struct {
+	Id    uuid.UUID `json:"id"`
+	Score float32   `json:"score"`
+}
