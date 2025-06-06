@@ -29,6 +29,7 @@ func NewAnalysisRequestController(group *gin.RouterGroup, manager *AnalysisManag
 	analysisGroup.POST("", arc.analysisRequest)
 	analysisGroup.GET("", arc.analyses)
 	analysisGroup.GET("/:arid", arc.analysisById)
+	analysisGroup.DELETE("/:arid", arc.deleteAnalysisRequestById)
 	analysisGroup.POST("/update/score", arc.updateAnalysisScore)
 
 	return arc
@@ -110,6 +111,27 @@ func (arc *AnalysisRequestController) analysisById(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, ars)
+}
+
+func (arc *AnalysisRequestController) deleteAnalysisRequestById(c *gin.Context) {
+	uid := glsecurity.GetUserIdFromContextParsed(c)
+	arid, err := uuid.Parse(c.Param("arid"))
+	if err != nil {
+		zap.S().Errorw("Analysis Request id is not uuid", "error", err)
+		c.JSON(glerror.BadRequestError())
+		return
+	}
+
+	err = arc.ars.DeleteAnalysisRequestById(arid, uid)
+	if err != nil {
+		zap.S().Errorw("error deleting analysis request", "error", err)
+		c.JSON(glerror.InternalServerError())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status": "ok",
+	})
 }
 
 func (arc *AnalysisRequestController) updateAnalysisScore(c *gin.Context) {

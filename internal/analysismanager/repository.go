@@ -8,6 +8,7 @@ import (
 	"github.com/samber/lo"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type AnalysisManagerRepository struct {
@@ -201,6 +202,25 @@ func (amr AnalysisManagerRepository) updateScore(analysisId uuid.UUID, score flo
 
 	if err != nil {
 		zap.S().Errorw("Could not resolve user ID from analysis ID", "analysis_id", analysisId, "error", err)
+		return err
+	}
+
+	return nil
+}
+
+func (amr AnalysisManagerRepository) deleteAnalysisRequestById(arid, uid uuid.UUID) error {
+	var recCount int64
+	if err := amr.db.Where("id = ? and user_id = ?", arid, uid).Model(AnalysisRequest{}).Count(&recCount).Error; err != nil {
+		zap.S().Errorw("Could not get analysis record for request and user id", "error", err)
+		return err
+	}
+
+	if recCount == 0 {
+		return errors.New("no record found for request id and user id")
+	}
+
+	if err := amr.db.Select(clause.Associations).Delete(&AnalysisRequest{Id: arid}).Error; err != nil {
+		zap.S().Errorw("Could not delete analysis request", "error", err)
 		return err
 	}
 

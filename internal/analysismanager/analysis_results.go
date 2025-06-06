@@ -15,6 +15,7 @@ type analysisGetter interface {
 
 type analysisUpdater interface {
 	updateScore(id uuid.UUID, score float32) error
+	deleteAnalysisRequestById(arid, uid uuid.UUID) error
 }
 
 type themeService interface {
@@ -140,4 +141,8 @@ func mapToAnalyzerToResult(a Analysis) analysisresult.Analyzer {
 
 func (ars *AnalysisResultService) UpdateScore(id uuid.UUID, score float32) error {
 	return ars.au.updateScore(id, score)
+}
+
+func (ars *AnalysisResultService) DeleteAnalysisRequestById(arid, uid uuid.UUID) error {
+	return ars.au.deleteAnalysisRequestById(arid, uid)
 }

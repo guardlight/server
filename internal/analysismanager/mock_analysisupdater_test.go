@@ -20,6 +20,53 @@ func (_m *MockanalysisUpdater) EXPECT() *MockanalysisUpdater_Expecter {
 	return &MockanalysisUpdater_Expecter{mock: &_m.Mock}
 }
 
+// deleteAnalysisRequestById provides a mock function with given fields: arid, uid
+func (_m *MockanalysisUpdater) deleteAnalysisRequestById(arid uuid.UUID, uid uuid.UUID) error {
+	ret := _m.Called(arid, uid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for deleteAnalysisRequestById")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID, uuid.UUID) error); ok {
+		r0 = rf(arid, uid)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockanalysisUpdater_deleteAnalysisRequestById_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'deleteAnalysisRequestById'
+type MockanalysisUpdater_deleteAnalysisRequestById_Call struct {
+	*mock.Call
+}
+
+// deleteAnalysisRequestById is a helper method to define mock.On call
+//   - arid uuid.UUID
+//   - uid uuid.UUID
+func (_e *MockanalysisUpdater_Expecter) deleteAnalysisRequestById(arid interface{}, uid interface{}) *MockanalysisUpdater_deleteAnalysisRequestById_Call {
+	return &MockanalysisUpdater_deleteAnalysisRequestById_Call{Call: _e.mock.On("deleteAnalysisRequestById", arid, uid)}
+}
+
+func (_c *MockanalysisUpdater_deleteAnalysisRequestById_Call) Run(run func(arid uuid.UUID, uid uuid.UUID)) *MockanalysisUpdater_deleteAnalysisRequestById_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(uuid.UUID), args[1].(uuid.UUID))
+	})
+	return _c
+}
+
+func (_c *MockanalysisUpdater_deleteAnalysisRequestById_Call) Return(_a0 error) *MockanalysisUpdater_deleteAnalysisRequestById_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockanalysisUpdater_deleteAnalysisRequestById_Call) RunAndReturn(run func(uuid.UUID, uuid.UUID) error) *MockanalysisUpdater_deleteAnalysisRequestById_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // updateScore provides a mock function with given fields: id, score
 func (_m *MockanalysisUpdater) updateScore(id uuid.UUID, score float32) error {
 	ret := _m.Called(id, score)
