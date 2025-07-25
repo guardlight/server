@@ -14,6 +14,7 @@ const (
 type AnalysisRequest struct {
 	Title       string      `json:"title"`
 	ContentType ContentType `json:"contentType"`
+	Category    string      `json:"category"`
 	File        File        `json:"file"`
 	Themes      []Theme     `json:"themes"`
 }

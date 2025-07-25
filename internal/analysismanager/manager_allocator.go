@@ -66,16 +66,25 @@ func (ama *AnalysisManagerAllocator) processParserResult(m *nats.Msg) {
 		//      Update to error status with description, "Task running to long"
 	}
 
-	err = ama.as.updateProcessedText(pr.AnalysisId, pr.Text)
-	if err != nil {
-		zap.S().Errorw("Could not update processed text in raw data", "error", err)
+	if pr.Status == parsercontract.ParseError {
+		err = ama.ju.UpdateJobStatus(pr.JobId, jobmanager.Error, pr.Text, 0)
+		// TODO Update analysis to failed
+		if err != nil {
+			zap.S().Errorw("Could not update job status", "error", err)
+			// TODO Update analysis to failed
+			return
+		}
 		return
 	}
 
-	if pr.Status == parsercontract.ParseError {
-		err = ama.ju.UpdateJobStatus(pr.JobId, jobmanager.Error, pr.Text, 0)
+	err = ama.as.updateProcessedText(pr.AnalysisId, pr.Text)
+	if err != nil {
+		zap.S().Errorw("Could not update processed text in raw data", "error", err)
+		// TODO Update analysis to failed
+		err = ama.ju.UpdateJobStatus(pr.JobId, jobmanager.Error, "Could not update processed text in raw data", 0)
 		if err != nil {
 			zap.S().Errorw("Could not update job status", "error", err)
+			// TODO Update analysis to failed
 			return
 		}
 		return

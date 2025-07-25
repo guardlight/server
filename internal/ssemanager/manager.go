@@ -73,5 +73,5 @@ func (sc *SseManager) SendEvent(userId uuid.UUID, e SseEvent) {
 		zap.S().Errorw("Error printing to writer", "error", err)
 	}
 	conn.flusher.Flush()
-	zap.S().Infow("Sent sse message", "user_id", userId.String(), "message", string(message))
+	zap.S().Debugw("Sent sse message", "user_id", userId.String(), "message", string(message))
 }

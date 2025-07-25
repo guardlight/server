@@ -32,6 +32,7 @@ type jobStore interface {
 	saveJob(j *Job) error
 	getNotFinishedJobs() ([]Job, error)
 	updateJobStatus(id uuid.UUID, s JobStatus, sd string, rc int) error
+	deleteJob(id uuid.UUID) error
 }
 
 type JobManager struct {
@@ -88,5 +89,10 @@ func (jm *JobManager) UpdateJobStatus(id uuid.UUID, s JobStatus, sd string, rc i
 		return err
 	}
 	zap.S().Infow("Job Status Updated", "job_id", id, "status", s, "dessription", sd)
+
+	if s == Finished {
+		jm.js.deleteJob(id)
+	}
+
 	return nil
 }

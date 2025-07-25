@@ -3,6 +3,7 @@ package jobmanager
 import (
 	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/guardlight/server/pkg/analyzercontract"
@@ -31,6 +32,8 @@ func (jt JobType) Match(s string) bool {
 
 type Job struct {
 	Id                uuid.UUID       `gorm:"column:id;primaryKey;type:uuid"`
+	CreatedAt         time.Time       `gorm:"column:created_at"`
+	UpdatedAt         time.Time       `gorm:"column:updated_at"`
 	Status            JobStatus       `gorm:"column:status"`
 	StatusDescription string          `gorm:"column:status_description"`
 	RetryCount        int             `gorm:"column:retry_count"`

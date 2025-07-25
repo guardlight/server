@@ -43,7 +43,7 @@ func (amr AnalysisManagerRepository) updateProcessedText(ai uuid.UUID, text stri
 		Model(RawData{
 			AnalysisRequestId: ai,
 		}).
-		Updates(RawData{ProcessedText: text})
+		Updates(RawData{ProcessedText: text, Content: []byte{}}) // Remove the raw data and save the processed text
 
 	if res.Error != nil {
 		zap.S().Errorw("Could not update processed text", "error", res.Error)

@@ -14,11 +14,13 @@ type AnalysisPaginated struct {
 }
 
 type Analysis struct {
-	Id          uuid.UUID `json:"id"`
-	Title       string    `json:"title"`
-	ContentType string    `json:"contentType"`
-	Themes      []Theme   `json:"themes"`
-	CreatedAt   time.Time `json:"createdAt"`
+	Id            uuid.UUID `json:"id"`
+	Title         string    `json:"title"`
+	Category      string    `json:"category"`
+	RequestOrigin string    `json:"requestOrigin"`
+	ContentType   string    `json:"contentType"`
+	Themes        []Theme   `json:"themes"`
+	CreatedAt     time.Time `json:"createdAt"`
 }
 
 type Theme struct {

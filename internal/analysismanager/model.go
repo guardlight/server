@@ -37,14 +37,25 @@ const (
 	AnalysisError      AnalysisStatus = "error"
 )
 
+type RequestOrigin string
+
+const (
+	RequestOriginUser     RequestOrigin = "user"
+	RequestOriginSystem   RequestOrigin = "system"
+	RequestOriginDataloom RequestOrigin = "dataloom"
+	RequestOriginExternal RequestOrigin = "external"
+)
+
 type AnalysisRequest struct {
-	Id          uuid.UUID  `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
-	UserId      uuid.UUID  `gorm:"column:user_id"`
-	Title       string     `gorm:"column:title"`
-	ContentType string     `gorm:"column:content_type"`
-	RawData     RawData    `gorm:"foreignKey:AnalysisRequestId"`
-	Analysis    []Analysis `gorm:"foreignKey:AnalysisRequestId"`
-	CreatedAt   time.Time  `gorm:"column:created_at"`
+	Id            uuid.UUID  `gorm:"column:id;primaryKey;type:uuid;default:gen_random_uuid()"`
+	UserId        uuid.UUID  `gorm:"column:user_id"`
+	RequestOrigin string     `gorm:"column:request_origin"`
+	Category      string     `gorm:"column:category"`
+	Title         string     `gorm:"column:title"`
+	ContentType   string     `gorm:"column:content_type"`
+	RawData       RawData    `gorm:"foreignKey:AnalysisRequestId"`
+	Analysis      []Analysis `gorm:"foreignKey:AnalysisRequestId"`
+	CreatedAt     time.Time  `gorm:"column:created_at"`
 }
 
 type RawData struct {

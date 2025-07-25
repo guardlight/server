@@ -102,11 +102,13 @@ func mapToAnalysisResult(ar AnalysisRequest, ts []theme.ThemeDto) analysisresult
 	}
 
 	a := analysisresult.Analysis{
-		Id:          ar.Id,
-		Title:       ar.Title,
-		ContentType: ar.ContentType,
-		Themes:      themes,
-		CreatedAt:   ar.CreatedAt,
+		Id:            ar.Id,
+		Title:         ar.Title,
+		Category:      ar.Category,
+		RequestOrigin: ar.RequestOrigin,
+		ContentType:   ar.ContentType,
+		Themes:        themes,
+		CreatedAt:     ar.CreatedAt,
 	}
 
 	return a

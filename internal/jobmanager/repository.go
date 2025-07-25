@@ -59,3 +59,11 @@ func (jmr JobManagerRepository) updateJobStatus(id uuid.UUID, s JobStatus, sd st
 
 	return nil
 }
+
+func (jmr JobManagerRepository) deleteJob(id uuid.UUID) error {
+	if err := jmr.db.Delete(&Job{Id: id}).Error; err != nil {
+		zap.S().Errorw("Could not delete job", "error", err, "id", id)
+		return err
+	}
+	return nil
+}

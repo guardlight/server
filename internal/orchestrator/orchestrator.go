@@ -50,8 +50,11 @@ func NewOrchestrator(jm jobManager, tc taskCreater, ns natsSender) (*Orchestrato
 }
 
 func (o *Orchestrator) checkForJobs() {
-	zap.S().Infow("Checking For Jobs")
-	nfj, _ := o.jm.GetAllNonFinishedJobs()
+	zap.S().Debugw("Checking For Jobs")
+	nfj, err := o.jm.GetAllNonFinishedJobs()
+	if err != nil {
+		zap.S().Errorw("Could not check for all open jobs", "err", err)
+	}
 	o.jcs.build(nfj)
 
 	for _, job := range nfj {
@@ -59,7 +62,7 @@ func (o *Orchestrator) checkForJobs() {
 			o.processJob(job)
 		}
 	}
-	zap.S().Infow("Relevant Jobs Processed")
+	zap.S().Debugw("Relevant Jobs Processed")
 }
 
 func (o *Orchestrator) processJob(j jobmanager.Job) {

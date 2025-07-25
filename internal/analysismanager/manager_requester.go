@@ -67,12 +67,14 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 	analysisParts := createAnalysis(arDto)
 
 	ar := &AnalysisRequest{
-		Id:          uuid.Nil,
-		UserId:      ui,
-		Title:       arDto.Title,
-		ContentType: string(arDto.ContentType),
-		RawData:     rawData,
-		Analysis:    analysisParts,
+		Id:            uuid.Nil,
+		UserId:        ui,
+		Title:         arDto.Title,
+		RequestOrigin: string(RequestOriginUser),
+		Category:      arDto.Category,
+		ContentType:   string(arDto.ContentType),
+		RawData:       rawData,
+		Analysis:      analysisParts,
 	}
 	err = am.ars.createAnalysisRequest(ar)
 	if err != nil {
@@ -92,7 +94,10 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		},
 	}
 	gk := fmt.Sprintf("parser.%s", p.Type)
-	am.jobMananger.EnqueueJob(jobId, jobmanager.Parse, gk, jd)
+	err = am.jobMananger.EnqueueJob(jobId, jobmanager.Parse, gk, jd)
+	if err != nil {
+		return err
+	}
 
 	am.sse.SendEvent(ui, ssemanager.SseEvent{
 		Type:   ssemanager.TypeUpdate,
