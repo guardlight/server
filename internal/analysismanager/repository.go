@@ -139,17 +139,39 @@ func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, ji
 	return nil
 }
 
-func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID, pag Pagination) (AnalysisResultPaginated, error) {
-	var totalRows int64
-	amr.db.Model(AnalysisRequest{}).Count(&totalRows)
+func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID, pag Pagination, catType, catCat, query string) (AnalysisResultPaginated, error) {
 
-	totalPages := int(math.Ceil(float64(totalRows) / float64(pag.GetLimit())))
+	var fuzzCatType = "%" + catType + "%"
+	var fuzzCatCat = "%" + catCat + "%"
+	var fuzzQuery = "%" + query + "%"
+
+	var dbQ = amr.db.Model(AnalysisRequest{UserId: id})
+
+	if len(catType) > 0 {
+		dbQ = dbQ.Where("content_type ILIKE ?", fuzzCatType)
+	}
+	if len(catCat) > 0 {
+		dbQ = dbQ.Where("category ILIKE ?", fuzzCatCat)
+	}
+	if len(query) > 0 {
+		dbQ = dbQ.Where("title ILIKE ?", fuzzQuery)
+	}
+
+	dbQ = dbQ.Session(&gorm.Session{})
 
 	var ars []AnalysisRequest
-	if err := amr.db.Offset(pag.GetOffset()).Limit(pag.GetLimit()).Order("created_at DESC").Preload("Analysis").Model(AnalysisRequest{UserId: id}).Find(&ars).Error; err != nil {
+	if err := dbQ.Offset(pag.GetOffset()).Limit(pag.GetLimit()).Order("created_at DESC").Preload("Analysis").Find(&ars).Error; err != nil {
 		zap.S().Errorw("Could not get analyses", "user_id", id)
 		return AnalysisResultPaginated{}, err
 	}
+
+	var totalRows int64
+	if err := dbQ.Debug().Count(&totalRows).Error; err != nil {
+		zap.S().Errorw("Could not get rows", "err", err)
+	}
+
+	totalPages := int(math.Ceil(float64(totalRows) / float64(pag.GetLimit())))
+
 	return AnalysisResultPaginated{
 		Limit:      pag.GetLimit(),
 		TotalPages: totalPages,

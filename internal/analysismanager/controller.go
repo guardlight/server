@@ -3,6 +3,7 @@ package analysismanager
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -84,7 +85,27 @@ func (arc *AnalysisRequestController) analyses(c *gin.Context) {
 		return lim
 	})
 
-	ars, err := arc.ars.GetAnalysesByUserId(uid, pgLim, pgNr)
+	cat := c.Query("category")
+	pgCatType := lo.If(pgl == "", "").ElseF(func() string {
+		var catSpl = strings.Split(cat, ":")
+		if len(catSpl) == 2 {
+			return catSpl[0]
+		} else {
+			return ""
+		}
+	})
+	pgCatCat := lo.If(pgl == "", "").ElseF(func() string {
+		var catSpl = strings.Split(cat, ":")
+		if len(catSpl) == 2 {
+			return catSpl[1]
+		} else {
+			return ""
+		}
+	})
+
+	pgQuery := c.Query("query")
+
+	ars, err := arc.ars.GetAnalysesByUserId(uid, pgLim, pgNr, pgCatType, pgCatCat, pgQuery)
 	if err != nil {
 		zap.S().Errorw("error get analyses", "error", err)
 		c.JSON(glerror.InternalServerError())
