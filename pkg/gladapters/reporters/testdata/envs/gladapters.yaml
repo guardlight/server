@@ -1,11 +1,15 @@
 analyzers:
     - concurrency: 4
-      contextWindow: 16000
-      description: Uses a basic word list to scan content for.
+      contextWindow: 32000
+      description: Uses a basic word list to scan content.
       external: true
       image: builtin
       inputs:
-        - description: Words in this list will immediatly flag the content.
+        - description: Allows you to specificy at which point the analyzer should flag the media content.
+          key: threshold
+          name: Threshold
+          type: threshold
+        - description: Words in this list will be used to flag media content.
           key: strict_words
           name: Strict Words
           type: textarea
@@ -14,38 +18,33 @@ analyzers:
       name: Word Search
 console:
     jwt:
-        maxAge: 36000
-        signingKey: qQJsN7FPjMUMGLzr8xRmBKGyYdRM81Go
+        maxAge: 3600
+        signingKey: ex7xkpVKvBlda2boYqRDMoPvpsBLNXcO
 cors:
-    origin: http://192.168.178.142:4000
+    origin: http://0.0.0.0
 database:
-    name: guardlight_test
+    name: guardlight
     password: root
     port: 5432
     server: 127.0.0.1
     user: root
-domain: 192.168.178.142
-env: development
+domain: 127.0.0.1
+env: production
 nats:
-    password: bi7Y0YmHby5Hasfo2n0sOEuc9R1VxzND
+    password: E1b3n7mFcbXurTbH
     port: 4222
     server: ""
     user: gl_nats_user
 orchestrator:
-    scheduleRateCron: '* * * * * *'
+    scheduleRateCron: '*/5 * * * * *'
 parsers:
-    - concurrency: 1
+    - concurrency: 4
       description: Parses a text to an utf-8 formated text.
       external: true
       image: builtin
+      key: freetext
       name: Freetext
       type: freetext
-    - concurrency: 1
-      description: Parses a .epub file to an utf-8 formated text.
-      external: true
-      image: guardlight/parser-epub
-      name: Epub
-      type: epub
 reporters:
     - concurrency: 4
       description: This reporter will match the threshold to the amount of lines.
@@ -58,7 +57,8 @@ server:
     port: 6842
 tz: UTC
 users:
-    - id: fc28fb4c-2280-49f5-a3ba-f99ed8f8843c
-      password: a
+    - username: admin@guardlight.org
+      password: mtIbInQTH4XLGGiB
       role: admin
-      username: a
+      id: 30ad9362-e5c3-45a7-aaaa-a4edf4ced8fa
+      apikey: H2Bw8EsRHvkGFYvc09lZNMAOD9n8LJcf

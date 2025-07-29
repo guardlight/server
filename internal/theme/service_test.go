@@ -59,6 +59,10 @@ func TestGetTheme(t *testing.T) {
 							},
 						},
 					},
+					Reporter: Reporter{
+						Key:       "word_count",
+						Threshold: 1,
+					},
 				},
 			},
 			expect: []ThemeDto{
@@ -83,6 +87,15 @@ func TestGetTheme(t *testing.T) {
 							},
 						},
 					},
+					Reporters: []ReporterDto{
+						{
+							Key:          "word_count",
+							Threshold:    1,
+							Name:         "Word Count",
+							Description:  "Basic reporter that will check basic counts.",
+							ChangeStatus: Same,
+						},
+					},
 				},
 				defaultEmptyThemeDto,
 			},
@@ -95,6 +108,10 @@ func TestGetTheme(t *testing.T) {
 					UserId:    uid,
 					Title:     "Test Theme",
 					Analyzers: []Analyzer{},
+					Reporter: Reporter{
+						Key:       "word_count",
+						Threshold: 1,
+					},
 				},
 			},
 			expect: []ThemeDto{
@@ -119,6 +136,15 @@ func TestGetTheme(t *testing.T) {
 							},
 						},
 					},
+					Reporters: []ReporterDto{
+						{
+							Key:          "word_count",
+							Threshold:    1,
+							Name:         "Word Count",
+							Description:  "Basic reporter that will check basic counts.",
+							ChangeStatus: Same,
+						},
+					},
 				},
 				defaultEmptyThemeDto,
 			},
@@ -140,6 +166,10 @@ func TestGetTheme(t *testing.T) {
 								},
 							},
 						},
+					},
+					Reporter: Reporter{
+						Key:       "word_count",
+						Threshold: 1,
 					},
 				},
 			},
@@ -181,6 +211,15 @@ func TestGetTheme(t *testing.T) {
 							},
 						},
 					},
+					Reporters: []ReporterDto{
+						{
+							Key:          "word_count",
+							Threshold:    1,
+							Name:         "Word Count",
+							Description:  "Basic reporter that will check basic counts.",
+							ChangeStatus: Same,
+						},
+					},
 				},
 				defaultEmptyThemeDto,
 			},
@@ -202,6 +241,10 @@ func TestGetTheme(t *testing.T) {
 								},
 							},
 						},
+					},
+					Reporter: Reporter{
+						Key:       "word_count",
+						Threshold: 1,
 					},
 				},
 			},
@@ -233,6 +276,15 @@ func TestGetTheme(t *testing.T) {
 									ChangeStatus: New,
 								},
 							},
+						},
+					},
+					Reporters: []ReporterDto{
+						{
+							Key:          "word_count",
+							Threshold:    1,
+							Name:         "Word Count",
+							Description:  "Basic reporter that will check basic counts.",
+							ChangeStatus: Same,
 						},
 					},
 				},

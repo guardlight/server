@@ -71,6 +71,8 @@ func (o *Orchestrator) processJob(j jobmanager.Job) {
 		o.processParseJob(j)
 	} else if j.Type == jobmanager.Analyze {
 		o.processAnalyzeJob(j)
+	} else if j.Type == jobmanager.Report {
+		o.processReportJob(j)
 	} else {
 		zap.S().Errorw("Job type unsupported", "type", j.Type)
 	}
@@ -94,7 +96,7 @@ func (o *Orchestrator) processParseJob(j jobmanager.Job) {
 
 	if o.jcs.t(j.GroupKey) <= p.Concurrency {
 		if p.External {
-			zap.S().Infow("Using external parser container", "type", f.Image, "type", p.Type)
+			zap.S().Infow("Using external parser container", "image", f.Image, "type", p.Type)
 		} else {
 			o.updateJobStatus(j.Id, jobmanager.Error, "External=false not supported yet", 0)
 			// REMOVE WHEN docker support is implemented.
@@ -136,7 +138,7 @@ func (o *Orchestrator) processAnalyzeJob(j jobmanager.Job) {
 
 	if o.jcs.t(j.GroupKey) <= a.Concurrency {
 		if a.External {
-			zap.S().Infow("Using external analyzer container", "type", f.Image, "key", a.Key)
+			zap.S().Infow("Using external analyzer container", "image", f.Image, "key", a.Key)
 		} else {
 			o.updateJobStatus(j.Id, jobmanager.Error, "External=false not supported yet", 0)
 			// REMOVE WHEN docker support is implemented.
@@ -156,6 +158,48 @@ func (o *Orchestrator) processAnalyzeJob(j jobmanager.Job) {
 			return
 		}
 
+	} else {
+		zap.S().Infow("Job Still Queued", "job_type", j.Id, "group_key", j.GroupKey)
+	}
+}
+
+func (o *Orchestrator) processReportJob(j jobmanager.Job) {
+	var f jobmanager.ReportJobData
+	err := json.Unmarshal(j.Data, &f)
+	if err != nil {
+		zap.S().Errorw("Error unmarshaling reporter job data", "error", err)
+		o.updateJobStatus(j.Id, jobmanager.Queued, err.Error(), j.RetryCount+1)
+		return
+	}
+
+	r, ok := config.Get().GetReporter(f.Type)
+	if !ok {
+		zap.S().Errorw("Reporter not found", "error", err)
+		o.updateJobStatus(j.Id, jobmanager.Queued, "Reporter not found", 3)
+		return
+	}
+
+	if o.jcs.t(j.GroupKey) <= r.Concurrency {
+		if r.External {
+			zap.S().Infow("Using external reporter container", "image", r.Image, "type", j.Type)
+		} else {
+			o.updateJobStatus(j.Id, jobmanager.Error, "External=false not supported yet", 0)
+			// REMOVE WHEN docker support is implemented.
+
+			// Start docker container and wait, with max duration.
+		}
+		o.jcs.inc(j.GroupKey)
+		err = o.ns.Publish(f.Topic, f.ReporterData)
+		if err != nil {
+			o.jcs.dec(j.GroupKey)
+			o.updateJobStatus(j.Id, jobmanager.Queued, "", j.RetryCount+1)
+			return
+		}
+		err = o.updateJobStatus(j.Id, jobmanager.Inprogress, "", j.RetryCount)
+		if err != nil {
+			o.jcs.dec(j.GroupKey)
+			return
+		}
 	} else {
 		zap.S().Infow("Job Still Queued", "job_type", j.Id, "group_key", j.GroupKey)
 	}

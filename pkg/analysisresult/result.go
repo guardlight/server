@@ -27,6 +27,12 @@ type Theme struct {
 	Id        uuid.UUID  `json:"id"`
 	Title     string     `json:"title"`
 	Analyzers []Analyzer `json:"analyzers"`
+	Reporter  Reporter   `json:"reporter"`
+}
+
+type Reporter struct {
+	Key       string  `json:"key"`
+	Threshold float32 `json:"threshold"`
 }
 
 type Analyzer struct {

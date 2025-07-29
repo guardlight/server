@@ -78,6 +78,118 @@ func (_c *MockanalysisStore_getAllAnalysisByAnalysisRecordId_Call) RunAndReturn(
 	return _c
 }
 
+// getAllAnalysisById provides a mock function with given fields: aid
+func (_m *MockanalysisStore) getAllAnalysisById(aid uuid.UUID) (Analysis, error) {
+	ret := _m.Called(aid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for getAllAnalysisById")
+	}
+
+	var r0 Analysis
+	var r1 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID) (Analysis, error)); ok {
+		return rf(aid)
+	}
+	if rf, ok := ret.Get(0).(func(uuid.UUID) Analysis); ok {
+		r0 = rf(aid)
+	} else {
+		r0 = ret.Get(0).(Analysis)
+	}
+
+	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
+		r1 = rf(aid)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockanalysisStore_getAllAnalysisById_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'getAllAnalysisById'
+type MockanalysisStore_getAllAnalysisById_Call struct {
+	*mock.Call
+}
+
+// getAllAnalysisById is a helper method to define mock.On call
+//   - aid uuid.UUID
+func (_e *MockanalysisStore_Expecter) getAllAnalysisById(aid interface{}) *MockanalysisStore_getAllAnalysisById_Call {
+	return &MockanalysisStore_getAllAnalysisById_Call{Call: _e.mock.On("getAllAnalysisById", aid)}
+}
+
+func (_c *MockanalysisStore_getAllAnalysisById_Call) Run(run func(aid uuid.UUID)) *MockanalysisStore_getAllAnalysisById_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(uuid.UUID))
+	})
+	return _c
+}
+
+func (_c *MockanalysisStore_getAllAnalysisById_Call) Return(_a0 Analysis, _a1 error) *MockanalysisStore_getAllAnalysisById_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockanalysisStore_getAllAnalysisById_Call) RunAndReturn(run func(uuid.UUID) (Analysis, error)) *MockanalysisStore_getAllAnalysisById_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// getReporterKeyByAnalysisId provides a mock function with given fields: aid
+func (_m *MockanalysisStore) getReporterKeyByAnalysisId(aid uuid.UUID) (string, error) {
+	ret := _m.Called(aid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for getReporterKeyByAnalysisId")
+	}
+
+	var r0 string
+	var r1 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID) (string, error)); ok {
+		return rf(aid)
+	}
+	if rf, ok := ret.Get(0).(func(uuid.UUID) string); ok {
+		r0 = rf(aid)
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
+		r1 = rf(aid)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockanalysisStore_getReporterKeyByAnalysisId_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'getReporterKeyByAnalysisId'
+type MockanalysisStore_getReporterKeyByAnalysisId_Call struct {
+	*mock.Call
+}
+
+// getReporterKeyByAnalysisId is a helper method to define mock.On call
+//   - aid uuid.UUID
+func (_e *MockanalysisStore_Expecter) getReporterKeyByAnalysisId(aid interface{}) *MockanalysisStore_getReporterKeyByAnalysisId_Call {
+	return &MockanalysisStore_getReporterKeyByAnalysisId_Call{Call: _e.mock.On("getReporterKeyByAnalysisId", aid)}
+}
+
+func (_c *MockanalysisStore_getReporterKeyByAnalysisId_Call) Run(run func(aid uuid.UUID)) *MockanalysisStore_getReporterKeyByAnalysisId_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(uuid.UUID))
+	})
+	return _c
+}
+
+func (_c *MockanalysisStore_getReporterKeyByAnalysisId_Call) Return(_a0 string, _a1 error) *MockanalysisStore_getReporterKeyByAnalysisId_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockanalysisStore_getReporterKeyByAnalysisId_Call) RunAndReturn(run func(uuid.UUID) (string, error)) *MockanalysisStore_getReporterKeyByAnalysisId_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // getUserIdByAnalysisId provides a mock function with given fields: analysisId
 func (_m *MockanalysisStore) getUserIdByAnalysisId(analysisId uuid.UUID) (uuid.UUID, error) {
 	ret := _m.Called(analysisId)
@@ -136,22 +248,32 @@ func (_c *MockanalysisStore_getUserIdByAnalysisId_Call) RunAndReturn(run func(uu
 	return _c
 }
 
-// updateAnalysisJobProgress provides a mock function with given fields: aid, jid, status, content, score
-func (_m *MockanalysisStore) updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32) error {
-	ret := _m.Called(aid, jid, status, content, score)
+// updateAnalysisJobProgress provides a mock function with given fields: aid, jid, status, content
+func (_m *MockanalysisStore) updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string) (bool, error) {
+	ret := _m.Called(aid, jid, status, content)
 
 	if len(ret) == 0 {
 		panic("no return value specified for updateAnalysisJobProgress")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID, uuid.UUID, AnalysisStatus, []string, float32) error); ok {
-		r0 = rf(aid, jid, status, content, score)
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID, uuid.UUID, AnalysisStatus, []string) (bool, error)); ok {
+		return rf(aid, jid, status, content)
+	}
+	if rf, ok := ret.Get(0).(func(uuid.UUID, uuid.UUID, AnalysisStatus, []string) bool); ok {
+		r0 = rf(aid, jid, status, content)
 	} else {
-		r0 = ret.Error(0)
+		r0 = ret.Get(0).(bool)
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(uuid.UUID, uuid.UUID, AnalysisStatus, []string) error); ok {
+		r1 = rf(aid, jid, status, content)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockanalysisStore_updateAnalysisJobProgress_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'updateAnalysisJobProgress'
@@ -164,24 +286,23 @@ type MockanalysisStore_updateAnalysisJobProgress_Call struct {
 //   - jid uuid.UUID
 //   - status AnalysisStatus
 //   - content []string
-//   - score float32
-func (_e *MockanalysisStore_Expecter) updateAnalysisJobProgress(aid interface{}, jid interface{}, status interface{}, content interface{}, score interface{}) *MockanalysisStore_updateAnalysisJobProgress_Call {
-	return &MockanalysisStore_updateAnalysisJobProgress_Call{Call: _e.mock.On("updateAnalysisJobProgress", aid, jid, status, content, score)}
+func (_e *MockanalysisStore_Expecter) updateAnalysisJobProgress(aid interface{}, jid interface{}, status interface{}, content interface{}) *MockanalysisStore_updateAnalysisJobProgress_Call {
+	return &MockanalysisStore_updateAnalysisJobProgress_Call{Call: _e.mock.On("updateAnalysisJobProgress", aid, jid, status, content)}
 }
 
-func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) Run(run func(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32)) *MockanalysisStore_updateAnalysisJobProgress_Call {
+func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) Run(run func(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string)) *MockanalysisStore_updateAnalysisJobProgress_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID), args[1].(uuid.UUID), args[2].(AnalysisStatus), args[3].([]string), args[4].(float32))
+		run(args[0].(uuid.UUID), args[1].(uuid.UUID), args[2].(AnalysisStatus), args[3].([]string))
 	})
 	return _c
 }
 
-func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) Return(_a0 error) *MockanalysisStore_updateAnalysisJobProgress_Call {
-	_c.Call.Return(_a0)
+func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) Return(_a0 bool, _a1 error) *MockanalysisStore_updateAnalysisJobProgress_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) RunAndReturn(run func(uuid.UUID, uuid.UUID, AnalysisStatus, []string, float32) error) *MockanalysisStore_updateAnalysisJobProgress_Call {
+func (_c *MockanalysisStore_updateAnalysisJobProgress_Call) RunAndReturn(run func(uuid.UUID, uuid.UUID, AnalysisStatus, []string) (bool, error)) *MockanalysisStore_updateAnalysisJobProgress_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -276,6 +397,53 @@ func (_c *MockanalysisStore_updateProcessedText_Call) Return(_a0 error) *Mockana
 }
 
 func (_c *MockanalysisStore_updateProcessedText_Call) RunAndReturn(run func(uuid.UUID, string) error) *MockanalysisStore_updateProcessedText_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// updateScore provides a mock function with given fields: analysisId, score
+func (_m *MockanalysisStore) updateScore(analysisId uuid.UUID, score float32) error {
+	ret := _m.Called(analysisId, score)
+
+	if len(ret) == 0 {
+		panic("no return value specified for updateScore")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uuid.UUID, float32) error); ok {
+		r0 = rf(analysisId, score)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockanalysisStore_updateScore_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'updateScore'
+type MockanalysisStore_updateScore_Call struct {
+	*mock.Call
+}
+
+// updateScore is a helper method to define mock.On call
+//   - analysisId uuid.UUID
+//   - score float32
+func (_e *MockanalysisStore_Expecter) updateScore(analysisId interface{}, score interface{}) *MockanalysisStore_updateScore_Call {
+	return &MockanalysisStore_updateScore_Call{Call: _e.mock.On("updateScore", analysisId, score)}
+}
+
+func (_c *MockanalysisStore_updateScore_Call) Run(run func(analysisId uuid.UUID, score float32)) *MockanalysisStore_updateScore_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(uuid.UUID), args[1].(float32))
+	})
+	return _c
+}
+
+func (_c *MockanalysisStore_updateScore_Call) Return(_a0 error) *MockanalysisStore_updateScore_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockanalysisStore_updateScore_Call) RunAndReturn(run func(uuid.UUID, float32) error) *MockanalysisStore_updateScore_Call {
 	_c.Call.Return(run)
 	return _c
 }

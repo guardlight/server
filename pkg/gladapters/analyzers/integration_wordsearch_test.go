@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/essential/logging"
 	"github.com/guardlight/server/internal/infrastructure/messaging"
 	"github.com/guardlight/server/pkg/analyzercontract"
@@ -23,6 +24,7 @@ type TestSuiteWordsearchAnalyzerIntegration struct {
 
 func (s *TestSuiteWordsearchAnalyzerIntegration) SetupSuite() {
 	logging.SetupLogging("test")
+	config.SetupConfig("testdata/envs/gladapters.yaml")
 
 	err := natsmessaging.NewNatsServer()
 	s.Assert().NoError(err)

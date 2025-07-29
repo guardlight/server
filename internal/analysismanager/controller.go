@@ -26,6 +26,11 @@ func NewAnalysisRequestController(group *gin.RouterGroup, manager *AnalysisManag
 	}
 
 	analysisGroup := group.Group("analysis")
+
+	analysisGroupLoom := analysisGroup.Group("dataloom")
+	analysisGroupLoom.Use(glsecurity.UseGuardlightAuthApiKey())
+	analysisGroupLoom.POST("", arc.analysisRequestDataloom)
+
 	analysisGroup.Use(glsecurity.UseGuardlightAuth())
 	analysisGroup.POST("", arc.analysisRequest)
 	analysisGroup.GET("", arc.analyses)
@@ -34,6 +39,35 @@ func NewAnalysisRequestController(group *gin.RouterGroup, manager *AnalysisManag
 	analysisGroup.POST("/update/score", arc.updateAnalysisScore)
 
 	return arc
+}
+
+func (arc *AnalysisRequestController) analysisRequestDataloom(c *gin.Context) {
+	ard := &analysisrequest.AnalysisRequestDataloom{}
+	err := glsecurity.ReuseBindAndValidate(c, ard)
+	if err != nil {
+		zap.S().Errorw("error validating analysis request", "error", err)
+		c.JSON(glerror.BadRequestError())
+		return
+	}
+
+	ui := glsecurity.GetUserIdFromContextParsed(c)
+
+	err = arc.manager.RequestAnalysisDataloom(ard, ui)
+	if err != nil {
+		zap.S().Errorw("error creating analysis request", "error", err)
+		switch err {
+		case ErrInvalidAnalyzer:
+		case ErrInvalidParser:
+			c.JSON(glerror.BadRequestError())
+			return
+		default:
+			c.JSON(glerror.InternalServerError())
+			return
+		}
+	}
+
+	c.JSON(http.StatusNoContent, gin.H{})
+
 }
 
 func (arc *AnalysisRequestController) analysisRequest(c *gin.Context) {

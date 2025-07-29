@@ -13,6 +13,7 @@ import (
 )
 
 const (
+	ApiKeyHeader         = "Api-Key"
 	ConsoleApiCookieName = "guardlight_session"
 	ContextNameUserId    = "guardlight-user-id"
 )
@@ -104,5 +105,28 @@ func UseGuardlightAuth() gin.HandlerFunc {
 
 		ctx.Set(ContextNameUserId, sub)
 		ctx.Next()
+	}
+}
+
+func UseGuardlightAuthApiKey() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+		apiKey := ctx.GetHeader("ApiKeyHeader")
+		if apiKey == "" {
+			zap.S().Errorw("Empty api key. Use Api-Key as header name")
+			ctx.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
+
+		for _, us := range config.Get().Users {
+			if us.ApiKey == apiKey {
+				ctx.Set(ContextNameUserId, us.Id)
+				ctx.Next()
+			}
+		}
+
+		zap.S().Errorw("Api key not known. If intended, add apiKey to user config")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+
 	}
 }

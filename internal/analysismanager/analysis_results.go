@@ -98,6 +98,7 @@ func mapToAnalysisResult(ar AnalysisRequest, ts []theme.ThemeDto) analysisresult
 			Id:        tk,
 			Title:     lo.If(ok, t.Title).Else("Theme unknown"),
 			Analyzers: tv,
+			Reporter:  getActiveReporter(t),
 		})
 	}
 
@@ -112,6 +113,17 @@ func mapToAnalysisResult(ar AnalysisRequest, ts []theme.ThemeDto) analysisresult
 	}
 
 	return a
+}
+
+func getActiveReporter(t theme.ThemeDto) analysisresult.Reporter {
+	rep := lo.FindOrElse(t.Reporters, theme.ReporterDto{Key: "none", Threshold: 0}, func(r theme.ReporterDto) bool {
+		return r.ChangeStatus == theme.Same
+	})
+
+	return analysisresult.Reporter{
+		Key:       rep.Key,
+		Threshold: rep.Threshold,
+	}
 }
 
 func mapToAnalyzerToResult(a Analysis) analysisresult.Analyzer {

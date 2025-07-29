@@ -33,6 +33,7 @@ type GLConfig struct {
 	Nats         nats         `koanf:"nats"`
 	Parsers      []Parser     `koanf:"parsers"`
 	Analyzers    []analyzer   `koanf:"analyzers"`
+	Reporters    []reporter   `koanf:"reporters"`
 	Users        []User       `koanf:"users"`
 }
 
@@ -48,6 +49,7 @@ type User struct {
 	Password string    `koanf:"password" default:"-"`
 	Role     string    `koanf:"role" default:"-"`
 	Id       uuid.UUID `koanf:"id" default:"-"`
+	ApiKey   string    `koanf:"apiKey" default:"-"`
 }
 
 type server struct {
@@ -81,15 +83,27 @@ type console struct {
 }
 
 type Parser struct {
+	Image       string `koanf:"image" default:"-"`
+	External    bool   `koanf:"external" default:"-"`
+	Key         string `koanf:"key" default:"-"`
+	Name        string `koanf:"name" default:"-"`
+	Description string `koanf:"description" default:"-"`
 	Type        string `koanf:"type" default:"-"`
+	Concurrency int    `koanf:"concurrency" default:"-"`
+}
+
+type reporter struct {
+	Image       string `koanf:"image" default:"-"`
+	External    bool   `koanf:"external" default:"-"`
+	Key         string `koanf:"key" default:"-"`
 	Name        string `koanf:"name" default:"-"`
 	Description string `koanf:"description" default:"-"`
 	Concurrency int    `koanf:"concurrency" default:"-"`
-	Image       string `koanf:"image" default:"-"`
-	External    bool   `koanf:"external" default:"-"`
 }
 
 type analyzer struct {
+	Image         string          `koanf:"image" default:"-"`
+	External      bool            `koanf:"external" default:"-"`
 	Key           string          `koanf:"key" default:"-"`
 	Name          string          `koanf:"name" default:"-"`
 	Description   string          `koanf:"description" default:"-"`
@@ -97,8 +111,6 @@ type analyzer struct {
 	Model         string          `koanf:"model" default:"-"`
 	Concurrency   int             `koanf:"concurrency" default:"-"`
 	Inputs        []AnalyzerInput `koanf:"inputs" default:"-"`
-	Image         string          `koanf:"image" default:"-"`
-	External      bool            `koanf:"external" default:"-"`
 }
 
 type AnalyzerInput struct {
@@ -223,16 +235,22 @@ func (fc GLConfig) GetAnalyzer(analyzerKey string) (analyzer, bool) {
 	})
 }
 
+func (fc GLConfig) GetReporter(reporterKey string) (reporter, bool) {
+	return lo.Find(Get().Reporters, func(a reporter) bool {
+		return a.Key == reporterKey
+	})
+}
+
 func configBasicAdapters(defaultedConfig *GLConfig) {
 	defaultedConfig.Analyzers = append(defaultedConfig.Analyzers, analyzer{
 		Key:           "word_search",
 		Name:          "Word Search",
 		Description:   "Uses a basic word list to scan content.",
+		Image:         "builtin",
+		External:      true,
 		ContextWindow: 32000,
 		Model:         "text",
 		Concurrency:   4,
-		Image:         "builtin",
-		External:      true,
 		Inputs: []AnalyzerInput{
 			{
 				Key:         "threshold",
@@ -250,12 +268,22 @@ func configBasicAdapters(defaultedConfig *GLConfig) {
 	})
 
 	defaultedConfig.Parsers = append(defaultedConfig.Parsers, Parser{
-		Type:        "freetext",
+		Key:         "freetext",
 		Name:        "Freetext",
 		Description: "Parses a text to an utf-8 formated text.",
-		Concurrency: 4,
 		Image:       "builtin",
 		External:    true,
+		Type:        "freetext",
+		Concurrency: 4,
+	})
+
+	defaultedConfig.Reporters = append(defaultedConfig.Reporters, reporter{
+		Key:         "word_count",
+		Name:        "Word Count",
+		Description: "This reporter will match the threshold to the amount of lines.",
+		Image:       "builtin",
+		External:    true,
+		Concurrency: 4,
 	})
 }
 
@@ -282,19 +310,16 @@ func configAdminUser(k *koanf.Koanf) {
 			Password: lo.RandomString(16, lo.AlphanumericCharset),
 			Role:     "admin",
 			Id:       uuid.New(),
+			ApiKey:   lo.RandomString(32, lo.AlphanumericCharset),
 		})
 		k.Set("users", users)
-		zap.S().Info("Created Admin User. Admin Password: " + users[0].Password)
+		zap.S().Infow("Created Admin User.", "password", users[0].Password, "apiKey", users[0].ApiKey)
 	}
 }
 
 func validateAnalyzers(gc *GLConfig) error {
-	for _, a := range gc.Analyzers {
-		if ok := lo.ContainsBy(a.Inputs, func(i AnalyzerInput) bool {
-			return i.Key == "threshold"
-		}); !ok {
-			return fmt.Errorf("threshold input not found in %s analyzer", a.Key)
-		}
+	for _, _ = range gc.Analyzers {
+		// Validate analyzer input
 	}
 	return nil
 }

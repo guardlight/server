@@ -46,6 +46,22 @@ func NewAnalysisManangerRequester(jobMananger jobManagerRequester, ars analysisR
 	}
 }
 
+func (am *AnalysisManagerRequester) RequestAnalysisDataloom(ardDto *analysisrequest.AnalysisRequestDataloom, ui uuid.UUID) error {
+	ard := &analysisrequest.AnalysisRequest{
+		Title:       ardDto.Title,
+		ContentType: ardDto.ContentType,
+		Category:    ardDto.Category,
+		File:        ardDto.File,
+	}
+
+	// Get themes
+	// Use changed and same fields
+
+	ard.Themes = []analysisrequest.Theme{}
+
+	return am.RequestAnalysis(ard, ui)
+}
+
 func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.AnalysisRequest, ui uuid.UUID) error {
 
 	p, ok := config.Get().GetParser(arDto.File.Mimetype)

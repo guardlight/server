@@ -44,3 +44,11 @@ type AnalysisUpdateScore struct {
 	Id    uuid.UUID `json:"id"`
 	Score float32   `json:"score"`
 }
+
+type AnalysisRequestDataloom struct {
+	Title       string      `json:"title"`
+	ContentType ContentType `json:"contentType"`
+	Category    string      `json:"category"`
+	File        File        `json:"file"`
+	ThemeIds    []uuid.UUID `json:"themeIds"`
+}

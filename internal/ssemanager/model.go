@@ -10,6 +10,7 @@ const (
 type ActionType string
 
 const (
+	ActionReportDone        ActionType = "report_done"
 	ActionAnalysisDone      ActionType = "analysis_done"
 	ActionAnalysisRequested ActionType = "analysis_requested"
 	ActionBeat              ActionType = "beat"

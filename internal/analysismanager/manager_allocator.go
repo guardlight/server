@@ -10,6 +10,7 @@ import (
 	"github.com/guardlight/server/internal/ssemanager"
 	"github.com/guardlight/server/pkg/analyzercontract"
 	"github.com/guardlight/server/pkg/parsercontract"
+	"github.com/guardlight/server/pkg/reportercontract"
 	"github.com/nats-io/nats.go"
 	"github.com/samber/lo"
 	"go.uber.org/zap"
@@ -19,8 +20,11 @@ type analysisStore interface {
 	updateProcessedText(ai uuid.UUID, text string) error
 	getAllAnalysisByAnalysisRecordId(id uuid.UUID) ([]Analysis, error)
 	updateAnalysisJobs(ai uuid.UUID, jbs []SingleJobProgress) error
-	updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32) error
+	updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string) (bool, error)
 	getUserIdByAnalysisId(analysisId uuid.UUID) (uuid.UUID, error)
+	updateScore(analysisId uuid.UUID, score float32) error
+	getReporterKeyByAnalysisId(aid uuid.UUID) (string, error)
+	getAllAnalysisById(aid uuid.UUID) (Analysis, error)
 }
 
 type subsriber interface {
@@ -52,6 +56,7 @@ func NewAnalysisManagerAllocator(s subsriber, as analysisStore, ju jobber, sse s
 
 	s.Subscribe("parser.result", ama.processParserResult)
 	s.Subscribe("analyzer.result", ama.processAnalyzerResult)
+	s.Subscribe("reporter.result", ama.processReporterResult)
 
 	return ama
 }
@@ -167,7 +172,7 @@ func (ama *AnalysisManagerAllocator) processAnalyzerResult(m *nats.Msg) {
 		//      Update to error status with description, "Task running to long"
 	}
 
-	err = ama.as.updateAnalysisJobProgress(ar.AnalysisId, ar.JobId, AnalysisFinished, ar.Results, ar.Score)
+	analysisCompleted, err := ama.as.updateAnalysisJobProgress(ar.AnalysisId, ar.JobId, AnalysisFinished, ar.Results)
 	if err != nil {
 		zap.S().Errorw("Could not update analysis progress", "error", err)
 		return
@@ -193,6 +198,72 @@ func (ama *AnalysisManagerAllocator) processAnalyzerResult(m *nats.Msg) {
 		Data:   ar.AnalysisId.String(),
 	})
 
-	// if contributeToPublicMADB (MADB=Media Analysis Database)
+	if analysisCompleted {
+		zap.S().Infow("Sending analysis results to reporting", "analysis_id", ar.AnalysisId)
 
+		rkey, err := ama.as.getReporterKeyByAnalysisId(ar.AnalysisId)
+		if err != nil {
+			return
+		}
+
+		ana, err := ama.as.getAllAnalysisById(ar.AnalysisId)
+		if err != nil {
+			return
+		}
+
+		reporterFromConfig, ok := config.Get().GetReporter(rkey)
+		if !ok {
+			zap.S().Errorw("Could not get reporter from config", "reporter_key", rkey)
+			return
+		}
+
+		jid := ama.ju.CreateId()
+		rjd := jobmanager.ReportJobData{
+			Type:  reporterFromConfig.Key,
+			Image: reporterFromConfig.Image,
+			Topic: fmt.Sprintf("reporter.%s", reporterFromConfig.Key),
+			ReporterData: reportercontract.ReporterRequest{
+				JobId:      jid,
+				AnalysisId: ar.AnalysisId,
+				Contents:   ana.Content,
+			},
+		}
+		gk := fmt.Sprintf("reporter.%s", reporterFromConfig.Key)
+		ama.ju.EnqueueJob(jid, jobmanager.Report, gk, rjd)
+	}
+
+}
+
+func (ama *AnalysisManagerAllocator) processReporterResult(m *nats.Msg) {
+	var rr reportercontract.ReporterResponse
+	err := json.Unmarshal(m.Data, &rr)
+	if err != nil {
+		zap.S().Errorw("Could not unmarshal reporter response", "error", err)
+	}
+
+	err = ama.ju.UpdateJobStatus(rr.JobId, jobmanager.Finished, "", 0)
+	if err != nil {
+		zap.S().Errorw("Could not update job status", "error", err, "jid", rr.JobId)
+		return
+	}
+
+	err = ama.as.updateScore(rr.AnalysisId, rr.Score)
+	if err != nil {
+		zap.S().Errorw("Could not update analysis score", "error", err)
+		return
+	}
+
+	// TODO : Update comments about analysis
+
+	// send update to SseManager
+	uid, err := ama.as.getUserIdByAnalysisId(rr.AnalysisId)
+	if err != nil {
+		return
+	}
+
+	ama.sse.SendEvent(uid, ssemanager.SseEvent{
+		Type:   ssemanager.TypeUpdate,
+		Action: ssemanager.ActionReportDone,
+		Data:   rr.AnalysisId.String(),
+	})
 }

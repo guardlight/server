@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/google/uuid"
+	"github.com/guardlight/server/internal/theme"
 	"github.com/samber/lo"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -68,6 +69,32 @@ func (amr AnalysisManagerRepository) getAllAnalysisByAnalysisRecordId(id uuid.UU
 	return a, nil
 }
 
+func (amr AnalysisManagerRepository) getAllAnalysisById(aid uuid.UUID) (Analysis, error) {
+	var a Analysis
+	if err := amr.db.Where("id = ?", aid).First(&a).Error; err != nil {
+		zap.S().Errorw("Could not get analysis record", "error", err)
+		return Analysis{}, err
+	}
+
+	return a, nil
+}
+
+func (amr AnalysisManagerRepository) getReporterKeyByAnalysisId(aid uuid.UUID) (string, error) {
+	a := Analysis{Id: aid}
+	if err := amr.db.First(&a).Error; err != nil {
+		zap.S().Errorw("Could not get analysis record", "error", err, "id", aid)
+		return "", err
+	}
+
+	t := theme.Theme{Id: a.ThemeId}
+	if err := amr.db.First(&t).Error; err != nil {
+		zap.S().Errorw("Could not get theme record", "error", err, "id", a.ThemeId)
+		return "", err
+	}
+
+	return t.Reporter.Key, nil
+}
+
 func (amr AnalysisManagerRepository) updateAnalysisJobs(ai uuid.UUID, jbs []SingleJobProgress) error {
 	res := amr.db.
 		Model(Analysis{
@@ -87,10 +114,10 @@ func (amr AnalysisManagerRepository) updateAnalysisJobs(ai uuid.UUID, jbs []Sing
 	return nil
 }
 
-func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string, score float32) error {
+func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string) (bool, error) {
 	a := Analysis{Id: aid}
 	if err := amr.db.First(&a).Error; err != nil {
-		return err
+		return false, err
 	}
 
 	newJs := lo.Map(a.Jobs, func(s SingleJobProgress, _ int) SingleJobProgress {
@@ -107,8 +134,6 @@ func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, ji
 
 	completedJobs := lo.CountBy(newJs, func(j SingleJobProgress) bool { return j.Status == AnalysisFinished })
 
-	newSc := (a.Score*float32(completedJobs-1) + score) / float32(completedJobs)
-
 	newStatus := func() AnalysisStatus {
 		if completedJobs == len(newJs) {
 			return AnalysisFinished
@@ -123,20 +148,19 @@ func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, ji
 	resp := amr.db.Model(&a).Updates(Analysis{
 		Jobs:    newJs,
 		Content: newCon,
-		Score:   newSc,
 		Status:  newStatus,
 	})
 
 	if resp.Error != nil {
-		return resp.Error
+		return false, resp.Error
 	}
 
 	if resp.RowsAffected == 0 {
 		zap.S().Errorw("No records updated", "analysis_id", aid)
-		return errors.New("no records affected after update")
+		return false, errors.New("no records affected after update")
 	}
 
-	return nil
+	return newStatus == AnalysisFinished, nil
 }
 
 func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID, pag Pagination, catType, catCat, query string) (AnalysisResultPaginated, error) {

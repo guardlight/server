@@ -36,7 +36,7 @@ func (wa *wordsearchAnalyzer) analyze(m *nats.Msg) {
 		return
 	}
 	zap.S().Info(ar.Content)
-	res, score, err := analyze(ar.Content, ar.Inputs)
+	res, err := analyze(ar.Content, ar.Inputs)
 	if err != nil {
 		wa.makeParserErrorResponse(&ar, err)
 		return
@@ -47,7 +47,6 @@ func (wa *wordsearchAnalyzer) analyze(m *nats.Msg) {
 		AnalysisId: ar.AnalysisId,
 		Results:    res,
 		Status:     analyzercontract.AnalyzerSuccess,
-		Score:      score,
 	}
 	dat, err := json.Marshal(aresp)
 	if err != nil {
@@ -76,12 +75,12 @@ func (wa *wordsearchAnalyzer) makeParserErrorResponse(ar *analyzercontract.Analy
 	wa.ncon.Publish("analyzer.result", dat)
 }
 
-func analyze(text string, ins []analyzercontract.AnalysisInput) ([]string, float32, error) {
+func analyze(text string, ins []analyzercontract.AnalysisInput) ([]string, error) {
 	in, ok := lo.Find(ins, func(item analyzercontract.AnalysisInput) bool {
 		return item.Key == INPUT_KEY_STRICT_WORDS
 	})
 	if !ok {
-		return nil, 0, errors.New("strict_words key not found in data")
+		return nil, errors.New("strict_words key not found in data")
 	}
 
 	strWordsMapper := func(str string, _ int) string {
@@ -116,14 +115,7 @@ func analyze(text string, ins []analyzercontract.AnalysisInput) ([]string, float
 		}
 	}
 
-	score := func() float32 {
-		if len(sents) == 0 {
-			return -1
-		}
-		return 2*float32(len(sents))/float32(len(splText)) - 1
-	}()
-
-	return sents, score, nil
+	return sents, nil
 }
 
 func buildSent(splText []string, ind int) string {

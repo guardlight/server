@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/guardlight/server/pkg/analyzercontract"
 	"github.com/guardlight/server/pkg/parsercontract"
+	"github.com/guardlight/server/pkg/reportercontract"
 )
 
 type JobStatus string
@@ -24,6 +25,7 @@ type JobType string
 const (
 	Parse   JobType = "parse"
 	Analyze JobType = "analyze"
+	Report  JobType = "report"
 )
 
 func (jt JobType) Match(s string) bool {
@@ -54,4 +56,11 @@ type AnalyzerJobData struct {
 	Topic        string                           `json:"topic"`
 	Image        string                           `json:"image"`
 	AnalyzerData analyzercontract.AnalyzerRequest `json:"analyzerData"`
+}
+
+type ReportJobData struct {
+	Type         string                           `json:"type"`
+	Topic        string                           `json:"topic"`
+	Image        string                           `json:"image"`
+	ReporterData reportercontract.ReporterRequest `json:"reporterData"`
 }

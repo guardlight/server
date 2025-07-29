@@ -45,6 +45,7 @@ func (tr *ThemeRepository) updateTheme(t *Theme, uid uuid.UUID) error {
 			}).Updates(Theme{
 				Title:     t.Title,
 				Analyzers: t.Analyzers,
+				Reporter:  t.Reporter,
 			})
 		}
 	}()

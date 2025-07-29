@@ -2,20 +2,16 @@ analyzers:
     - concurrency: 4
       contextWindow: 16000
       description: Uses a basic word list to scan content for.
+      external: true
       image: builtin
       inputs:
         - description: Words in this list will immediatly flag the content.
           key: strict_words
           name: Strict Words
           type: textarea
-        - description: The threshold is the predefined value that triggers the analyzer to flag content when the value is reached or exceeded.
-          key: threshold
-          name: Threshold
-          type: threshold
       key: word_search
       model: text
       name: Word Search Analyzer
-      external: true
 console:
     jwt:
         maxAge: 3600
@@ -30,15 +26,26 @@ database:
     user: root
 domain: 192.168.178.142
 env: development
+nats:
+    password: 34t2MeqE24cOi8Jd
+    port: 4222
+    server: ""
+    user: gl_nats_user
 orchestrator:
     scheduleRateCron: '* * * * * *'
 parsers:
     - concurrency: 1
       description: Parses a text to an utf-8 formated text.
+      external: true
       image: builtin
       name: Freetext parsers
       type: freetext
+reporters:
+    - description: Basic reporter that will check basic counts.
       external: true
+      image: builtin
+      key: word_count
+      name: Word Count
 server:
     host: 0.0.0.0
     port: 6660

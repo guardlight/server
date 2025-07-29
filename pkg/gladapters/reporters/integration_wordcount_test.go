@@ -1,9 +1,7 @@
-package parsers
+package reporters
 
 import (
-	"encoding/base64"
 	"encoding/json"
-	"os"
 	"sync"
 	"testing"
 
@@ -11,19 +9,19 @@ import (
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/essential/logging"
 	"github.com/guardlight/server/internal/infrastructure/messaging"
-	"github.com/guardlight/server/pkg/parsercontract"
+	"github.com/guardlight/server/pkg/reportercontract"
 	"github.com/guardlight/server/servers/natsmessaging"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/zap"
 )
 
-type TestSuiteFreetextParserIntegration struct {
+type TestSuiteWordcountReporterIntegration struct {
 	suite.Suite
 	ncon *nats.Conn
 }
 
-func (s *TestSuiteFreetextParserIntegration) SetupSuite() {
+func (s *TestSuiteWordcountReporterIntegration) SetupSuite() {
 	logging.SetupLogging("test")
 	config.SetupConfig("testdata/envs/gladapters.yaml")
 
@@ -35,41 +33,40 @@ func (s *TestSuiteFreetextParserIntegration) SetupSuite() {
 	zap.S().Info("Setted up")
 }
 
-func TestFreetextParserSuiteRun(t *testing.T) {
-	suite.Run(t, new(TestSuiteFreetextParserIntegration))
+func TestWordcountReporterSuiteRun(t *testing.T) {
+	suite.Run(t, new(TestSuiteWordcountReporterIntegration))
 }
 
-func (s *TestSuiteFreetextParserIntegration) TestParser() {
-	NewFreetextParser(s.ncon)
-
-	freetext, err := os.ReadFile("../../../testdata/epubs/lion.txt")
-	s.Assert().NoError(err)
+func (s *TestSuiteWordcountReporterIntegration) TestWordcountReporter() {
+	NewWordcountReporter(s.ncon)
 
 	jid := uuid.MustParse("1d36a166-2fb9-4028-ad2f-c184980eb33e")
 	aid := uuid.MustParse("6a786e6d-e6f9-4ff8-a477-40ba73c6d6d1")
-	pr := parsercontract.ParserRequest{
+
+	ar := reportercontract.ReporterRequest{
 		JobId:      jid,
 		AnalysisId: aid,
-		Content:    base64.StdEncoding.EncodeToString(freetext),
+		Contents:   []string{},
 	}
 
-	data, err := json.Marshal(pr)
+	data, err := json.Marshal(ar)
 	s.Assert().NoError(err)
 
-	err = s.ncon.Publish("parser.freetext", data)
+	err = s.ncon.Publish("reporter.word_count", data)
 	s.Assert().NoError(err)
 
 	var wg sync.WaitGroup
 	wg.Add(1)
-	s.ncon.Subscribe("parser.result", func(m *nats.Msg) {
-		var t parsercontract.ParserResponse
+	s.ncon.Subscribe("reporter.result", func(m *nats.Msg) {
+		var t reportercontract.ReporterResponse
 		err := json.Unmarshal(m.Data, &t)
 		s.Assert().NoError(err)
 		s.Assert().Equal(jid, t.JobId)
-		zap.S().Infow("parsed text", "text", t.Text)
-		// os.WriteFile("./test.txt", []byte(t.Text), os.ModePerm)
+		s.Assert().NotZero(t.Score)
+		zap.S().Infow("Reporter results", "results", t.Score)
 		wg.Done()
 	})
 
 	wg.Wait()
+
 }

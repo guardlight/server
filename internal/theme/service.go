@@ -22,8 +22,6 @@ func NewThemeService(ts themeStore) *ThemeService {
 }
 
 func (ts *ThemeService) updateTheme(tDto ThemeDto, uid uuid.UUID) error {
-	// TODO Validate theme -- Eg. Must contain Analysis:Input:Theshold
-
 	t := mapDtoToEntity(tDto, uid)
 	err := ts.ts.updateTheme(&t, uid)
 	if err != nil {
@@ -34,12 +32,20 @@ func (ts *ThemeService) updateTheme(tDto ThemeDto, uid uuid.UUID) error {
 }
 
 func mapDtoToEntity(tDto ThemeDto, uid uuid.UUID) Theme {
+	rep := lo.FindOrElse(tDto.Reporters, ReporterDto{Key: "none", Threshold: 0}, func(rDto ReporterDto) bool {
+		return rDto.ChangeStatus == Same || rDto.ChangeStatus == Changed
+	})
+
 	return Theme{
 		Id:          tDto.Id,
 		UserId:      uid,
 		Title:       tDto.Title,
 		Description: tDto.Description,
-		Analyzers:   lo.Map(tDto.Analyzers, mapAnalyzerDtoToEntity),
+		Reporter: Reporter{
+			Key:       rep.Key,
+			Threshold: rep.Threshold,
+		},
+		Analyzers: lo.Map(tDto.Analyzers, mapAnalyzerDtoToEntity),
 	}
 }
 
@@ -70,6 +76,7 @@ func (ts *ThemeService) GetAllThemesByUserId(id uuid.UUID) ([]ThemeDto, error) {
 		Title:       "",
 		Description: "",
 		Analyzers:   []Analyzer{},
+		Reporter:    Reporter{},
 	})
 
 	return lo.Map(dbThemes, mergeThemesFromConfig), nil
@@ -80,6 +87,7 @@ func mergeThemesFromConfig(t Theme, _ int) ThemeDto {
 		Id:          t.Id,
 		Title:       t.Title,
 		Description: t.Description,
+		Reporters:   mergeReporterFromConfig(t.Reporter),
 		// Contains all Same, Removed and Changed analyzers
 		Analyzers: lo.Map(t.Analyzers, mergeAnalyzerFromConfig),
 	}
@@ -97,7 +105,52 @@ func mergeThemesFromConfig(t Theme, _ int) ThemeDto {
 		}
 	}
 
+	// Adds all new reporters
+	for _, rConf := range config.Get().Reporters {
+		if ok := lo.ContainsBy(tDto.Reporters, func(r ReporterDto) bool { return r.Key == rConf.Key }); !ok {
+			tDto.Reporters = append(tDto.Reporters, ReporterDto{
+				Key:          rConf.Key,
+				Name:         rConf.Name,
+				Description:  rConf.Description,
+				ChangeStatus: New,
+				Threshold:    0,
+			})
+		}
+	}
+
 	return tDto
+}
+
+func mergeReporterFromConfig(r Reporter) []ReporterDto {
+	rConf, ok := config.Get().GetReporter(r.Key)
+
+	// Default key if none is empty string
+	if len(r.Key) == 0 {
+		return []ReporterDto{}
+	}
+
+	// Reporter is not in config anymore
+	if !ok {
+		return []ReporterDto{
+			{
+				Key:          r.Key,
+				ChangeStatus: Removed,
+				Threshold:    r.Threshold,
+				Name:         "",
+				Description:  "",
+			},
+		}
+	}
+
+	return []ReporterDto{
+		{
+			Key:          rConf.Key,
+			Name:         rConf.Name,
+			Threshold:    r.Threshold,
+			Description:  rConf.Description,
+			ChangeStatus: Same,
+		},
+	}
 }
 
 func mergeAnalyzerFromConfig(a Analyzer, _ int) AnalyzerDto {

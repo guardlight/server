@@ -123,7 +123,6 @@ func (sama *TestSuiteAnalysisManagerAllocatorIntegration) TestAnalyzerResult() {
 		AnalysisId: aid,
 		Results:    []string{"Running and Walking"},
 		Status:     analyzercontract.AnalyzerSuccess,
-		Score:      0.25,
 	}
 
 	dat, err := json.Marshal(pr)
