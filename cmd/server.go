@@ -76,9 +76,10 @@ func Server() {
 	baseGroup := mainRouter.Group("")
 
 	// Services
-	nc := natsclient.NewNatsClient(ncon)
-	jm := jobmanager.NewJobMananger(jmr)
 	sch, err := scheduler.NewScheduler(loc)
+
+	nc := natsclient.NewNatsClient(ncon)
+	jm := jobmanager.NewJobMananger(jmr, sch.Gos)
 	if err != nil {
 		zap.S().Errorw("Could not create scheduler", "error", err)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -91,7 +92,7 @@ func Server() {
 	}
 	ts := theme.NewThemeService(tsr)
 	ars := analysismanager.NewAnalysisResultService(amr, amr, ts)
-	am := analysismanager.NewAnalysisManangerRequester(jm, amr, ssem)
+	am := analysismanager.NewAnalysisManangerRequester(jm, amr, ssem, ts)
 
 	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm, ssem)
 

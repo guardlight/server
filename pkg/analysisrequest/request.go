@@ -9,6 +9,7 @@ const (
 	MOVIE  ContentType = "movie"
 	SERIES ContentType = "series"
 	LYRICS ContentType = "lyrics"
+	OTHER  ContentType = "other"
 )
 
 type AnalysisRequest struct {
@@ -51,4 +52,8 @@ type AnalysisRequestDataloom struct {
 	Category    string      `json:"category"`
 	File        File        `json:"file"`
 	ThemeIds    []uuid.UUID `json:"themeIds"`
+}
+
+type AnalysisRequestResponse struct {
+	Id uuid.UUID `json:"id"`
 }

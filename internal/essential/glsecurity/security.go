@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	ApiKeyHeader         = "Api-Key"
+	ApiKeyHeader         = "x-api-key"
 	ConsoleApiCookieName = "guardlight_session"
 	ContextNameUserId    = "guardlight-user-id"
 )
@@ -111,17 +111,18 @@ func UseGuardlightAuth() gin.HandlerFunc {
 func UseGuardlightAuthApiKey() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
-		apiKey := ctx.GetHeader("ApiKeyHeader")
+		apiKey := ctx.GetHeader(ApiKeyHeader)
 		if apiKey == "" {
-			zap.S().Errorw("Empty api key. Use Api-Key as header name")
+			zap.S().Errorw("Empty api key. Use x-api-key as header name")
 			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 
 		for _, us := range config.Get().Users {
 			if us.ApiKey == apiKey {
-				ctx.Set(ContextNameUserId, us.Id)
+				ctx.Set(ContextNameUserId, us.Id.String())
 				ctx.Next()
+				return
 			}
 		}
 

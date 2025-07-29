@@ -92,8 +92,11 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 
 	// Services
 	nc := natsclient.NewNatsClient(ncon)
-	jm := jobmanager.NewJobMananger(jmr)
 	sch, err := scheduler.NewScheduler(loc)
+	s.Assert().NoError(err)
+	jm := jobmanager.NewJobMananger(jmr, sch.Gos)
+
+	sch, err = scheduler.NewScheduler(loc)
 	if err != nil {
 		zap.S().Errorw("Could not create scheduler", "error", err)
 		s.Assert().NoError(err)
@@ -106,7 +109,7 @@ func (s *TestSuiteMainIntegration) SetupSuite() {
 	ts := theme.NewThemeService(tsr)
 	ssem := ssemanager.NewSseMananger()
 	ars := analysismanager.NewAnalysisResultService(amr, amr, ts)
-	am := analysismanager.NewAnalysisManangerRequester(jm, amr, ssem)
+	am := analysismanager.NewAnalysisManangerRequester(jm, amr, ssem, ts)
 	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm, ssem)
 
 	// Controllers

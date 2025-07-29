@@ -11,6 +11,7 @@ import (
 	"github.com/guardlight/server/internal/essential/config"
 	"github.com/guardlight/server/internal/jobmanager"
 	"github.com/guardlight/server/internal/ssemanager"
+	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/pkg/analysisrequest"
 	"github.com/guardlight/server/pkg/parsercontract"
 	"github.com/samber/lo"
@@ -18,13 +19,15 @@ import (
 )
 
 var (
-	ErrInvalidParser   = errors.New("invalid parser selected")
-	ErrInvalidAnalyzer = errors.New("invalid analyzer selected")
-	ErrParserMarshal   = errors.New("error marshaling parser data")
+	ErrInvalidParser    = errors.New("invalid parser selected")
+	ErrInvalidAnalyzer  = errors.New("invalid analyzer selected")
+	ErrParserMarshal    = errors.New("error marshaling parser data")
+	ErrHashAlreadyExist = errors.New("hash already exist")
 )
 
 type analysisRequestStore interface {
 	createAnalysisRequest(analysisRequest *AnalysisRequest) error
+	getAnalysisRequestIdByHash(hash string) (uuid.UUID, error)
 }
 
 type jobManagerRequester interface {
@@ -35,50 +38,89 @@ type jobManagerRequester interface {
 type AnalysisManagerRequester struct {
 	jobMananger jobManagerRequester
 	ars         analysisRequestStore
+	ts          themeService
 	sse         sseEventSender
 }
 
-func NewAnalysisManangerRequester(jobMananger jobManagerRequester, ars analysisRequestStore, sse sseEventSender) *AnalysisManagerRequester {
+func NewAnalysisManangerRequester(jobMananger jobManagerRequester, ars analysisRequestStore, sse sseEventSender, ts themeService) *AnalysisManagerRequester {
 	return &AnalysisManagerRequester{
 		jobMananger: jobMananger,
 		ars:         ars,
 		sse:         sse,
+		ts:          ts,
 	}
 }
 
-func (am *AnalysisManagerRequester) RequestAnalysisDataloom(ardDto *analysisrequest.AnalysisRequestDataloom, ui uuid.UUID) error {
+func (am *AnalysisManagerRequester) RequestAnalysisDataloom(ardDto *analysisrequest.AnalysisRequestDataloom, ui uuid.UUID) (uuid.UUID, error) {
 	ard := &analysisrequest.AnalysisRequest{
 		Title:       ardDto.Title,
 		ContentType: ardDto.ContentType,
 		Category:    ardDto.Category,
 		File:        ardDto.File,
+		Themes:      []analysisrequest.Theme{},
 	}
 
-	// Get themes
-	// Use changed and same fields
+	userThemes, err := am.ts.GetAllThemesByUserId(ui)
+	if err != nil {
+		return uuid.Nil, err
+	}
 
-	ard.Themes = []analysisrequest.Theme{}
+	ard.Themes = lo.FilterMap(userThemes, func(ut theme.ThemeDto, _ int) (analysisrequest.Theme, bool) {
+		if lo.ContainsBy(ardDto.ThemeIds, func(ti uuid.UUID) bool { return ti == ut.Id }) {
+			return analysisrequest.Theme{
+				Id:    ut.Id,
+				Title: ut.Title,
+				Analyzers: lo.FilterMap(ut.Analyzers, func(ta theme.AnalyzerDto, _ int) (analysisrequest.Analyzer, bool) {
+					if ta.ChangeStatus == theme.Same || ta.ChangeStatus == theme.Changed {
+						return analysisrequest.Analyzer{
+							Key: ta.Key,
+							Inputs: lo.FilterMap(ta.Inputs, func(tai theme.AnalyzerInputDto, _ int) (analysisrequest.AnalyzerInput, bool) {
+								if tai.ChangeStatus == theme.Same || tai.ChangeStatus == theme.Changed {
+									return analysisrequest.AnalyzerInput{
+										Key:   tai.Key,
+										Value: tai.Value,
+									}, true
+								}
+								return analysisrequest.AnalyzerInput{}, false
+							}),
+						}, true
+					}
+					return analysisrequest.Analyzer{}, false
+				}),
+			}, true
+		}
+		return analysisrequest.Theme{}, false
+	})
 
-	return am.RequestAnalysis(ard, ui)
+	return am.RequestAnalysis(ard, ui, string(RequestOriginDataloom))
 }
 
-func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.AnalysisRequest, ui uuid.UUID) error {
+func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.AnalysisRequest, ui uuid.UUID, requestOrigin string) (uuid.UUID, error) {
 
 	p, ok := config.Get().GetParser(arDto.File.Mimetype)
 	if !ok {
 		zap.S().Errorw("Invalid parser specified", "parser_type", arDto.File.Mimetype)
-		return ErrInvalidParser
+		return uuid.Nil, ErrInvalidParser
 	}
 
 	if !hasValidAnalyzers(arDto) {
-		return ErrInvalidAnalyzer
+		return uuid.Nil, ErrInvalidAnalyzer
 	}
 
 	bContent, err := base64.StdEncoding.DecodeString(arDto.File.Content)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	rawData := createRawData(arDto, bContent)
+
+	arid, err := am.ars.getAnalysisRequestIdByHash(rawData.Hash)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	if arid != uuid.Nil {
+		return arid, ErrHashAlreadyExist
+	}
 
 	analysisParts := createAnalysis(arDto)
 
@@ -86,7 +128,7 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		Id:            uuid.Nil,
 		UserId:        ui,
 		Title:         arDto.Title,
-		RequestOrigin: string(RequestOriginUser),
+		RequestOrigin: requestOrigin,
 		Category:      arDto.Category,
 		ContentType:   string(arDto.ContentType),
 		RawData:       rawData,
@@ -94,7 +136,7 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 	}
 	err = am.ars.createAnalysisRequest(ar)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	jobId := am.jobMananger.CreateId()
@@ -112,7 +154,7 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 	gk := fmt.Sprintf("parser.%s", p.Type)
 	err = am.jobMananger.EnqueueJob(jobId, jobmanager.Parse, gk, jd)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	am.sse.SendEvent(ui, ssemanager.SseEvent{
@@ -121,7 +163,7 @@ func (am *AnalysisManagerRequester) RequestAnalysis(arDto *analysisrequest.Analy
 		Data:   ar.Id.String(),
 	})
 
-	return nil
+	return ar.Id, nil
 }
 
 func createAnalysis(arDto *analysisrequest.AnalysisRequest) []Analysis {

@@ -238,6 +238,21 @@ func (amr AnalysisManagerRepository) getUserIdByAnalysisId(analysisId uuid.UUID)
 	return uuid.MustParse(userId), nil
 }
 
+func (amr AnalysisManagerRepository) getAnalysisRequestIdByHash(hash string) (uuid.UUID, error) {
+	var rawData RawData
+
+	result := amr.db.Model(&RawData{}).Where("hash = ?", hash).First(&rawData)
+	if result.Error != nil {
+		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+			return uuid.Nil, nil
+		}
+		zap.S().Errorw("Could not find raw data by hash", "raw_hash", hash, "error", result.Error)
+		return uuid.Nil, result.Error
+	}
+
+	return rawData.AnalysisRequestId, nil
+}
+
 func (amr AnalysisManagerRepository) updateScore(analysisId uuid.UUID, score float32) error {
 
 	err := amr.db.

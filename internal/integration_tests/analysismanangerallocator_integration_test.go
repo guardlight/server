@@ -15,6 +15,7 @@ import (
 	"github.com/guardlight/server/internal/infrastructure/database"
 	"github.com/guardlight/server/internal/infrastructure/messaging"
 	"github.com/guardlight/server/internal/jobmanager"
+	"github.com/guardlight/server/internal/scheduler"
 	"github.com/guardlight/server/internal/ssemanager"
 	"github.com/guardlight/server/pkg/analyzercontract"
 	"github.com/guardlight/server/pkg/parsercontract"
@@ -47,8 +48,12 @@ func (sama *TestSuiteAnalysisManagerAllocatorIntegration) SetupSuite() {
 	sama.db.Logger = logger.Default.LogMode(logger.Info)
 	zap.S().Infow("connection details", "url", conString)
 
+	loc, err := time.LoadLocation("Europe/Amsterdam")
+	sama.Assert().NoError(err)
+	sch, err := scheduler.NewScheduler(loc)
+	sama.Assert().NoError(err)
 	jmr := jobmanager.NewJobManagerRepository(sama.db)
-	jobManager := jobmanager.NewJobMananger(jmr)
+	jobManager := jobmanager.NewJobMananger(jmr, sch.Gos)
 
 	ssem := ssemanager.NewSseMananger()
 

@@ -52,8 +52,14 @@ func (arc *AnalysisRequestController) analysisRequestDataloom(c *gin.Context) {
 
 	ui := glsecurity.GetUserIdFromContextParsed(c)
 
-	err = arc.manager.RequestAnalysisDataloom(ard, ui)
+	aid, err := arc.manager.RequestAnalysisDataloom(ard, ui)
 	if err != nil {
+		if err == ErrHashAlreadyExist {
+			c.JSON(http.StatusOK, analysisrequest.AnalysisRequestResponse{
+				Id: aid,
+			})
+			return
+		}
 		zap.S().Errorw("error creating analysis request", "error", err)
 		switch err {
 		case ErrInvalidAnalyzer:
@@ -66,7 +72,9 @@ func (arc *AnalysisRequestController) analysisRequestDataloom(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{})
+	c.JSON(http.StatusOK, analysisrequest.AnalysisRequestResponse{
+		Id: aid,
+	})
 
 }
 
@@ -81,7 +89,7 @@ func (arc *AnalysisRequestController) analysisRequest(c *gin.Context) {
 
 	ui := glsecurity.GetUserIdFromContextParsed(c)
 
-	err = arc.manager.RequestAnalysis(ar, ui)
+	aid, err := arc.manager.RequestAnalysis(ar, ui, string(RequestOriginUser))
 	if err != nil {
 		zap.S().Errorw("error creating analysis request", "error", err)
 		switch err {
@@ -95,7 +103,9 @@ func (arc *AnalysisRequestController) analysisRequest(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusNoContent, gin.H{})
+	c.JSON(http.StatusOK, analysisrequest.AnalysisRequestResponse{
+		Id: aid,
+	})
 }
 
 func (arc *AnalysisRequestController) analyses(c *gin.Context) {

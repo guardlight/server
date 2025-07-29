@@ -13,12 +13,13 @@ import (
 
 func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 	mockJs := NewMockjobStore(t)
+	mockTc := NewMocktaskCreater(t)
 	config.SetupConfig("../../env-test.yaml")
 
 	jobId := uuid.MustParse("d2efcbb9-c7e0-423c-95c3-a01e7723bedf")
 	analysisId := uuid.MustParse("4bc608a3-7f52-4dd4-97dc-ea01975d9f09")
 
-	jm := NewJobMananger(mockJs)
+	jm := NewJobMananger(mockJs, mockTc)
 
 	pjd := ParserJobData{
 		Image: "test",

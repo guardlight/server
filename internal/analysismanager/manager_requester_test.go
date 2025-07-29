@@ -16,11 +16,12 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 	mockAnalysisRecordSaver := NewMockanalysisRequestStore(t)
 	mockJobManager := NewMockjobManagerRequester(t)
 	mockSsem := NewMocksseEventSender(t)
+	mockTs := NewMockthemeService(t)
 	config.SetupConfig("../../testdata/envs/analysismanangerequester.yaml")
 
 	userId := uuid.MustParse("f6bec23c-5106-4805-980f-9c9c1c050af4")
 
-	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver, mockSsem)
+	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver, mockSsem, mockTs)
 
 	t.Run("parserFailed", func(t *testing.T) {
 		ar := &analysisrequest.AnalysisRequest{
@@ -33,9 +34,10 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 			Themes: []analysisrequest.Theme{},
 		}
 
-		err := analyzerRequester.RequestAnalysis(ar, userId)
+		aid, err := analyzerRequester.RequestAnalysis(ar, userId, string(RequestOriginUser))
 
 		assert.ErrorIs(t, err, ErrInvalidParser)
+		assert.Nil(t, aid)
 	})
 
 	t.Run("analyzerFailed", func(t *testing.T) {
@@ -60,9 +62,10 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 			},
 		}
 
-		err := analyzerRequester.RequestAnalysis(ar, userId)
+		aid, err := analyzerRequester.RequestAnalysis(ar, userId, string(RequestOriginUser))
 
 		assert.ErrorIs(t, err, ErrInvalidAnalyzer)
+		assert.Nil(t, aid)
 	})
 
 	t.Run("analyzerValidNoInput", func(t *testing.T) {
@@ -87,9 +90,10 @@ func TestAnalysisRequestParsersAndAnalyzersSuccess(t *testing.T) {
 			},
 		}
 
-		err := analyzerRequester.RequestAnalysis(ar, userId)
+		aid, err := analyzerRequester.RequestAnalysis(ar, userId, string(RequestOriginUser))
 
 		assert.ErrorIs(t, err, ErrInvalidAnalyzer)
+		assert.Nil(t, aid)
 	})
 
 }
@@ -98,11 +102,12 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 	mockAnalysisRecordSaver := NewMockanalysisRequestStore(t)
 	mockJobManager := NewMockjobManagerRequester(t)
 	mockSsem := NewMocksseEventSender(t)
+	mockTs := NewMockthemeService(t)
 	config.SetupConfig("../../testdata/envs/analysismanangerequester.yaml")
 
 	userId := uuid.MustParse("f6bec23c-5106-4805-980f-9c9c1c050af4")
 
-	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver, mockSsem)
+	analyzerRequester := NewAnalysisManangerRequester(mockJobManager, mockAnalysisRecordSaver, mockSsem, mockTs)
 
 	jobId := uuid.MustParse("0e4240a2-a099-4501-b373-7d982b5d5d5d")
 	mockJobManager.EXPECT().CreateId().Return(jobId)
@@ -215,7 +220,8 @@ func TestAnalysisRequestSuccess(t *testing.T) {
 
 	mockJobManager.EXPECT().EnqueueJob(jobId, jobmanager.Parse, "parser.freetext", pData).Return(nil)
 
-	err := analyzerRequester.RequestAnalysis(ar, userId)
+	aid, err := analyzerRequester.RequestAnalysis(ar, userId, string(RequestOriginUser))
 
 	assert.NoError(t, err)
+	assert.NotNil(t, aid)
 }

@@ -19,13 +19,13 @@ console:
 cors:
     origin: http://192.168.178.142:4000
 database:
-    name: guardlight_test
-    password: root
+    name: guardlight
+    password: securePassword
     port: 5432
-    server: 127.0.0.1
-    user: root
+    server: 192.168.178.2
+    user: guardlight
 domain: 192.168.178.142
-env: development
+env: production
 nats:
     password: bi7Y0YmHby5Hasfo2n0sOEuc9R1VxzND
     port: 4222
@@ -38,12 +38,14 @@ parsers:
       description: Parses a text to an utf-8 formated text.
       external: true
       image: builtin
+      key: freetext
       name: Freetext
       type: freetext
     - concurrency: 1
       description: Parses a .epub file to an utf-8 formated text.
       external: true
       image: guardlight/parser-epub
+      key: epub
       name: Epub
       type: epub
 reporters:
@@ -58,8 +60,8 @@ server:
     port: 6842
 tz: UTC
 users:
-    - apiKey: superSecureApikey
-      id: fc28fb4c-2280-49f5-a3ba-f99ed8f8843c
+    - apiKey: secretApiKey
+      id: 6e145028-c854-459f-8e75-ad55e34359d9
       password: a
       role: admin
       username: a

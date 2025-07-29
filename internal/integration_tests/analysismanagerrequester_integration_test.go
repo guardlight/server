@@ -21,6 +21,7 @@ import (
 	"github.com/guardlight/server/internal/essential/testcontainers"
 	"github.com/guardlight/server/internal/infrastructure/database"
 	"github.com/guardlight/server/internal/jobmanager"
+	"github.com/guardlight/server/internal/scheduler"
 	"github.com/guardlight/server/internal/ssemanager"
 	"github.com/guardlight/server/internal/theme"
 	"github.com/guardlight/server/pkg/analysisrequest"
@@ -53,8 +54,12 @@ func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
 
 	s.router = gin.Default()
 
+	loc, err := time.LoadLocation("Europe/Amsterdam")
+	s.Assert().NoError(err)
+	sch, err := scheduler.NewScheduler(loc)
+	s.Assert().NoError(err)
 	jmr := jobmanager.NewJobManagerRepository(s.db)
-	jobManager := jobmanager.NewJobMananger(jmr)
+	jobManager := jobmanager.NewJobMananger(jmr, sch.Gos)
 	ssem := ssemanager.NewSseMananger()
 
 	s.analysisManagerRepository = analysismanager.NewAnalysisManagerRepository(s.db)
@@ -63,7 +68,7 @@ func (s *TestSuiteAnalysisManagerIntegration) SetupSuite() {
 	ts := theme.NewThemeService(tsr)
 	ars := analysismanager.NewAnalysisResultService(s.analysisManagerRepository, s.analysisManagerRepository, ts)
 
-	analysisManangerRequester := analysismanager.NewAnalysisManangerRequester(jobManager, s.analysisManagerRepository, ssem)
+	analysisManangerRequester := analysismanager.NewAnalysisManangerRequester(jobManager, s.analysisManagerRepository, ssem, ts)
 
 	analysismanager.NewAnalysisRequestController(s.router.Group(""), analysisManangerRequester, ars)
 

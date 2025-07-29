@@ -2,8 +2,10 @@ package jobmanager
 
 import (
 	"encoding/json"
+	"time"
 	"unsafe"
 
+	"github.com/go-co-op/gocron/v2"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -39,9 +41,48 @@ type JobManager struct {
 	js jobStore
 }
 
-func NewJobMananger(js jobStore) *JobManager {
-	return &JobManager{
+type taskCreater interface {
+	NewJob(jobDefinition gocron.JobDefinition, task gocron.Task, options ...gocron.JobOption) (gocron.Job, error)
+}
+
+func NewJobMananger(js jobStore, tc taskCreater) *JobManager {
+	jm := &JobManager{
 		js: js,
+	}
+
+	_, err := tc.NewJob(
+		gocron.DurationJob(
+			30*time.Second,
+		),
+		gocron.NewTask(jm.stopLongRunningJobs),
+		gocron.WithSingletonMode(gocron.LimitModeReschedule),
+	)
+	if err != nil {
+		return nil
+	}
+
+	return jm
+}
+
+func (jm *JobManager) stopLongRunningJobs() {
+	zap.S().Debugw("Stopping long running jobs")
+	js, _ := jm.js.getNotFinishedJobs()
+	for _, j := range js {
+		if j.Status == Inprogress {
+			if j.Type == Parse || j.Type == Analyze || j.Type == Report {
+				if time.Since(j.CreatedAt) > time.Minute {
+					if j.RetryCount > 2 {
+						zap.S().Infow("Stopping job", "job_id", j.Id)
+						jm.UpdateJobStatus(j.Id, Error, "Timed out", 3)
+					} else {
+						zap.S().Infow("retrying job", "job_id", j.Id)
+						jm.UpdateJobStatus(j.Id, Queued, "long running task", j.RetryCount+1)
+					}
+
+				}
+			}
+		}
+
 	}
 }
 

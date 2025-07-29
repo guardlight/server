@@ -23,3 +23,15 @@
                   [{ key: "strict_words", value: "God, Jesus, Christ, Lord" }],
           },
       ]
+- id: 2a455a52-1c30-4c08-9275-3ba6cd4fd95a
+  user_id: fc28fb4c-2280-49f5-a3ba-f99ed8f8843c
+  title: "Christian Sensitivity only Jesus"
+  description: "A theme related to christian sensitivity and how it's used in media."
+  reporter: { "key": "word_count", "threshold": -1 }
+  analyzers:
+      [
+          {
+              key: "word_search",
+              inputs: [{ key: "strict_words", value: "Jesus, Christ" }],
+          },
+      ]

@@ -1,0 +1,10 @@
+services:
+    parser-epub:
+        image: ghcr.io/guardlight/parser-epub:main
+        restart: unless-stopped
+        environment:
+            - GL_IS_EXTERNAL=true
+            - GL_NATS_SERVER=192.168.178.142
+            - GL_NATS_PORT=4222
+            - GL_NATS_USER=gl_nats_user
+            - GL_NATS_PASSWORD=bi7Y0YmHby5Hasfo2n0sOEuc9R1VxzND

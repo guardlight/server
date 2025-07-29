@@ -45,11 +45,16 @@ func (s *TestSuiteOrchestratorIntegration) SetupSuite() {
 	conString, err := sqlContainer.ConnectionString(ctx)
 	s.Require().NoError(err)
 
+	loc, err := time.LoadLocation("Europe/Amsterdam")
+	s.Assert().NoError(err)
+
 	zap.S().Infow("Connection string", "url", conString)
 	s.db = database.InitDatabase(conString)
 
+	sch, err := scheduler.NewScheduler(loc)
+	s.Assert().NoError(err)
 	jmr := jobmanager.NewJobManagerRepository(s.db)
-	s.jobManager = jobmanager.NewJobMananger(jmr)
+	s.jobManager = jobmanager.NewJobMananger(jmr, sch.Gos)
 
 	sqlDb, _ := s.db.DB()
 	fixtures, err := testfixtures.New(
