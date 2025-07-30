@@ -1,5 +1,5 @@
 analyzers:
-    - concurrency: 4
+    - concurrency: 40
       contextWindow: 16000
       description: Uses a basic word list to scan content for.
       external: true
@@ -40,14 +40,14 @@ parsers:
       image: builtin
       name: Freetext
       type: freetext
-    - concurrency: 1
+    - concurrency: 4
       description: Parses a .epub file to an utf-8 formated text.
       external: true
       image: guardlight/parser-epub
       name: Epub
       type: epub
 reporters:
-    - concurrency: 4
+    - concurrency: 10
       description: This reporter will match the threshold to the amount of lines.
       external: true
       image: builtin

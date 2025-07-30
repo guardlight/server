@@ -35,7 +35,7 @@ func (wa *wordsearchAnalyzer) analyze(m *nats.Msg) {
 		wa.makeParserErrorResponse(&ar, err)
 		return
 	}
-	zap.S().Info(ar.Content)
+
 	res, err := analyze(ar.Content, ar.Inputs)
 	if err != nil {
 		wa.makeParserErrorResponse(&ar, err)
