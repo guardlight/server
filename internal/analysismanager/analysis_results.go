@@ -9,7 +9,7 @@ import (
 )
 
 type analysisGetter interface {
-	getAnalysesByUserId(id uuid.UUID, pag Pagination, catType, catCat, query string) (AnalysisResultPaginated, error)
+	getAnalysesByUserId(id uuid.UUID, pag Pagination, catType, catCat, query, sc string) (AnalysisResultPaginated, error)
 	getAnalysesByAnalysisIdAndUserId(id, arid uuid.UUID) (AnalysisRequest, error)
 }
 
@@ -36,8 +36,8 @@ func NewAnalysisResultService(ag analysisGetter, au analysisUpdater, ts themeSer
 	}
 }
 
-func (ars *AnalysisResultService) GetAnalysesByUserId(id uuid.UUID, limit, page int, catType, catCat, query string) (analysisresult.AnalysisPaginated, error) {
-	as, err := ars.ag.getAnalysesByUserId(id, Pagination{Limit: limit, Page: page}, catType, catCat, query)
+func (ars *AnalysisResultService) GetAnalysesByUserId(id uuid.UUID, limit, page int, catType, catCat, query, sc string) (analysisresult.AnalysisPaginated, error) {
+	as, err := ars.ag.getAnalysesByUserId(id, Pagination{Limit: limit, Page: page}, catType, catCat, query, sc)
 	if err != nil {
 		return analysisresult.AnalysisPaginated{}, err
 	}

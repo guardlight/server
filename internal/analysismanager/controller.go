@@ -155,7 +155,9 @@ func (arc *AnalysisRequestController) analyses(c *gin.Context) {
 
 	pgQuery := c.Query("query")
 
-	ars, err := arc.ars.GetAnalysesByUserId(uid, pgLim, pgNr, pgCatType, pgCatCat, pgQuery)
+	sc := c.Query("score")
+
+	ars, err := arc.ars.GetAnalysesByUserId(uid, pgLim, pgNr, pgCatType, pgCatCat, pgQuery, sc)
 	if err != nil {
 		zap.S().Errorw("error get analyses", "error", err)
 		c.JSON(glerror.InternalServerError())

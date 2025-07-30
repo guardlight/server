@@ -8,3 +8,16 @@ services:
             - GL_NATS_PORT=4222
             - GL_NATS_USER=gl_nats_user
             - GL_NATS_PASSWORD=bi7Y0YmHby5Hasfo2n0sOEuc9R1VxzND
+    guardlight-dataloom:
+        image: ghcr.io/quattroviper/guardlight-dataloom:main
+        restart: unless-stopped
+        volumes:
+            - "./docker-compose/dataloom/books:/usr/src/app/books"
+            - "./docker-compose/dataloom/databases:/usr/src/app/databases"
+        ports:
+            - 3001:3000
+        environment:
+            - PORT=3000
+            - NODE_ENV=production
+            - GUARDLIGHT_URL=http://192.168.178.142:6842
+            - GUARDLIGHT_API_KEY=superSecureApikey

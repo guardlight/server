@@ -163,7 +163,7 @@ func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, ji
 	return newStatus == AnalysisFinished, nil
 }
 
-func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID, pag Pagination, catType, catCat, query string) (AnalysisResultPaginated, error) {
+func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID, pag Pagination, catType, catCat, query, sc string) (AnalysisResultPaginated, error) {
 
 	var fuzzCatType = "%" + catType + "%"
 	var fuzzCatCat = "%" + catCat + "%"
@@ -179,6 +179,16 @@ func (amr AnalysisManagerRepository) getAnalysesByUserId(id uuid.UUID, pag Pagin
 	}
 	if len(query) > 0 {
 		dbQ = dbQ.Where("title ILIKE ?", fuzzQuery)
+	}
+
+	if sc == "BAD" {
+		dbQ = dbQ.Where("NOT EXISTS (SELECT 1 FROM analyses WHERE analyses.analysis_request_id = analysis_requests.id AND analyses.score > ?)", -1)
+	}
+	if sc == "MIXED" {
+		dbQ = dbQ.Where("EXISTS (SELECT 1 FROM analyses WHERE analyses.analysis_request_id = analysis_requests.id AND analyses.score > ?)", 0)
+	}
+	if sc == "GOOD" {
+		dbQ = dbQ.Where("NOT EXISTS (SELECT 1 FROM analyses WHERE analyses.analysis_request_id = analysis_requests.id AND analyses.score < ?)", 1)
 	}
 
 	dbQ = dbQ.Session(&gorm.Session{})

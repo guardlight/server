@@ -77,9 +77,9 @@ func (_c *MockanalysisGetter_getAnalysesByAnalysisIdAndUserId_Call) RunAndReturn
 	return _c
 }
 
-// getAnalysesByUserId provides a mock function with given fields: id, pag, catType, catCat, query
-func (_m *MockanalysisGetter) getAnalysesByUserId(id uuid.UUID, pag Pagination, catType string, catCat string, query string) (AnalysisResultPaginated, error) {
-	ret := _m.Called(id, pag, catType, catCat, query)
+// getAnalysesByUserId provides a mock function with given fields: id, pag, catType, catCat, query, sc
+func (_m *MockanalysisGetter) getAnalysesByUserId(id uuid.UUID, pag Pagination, catType string, catCat string, query string, sc string) (AnalysisResultPaginated, error) {
+	ret := _m.Called(id, pag, catType, catCat, query, sc)
 
 	if len(ret) == 0 {
 		panic("no return value specified for getAnalysesByUserId")
@@ -87,17 +87,17 @@ func (_m *MockanalysisGetter) getAnalysesByUserId(id uuid.UUID, pag Pagination, 
 
 	var r0 AnalysisResultPaginated
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID, Pagination, string, string, string) (AnalysisResultPaginated, error)); ok {
-		return rf(id, pag, catType, catCat, query)
+	if rf, ok := ret.Get(0).(func(uuid.UUID, Pagination, string, string, string, string) (AnalysisResultPaginated, error)); ok {
+		return rf(id, pag, catType, catCat, query, sc)
 	}
-	if rf, ok := ret.Get(0).(func(uuid.UUID, Pagination, string, string, string) AnalysisResultPaginated); ok {
-		r0 = rf(id, pag, catType, catCat, query)
+	if rf, ok := ret.Get(0).(func(uuid.UUID, Pagination, string, string, string, string) AnalysisResultPaginated); ok {
+		r0 = rf(id, pag, catType, catCat, query, sc)
 	} else {
 		r0 = ret.Get(0).(AnalysisResultPaginated)
 	}
 
-	if rf, ok := ret.Get(1).(func(uuid.UUID, Pagination, string, string, string) error); ok {
-		r1 = rf(id, pag, catType, catCat, query)
+	if rf, ok := ret.Get(1).(func(uuid.UUID, Pagination, string, string, string, string) error); ok {
+		r1 = rf(id, pag, catType, catCat, query, sc)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -116,13 +116,14 @@ type MockanalysisGetter_getAnalysesByUserId_Call struct {
 //   - catType string
 //   - catCat string
 //   - query string
-func (_e *MockanalysisGetter_Expecter) getAnalysesByUserId(id interface{}, pag interface{}, catType interface{}, catCat interface{}, query interface{}) *MockanalysisGetter_getAnalysesByUserId_Call {
-	return &MockanalysisGetter_getAnalysesByUserId_Call{Call: _e.mock.On("getAnalysesByUserId", id, pag, catType, catCat, query)}
+//   - sc string
+func (_e *MockanalysisGetter_Expecter) getAnalysesByUserId(id interface{}, pag interface{}, catType interface{}, catCat interface{}, query interface{}, sc interface{}) *MockanalysisGetter_getAnalysesByUserId_Call {
+	return &MockanalysisGetter_getAnalysesByUserId_Call{Call: _e.mock.On("getAnalysesByUserId", id, pag, catType, catCat, query, sc)}
 }
 
-func (_c *MockanalysisGetter_getAnalysesByUserId_Call) Run(run func(id uuid.UUID, pag Pagination, catType string, catCat string, query string)) *MockanalysisGetter_getAnalysesByUserId_Call {
+func (_c *MockanalysisGetter_getAnalysesByUserId_Call) Run(run func(id uuid.UUID, pag Pagination, catType string, catCat string, query string, sc string)) *MockanalysisGetter_getAnalysesByUserId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(uuid.UUID), args[1].(Pagination), args[2].(string), args[3].(string), args[4].(string))
+		run(args[0].(uuid.UUID), args[1].(Pagination), args[2].(string), args[3].(string), args[4].(string), args[5].(string))
 	})
 	return _c
 }
@@ -132,7 +133,7 @@ func (_c *MockanalysisGetter_getAnalysesByUserId_Call) Return(_a0 AnalysisResult
 	return _c
 }
 
-func (_c *MockanalysisGetter_getAnalysesByUserId_Call) RunAndReturn(run func(uuid.UUID, Pagination, string, string, string) (AnalysisResultPaginated, error)) *MockanalysisGetter_getAnalysesByUserId_Call {
+func (_c *MockanalysisGetter_getAnalysesByUserId_Call) RunAndReturn(run func(uuid.UUID, Pagination, string, string, string, string) (AnalysisResultPaginated, error)) *MockanalysisGetter_getAnalysesByUserId_Call {
 	_c.Call.Return(run)
 	return _c
 }
