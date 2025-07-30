@@ -91,6 +91,12 @@ func (arc *AnalysisRequestController) analysisRequest(c *gin.Context) {
 
 	aid, err := arc.manager.RequestAnalysis(ar, ui, string(RequestOriginUser))
 	if err != nil {
+		if err == ErrHashAlreadyExist {
+			c.JSON(http.StatusOK, analysisrequest.AnalysisRequestResponse{
+				Id: aid,
+			})
+			return
+		}
 		zap.S().Errorw("error creating analysis request", "error", err)
 		switch err {
 		case ErrInvalidAnalyzer:
