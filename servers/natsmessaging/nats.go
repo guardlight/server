@@ -25,7 +25,7 @@ func NewNatsServer() error {
 			},
 		},
 		JetStream:  true,
-		MaxPayload: 20 * 1_000_000,
+		MaxPayload: 64 * 1_000_000,
 	}
 
 	// Use external nats if Nats.Server is set
