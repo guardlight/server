@@ -25,6 +25,7 @@ type analysisStore interface {
 	updateScore(analysisId uuid.UUID, score float32) error
 	getReporterKeyByAnalysisId(aid uuid.UUID) (string, error)
 	getAllAnalysisById(aid uuid.UUID) (Analysis, error)
+	updateAllAnalysesStatusByAnalysisRequestId(arid uuid.UUID, status AnalysisStatus) error
 }
 
 type subsriber interface {
@@ -73,10 +74,12 @@ func (ama *AnalysisManagerAllocator) processParserResult(m *nats.Msg) {
 
 	if pr.Status == parsercontract.ParseError {
 		err = ama.ju.UpdateJobStatus(pr.JobId, jobmanager.Error, pr.Text, 0)
-		// TODO Update analysis to failed
 		if err != nil {
 			zap.S().Errorw("Could not update job status", "error", err)
-			// TODO Update analysis to failed
+		}
+		err = ama.as.updateAllAnalysesStatusByAnalysisRequestId(pr.AnalysisId, AnalysisError)
+		if err != nil {
+			zap.S().Errorw("Could not update analyses status", "error", err)
 			return
 		}
 		return

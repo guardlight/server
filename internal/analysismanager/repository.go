@@ -114,6 +114,24 @@ func (amr AnalysisManagerRepository) updateAnalysisJobs(ai uuid.UUID, jbs []Sing
 	return nil
 }
 
+func (amr AnalysisManagerRepository) updateAllAnalysesStatusByAnalysisRequestId(arid uuid.UUID, status AnalysisStatus) error {
+	res := amr.db.
+		Model(Analysis{}).
+		Where("analysis_request_id = ?", arid).
+		Updates(Analysis{Status: status})
+
+	if res.Error != nil {
+		zap.S().Errorw("Could not update analysis status", "error", res.Error)
+		return res.Error
+	}
+
+	if res.RowsAffected == 0 {
+		zap.S().Errorw("No records updated", "analysis_request_id", arid)
+		return errors.New("no records affected after update")
+	}
+	return nil
+}
+
 func (amr AnalysisManagerRepository) updateAnalysisJobProgress(aid uuid.UUID, jid uuid.UUID, status AnalysisStatus, content []string) (bool, error) {
 	a := Analysis{Id: aid}
 	if err := amr.db.First(&a).Error; err != nil {
