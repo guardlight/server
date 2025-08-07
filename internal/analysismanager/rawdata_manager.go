@@ -30,10 +30,11 @@ func NewRawDataManager(tc taskCreater, db *gorm.DB) *RawDataManager {
 		db: db,
 	}
 
+	zap.S().Info("Processed text exporting", "status", config.Get().Data.ExportProcessedText)
 	if config.Get().Data.ExportProcessedText {
 		_, err := tc.NewJob(
 			gocron.DurationJob(
-				30*time.Second,
+				10*time.Second,
 			),
 			gocron.NewTask(rdm.exportProcessedTextToFile),
 			gocron.WithSingletonMode(gocron.LimitModeReschedule),
@@ -41,8 +42,6 @@ func NewRawDataManager(tc taskCreater, db *gorm.DB) *RawDataManager {
 		if err != nil {
 			return nil
 		}
-	} else {
-		zap.S().Info("Processed text exporting disabled")
 	}
 
 	return rdm
@@ -65,7 +64,7 @@ func (rdm *RawDataManager) exportProcessedTextToFile() {
 		Select("analysis_requests.id, analysis_requests.category, analysis_requests.title, raw_data.processed_text").
 		Joins("LEFT JOIN raw_data ON raw_data.analysis_request_id = analysis_requests.id").
 		Where("raw_data.processed_text <> ?", "EXPORTED").
-		Limit(5).
+		Limit(1).
 		Scan(&exportDatas).Error
 	if err != nil {
 		zap.S().Errorw("Problem getting export rawdata", "error", err)
@@ -73,7 +72,7 @@ func (rdm *RawDataManager) exportProcessedTextToFile() {
 	}
 
 	if len(exportDatas) == 0 {
-		zap.S().Debugw("No rawdata records found")
+		zap.S().Infow("No rawdata processed text to export")
 	}
 
 	for _, ed := range exportDatas {
