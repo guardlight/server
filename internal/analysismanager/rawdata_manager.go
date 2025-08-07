@@ -30,7 +30,7 @@ func NewRawDataManager(tc taskCreater, db *gorm.DB) *RawDataManager {
 		db: db,
 	}
 
-	zap.S().Info("Processed text exporting", "status", config.Get().Data.ExportProcessedText)
+	zap.S().Infow("Processed text exporting", "status", config.Get().Data.ExportProcessedText)
 	if config.Get().Data.ExportProcessedText {
 		_, err := tc.NewJob(
 			gocron.DurationJob(
@@ -56,7 +56,7 @@ type exportData struct {
 
 func (rdm *RawDataManager) exportProcessedTextToFile() {
 
-	zap.S().Debugw("Exporting raw data to file")
+	zap.S().Infow("Starting exporting raw data processed text to file")
 	var exportDatas []exportData
 
 	err := rdm.db.
