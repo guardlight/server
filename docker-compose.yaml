@@ -1,4 +1,12 @@
 services:
+    nats:
+        image: nats:latest
+        ports:
+            - 4222:4222
+        volumes:
+            - "./docker-compose/nats/config/nats.conf:/etc/nats/nats.conf:ro"
+            - "./docker-compose/nats/data:/data"
+        command: "--user gl_nats_user --pass bi7Y0YmHby5Hasfo2n0sOEuc9R1VxzND -c /etc/nats/nats.conf"
     parser-epub:
         image: ghcr.io/guardlight/parser-epub:main
         restart: unless-stopped

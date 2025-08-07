@@ -35,6 +35,12 @@ type GLConfig struct {
 	Analyzers    []analyzer   `koanf:"analyzers"`
 	Reporters    []reporter   `koanf:"reporters"`
 	Users        []User       `koanf:"users"`
+	Data         data         `koanf:"data"`
+}
+
+type data struct {
+	ExportProcessedText bool   `koanf:"exportProcessedText" default:"false"`
+	ExportPath          string `koanf:"exportPath" default:"/data/books/processed"`
 }
 
 type nats struct {

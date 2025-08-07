@@ -96,6 +96,8 @@ func Server() {
 
 	_ = analysismanager.NewAnalysisManagerAllocator(ncon, amr, jm, ssem)
 
+	_ = analysismanager.NewRawDataManager(sch.Gos, db)
+
 	// Controllers
 	health.NewHealthController(baseGroup)
 	analysismanager.NewAnalysisRequestController(baseGroup, am, ars)
