@@ -34,7 +34,7 @@ func NewRawDataManager(tc taskCreater, db *gorm.DB) *RawDataManager {
 	if config.Get().Data.ExportProcessedText {
 		_, err := tc.NewJob(
 			gocron.DurationJob(
-				10*time.Second,
+				30*time.Second,
 			),
 			gocron.NewTask(rdm.exportProcessedTextToFile),
 			gocron.WithSingletonMode(gocron.LimitModeReschedule),
@@ -55,8 +55,9 @@ type exportData struct {
 }
 
 func (rdm *RawDataManager) exportProcessedTextToFile() {
+	runLogger := zap.S().With("run_id", uuid.New().String())
 
-	zap.S().Infow("Starting exporting raw data processed text to file")
+	runLogger.Infow("Starting exporting raw data processed text to file")
 	var exportDatas []exportData
 
 	err := rdm.db.
@@ -64,15 +65,15 @@ func (rdm *RawDataManager) exportProcessedTextToFile() {
 		Select("analysis_requests.id, analysis_requests.category, analysis_requests.title, raw_data.processed_text").
 		Joins("LEFT JOIN raw_data ON raw_data.analysis_request_id = analysis_requests.id").
 		Where("raw_data.processed_text <> ?", "EXPORTED").
-		Limit(1).
+		Limit(5).
 		Scan(&exportDatas).Error
 	if err != nil {
-		zap.S().Errorw("Problem getting export rawdata", "error", err)
+		runLogger.Errorw("Problem getting export rawdata", "error", err)
 		return
 	}
 
 	if len(exportDatas) == 0 {
-		zap.S().Infow("No rawdata processed text to export")
+		runLogger.Infow("No rawdata processed text to export")
 	}
 
 	for _, ed := range exportDatas {
@@ -89,15 +90,15 @@ func (rdm *RawDataManager) exportProcessedTextToFile() {
 			Where("analysis_request_id = ?", ed.Id).
 			Updates(RawData{ProcessedText: "EXPORTED"})
 		if res.Error != nil {
-			zap.S().Errorw("Could not update processed text", "error", res.Error)
+			runLogger.Errorw("Could not update processed text", "error", res.Error)
 			return
 		}
 
 		if res.RowsAffected == 0 {
-			zap.S().Errorw("No records updated", "analysis_request_id", ed.Id)
+			runLogger.Errorw("No records updated", "analysis_request_id", ed.Id)
 			return
 		}
-		zap.S().Infow("Exported and updated text", "analysis_request_id", ed.Id, "filepath", filePath)
+		runLogger.Infow("Exported and updated text", "analysis_request_id", ed.Id, "filepath", filePath)
 	}
 
 }
