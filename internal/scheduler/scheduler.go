@@ -13,6 +13,7 @@ type Scheduler struct {
 func NewScheduler(loc *time.Location) (*Scheduler, error) {
 	gos, err := gocron.NewScheduler(
 		gocron.WithLocation(loc),
+		gocron.WithLimitConcurrentJobs(15, gocron.LimitModeWait),
 	)
 	if err != nil {
 		return nil, err

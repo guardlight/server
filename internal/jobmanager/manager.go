@@ -65,7 +65,7 @@ func NewJobMananger(js jobStore, tc taskCreater) *JobManager {
 }
 
 func (jm *JobManager) stopLongRunningJobs() {
-	zap.S().Debugw("Stopping long running jobs")
+	zap.S().Infow("Stopping long running jobs")
 	js, _ := jm.js.getNotFinishedJobs()
 	for _, j := range js {
 		if j.Status == Inprogress {
