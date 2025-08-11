@@ -33,7 +33,7 @@ func (jmr JobManagerRepository) saveJob(j *Job) error {
 
 func (jmr JobManagerRepository) getNotFinishedJobs() ([]Job, error) {
 	var js []Job
-	if err := jmr.db.Where("status <> ? AND retry_count <= ?", Finished, 3).Find(&js).Error; err != nil {
+	if err := jmr.db.Where("status <> ? AND status <> ? AND retry_count <= ?", Finished, Error, 3).Find(&js).Error; err != nil {
 		zap.S().Errorw("Could not get unfinished jobs", "error", err)
 		return nil, err
 	}
