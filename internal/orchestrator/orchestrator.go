@@ -50,7 +50,7 @@ func NewOrchestrator(jm jobManager, tc taskCreater, ns natsSender) (*Orchestrato
 }
 
 func (o *Orchestrator) checkForJobs() {
-	zap.S().Infow("Checking For Jobs")
+	zap.S().Debugw("Checking For Jobs")
 	nfj, err := o.jm.GetAllNonFinishedJobs()
 	if err != nil {
 		zap.S().Errorw("Could not check for all open jobs", "err", err)

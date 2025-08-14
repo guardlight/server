@@ -19,6 +19,7 @@ func NewAuthenticationController(group *gin.RouterGroup) *AuthenticationControll
 	authGroup := group.Group("auth")
 	authGroup.POST("login", ac.login)
 	authGroup.GET("silent", glsecurity.UseGuardlightAuth(), ac.silentLogin)
+	authGroup.GET("ping", glsecurity.UseGuardlightAuth(), ac.ping)
 
 	return ac
 }
@@ -54,6 +55,10 @@ func (ac *AuthenticationController) login(c *gin.Context) {
 
 	c.SetCookie(glsecurity.ConsoleApiCookieName, tkStr, config.Get().Console.Jwt.MaxAge, "/", config.Get().Domain, false, true)
 	c.JSON(http.StatusOK, gin.H{"authenticationStatus": "Authenticated"})
+}
+
+func (ac *AuthenticationController) ping(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{})
 }
 
 func (ac *AuthenticationController) silentLogin(c *gin.Context) {
